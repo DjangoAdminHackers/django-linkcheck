@@ -1,0 +1,74 @@
+{% extends "base_linkcheck.html" %}
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript">
+    function clean() {
+        tables = $('table.links');
+        tables.each(function(i) {
+            if ($(this).find('tr:visible').size()==0) {
+                $(this).parent().hide('fast');
+            } else {
+                <!--$(this).parent().show('fast');-->
+            };
+        })
+    }
+
+    function filter() {
+        if ($(".filters:checked").val()=='show_valid') {
+            $('.status-green').show();
+            $('.status-red').hide();
+            $('.status-blue').hide();
+        }
+        if ($(".filters:checked").val()=='show_invalid') {
+            $('.status-green').hide();
+            $('.status-red').show();
+            $('.status-blue').hide();
+        }
+        if ($(".filters:checked").val()=='show_unchecked') {
+            $('.status-green').hide();
+            $('.status-red').hide();
+            $('.status-blue').show();
+        }
+        clean();
+    }
+
+    $(document).ready(function() {
+        filter();
+        $(".filters").change(function(){
+            filter();
+        });
+    });
+
+</script>
+{% endblock %}
+{% block innercontent %}
+<div style='width: 100%; margin-left: auto; margin-right: auto; text-align: center;'>
+<form action="." method="get"><strong>Show: </strong>
+    <label>Valid urls</label>: <input type="radio" class="filters" name="filters" value="show_valid">&nbsp;&nbsp;
+    <label>Invalid urls</label>: <input type="radio" class="filters" name="filters" value="show_invalid" checked="checked">&nbsp;&nbsp;
+    <label>Unchecked urls</label>: <input type="radio" class="filters" name="filters" value="show_unchecked">&nbsp;&nbsp;
+</form>
+
+</div>
+
+    {% for content_type in content_types_list %}
+        <table id="links" style='width: 80%!important; background-color: white; margin-left: 20px;'>
+            <tr class="type-header"><td style='padding: 0;'><h2>{{content_type.content_type.name|title}} Objects</h2>
+                {% for object in content_type.object_list %}
+                    <div style='margin: 0; padding: 10px 0 0 0;'><h3 style='display: inline;'>{{object.object}}</h3>&nbsp;&nbsp;<a href='{{object.object.get_absolute_url}}'>view</a> <a href='{{object.admin_url}}'>edit</a>
+                    <table class="links" style='width: 100%!important;'>
+                        {% for link in object.link_list %}
+                            <tr class="status-{{link.url.colour}}">
+                                <td style='width: 60%;'><a href='{{link.url}}' target='_blank'>{{link.url}}</a></td>
+                                <td style='width: 20%;'>{{link.field}}</td>
+                                <td style='width: 20%; font-weight: bold; color: {{link.url.colour}};'>{{link.url.message}}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    </div>
+                {% endfor %}
+            </td></tr>
+        </table>
+        <p>&nbsp;</p>
+    {% endfor %}
+{% endblock %}
