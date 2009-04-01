@@ -32,9 +32,6 @@ def parse_images(obj, field):
     parser = ImageLister()
     return parse(obj, field, parser)
 
-class LinkListNotFound(Exception):
-    pass
-
 class Linklist(object):
     html_fields = []
     url_fields = []
@@ -65,9 +62,6 @@ class Linklist(object):
     @classmethod
     def objects(cls):
         return cls.model.objects.all()
-    @classmethod
-    def get_from_url(cls, url):
-        return cls.model.get_from_url(url)
     def get_linklist(self):
         linklist = []
         for object in self.objects():

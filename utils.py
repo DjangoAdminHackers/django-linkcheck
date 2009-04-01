@@ -9,7 +9,7 @@ from linkcheck.models import Link, Url
 
 from linkcheck_config import linklists
 
-from path import path
+from path import path # TODO fix dependency on Jason Orendorff's path.py
 
 def check():
     check_internal()
@@ -27,7 +27,7 @@ def check_internal():
             u.status = None
             u.message = 'Link to same page (not checked)'
         else:
-            if u.url.startswith('/media/'): #TODO fix hardcoded media url
+            if u.url.startswith('/media/'): #TODO fix hard-coded media url
                 u.last_checked = datetime.now()
                 if path(settings.MEDIA_ROOT+u.url[6:]).exists():
                     u.message = 'Working document link'
@@ -40,7 +40,7 @@ def check_internal():
                 valid = False
                 for k,v in linklists.items():
                     response = Client().get(u.url)
-                    if response.status_code == 200:
+                    if response.status_code == 200: # TODO handle redirects.
                         valid = True
                 if valid:
                     u.message = 'Working internal link'
@@ -59,9 +59,9 @@ def check_external():
     for u in Url.objects.all():
         if u.url.startswith('http://'):
             if settings.DEBUG:
-                check_every = timedelta(hours=60)
+                check_every = timedelta(hours=60) #TODO fix hardcoded values
             else:
-                check_every = timedelta(hours=15)
+                check_every = timedelta(hours=15) #TODO fix hardcoded values
             if u.last_checked==None or u.last_checked<=(datetime.now()-check_every):
                 u.last_checked = datetime.now()
                 try:
