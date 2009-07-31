@@ -18,9 +18,9 @@ delete_signal.connect(handle_delete)
 class Url(models.Model):
     url = models.CharField(max_length=255, unique=True)
     last_checked = models.DateTimeField(max_length=1024, blank=True, null=True)
-    status = models.BooleanField(blank=True, null=True)
+    status = models.BooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
-    still_exists = models.BooleanField(blank=True, null=True)
+    still_exists = models.BooleanField()
     @property
     def type(self):
         if self.url.startswith('http://'):

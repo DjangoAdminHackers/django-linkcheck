@@ -8,10 +8,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 
 from linkcheck.models import Link
-
-from utils import check_internal
-from utils import find
-
+from linkcheck.utils import check_internal
+from linkcheck.utils import find
 
 @staff_member_required
 def report(request):
@@ -28,8 +26,12 @@ def report(request):
         for ok, og in groupby(tg, innerkeyfunc):
             content_type = ContentType.objects.get(pk=tk)
             og = list(og)
+            try:
+                object = content_type.model_class().objects.get(pk=ok)
+            except content_type.model_class().DoesNotExist:
+                object = None
             objects.append({
-                'object': content_type.model_class().objects.get(pk=ok),
+                'object': object,
                 'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(), # convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
                 'admin_url': '/admin/%s/%s/%s/' % (content_type.app_label, content_type.model, ok)
             })

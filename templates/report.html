@@ -5,11 +5,10 @@
     function clean() {
         tables = $('table.links');
         tables.each(function(i) {
+            $(this).parent().show();
             if ($(this).find('tr:visible').size()==0) {
-                $(this).parent().hide('fast');
-            } else {
-                <!--$(this).parent().show('fast');-->
-            };
+                $(this).parent().hide();
+            }
         })
     }
 

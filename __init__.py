@@ -20,9 +20,13 @@ class ImageLister(Lister):
 
 def parse(obj, field, parser):
     urls=[]
-    parser.feed(getattr(obj,field))
-    parser.close()
-    return parser.urls
+    html = getattr(obj,field)
+    if html:
+        parser.feed(html)
+        parser.close()
+        return parser.urls
+    else:
+        return []
 
 def parse_urls(obj, field):
     parser = URLLister()
@@ -36,6 +40,7 @@ class Linklist(object):
     html_fields = []
     url_fields = []
     image_fields = []
+    object_filter = None
     def __get(self, name, obj, default=None):
         try:
             attr = getattr(self, name)
@@ -57,11 +62,17 @@ class Linklist(object):
         for field in self.html_fields:
             urls += [(field, url) for url in parse_images(obj,field)]
         for field in self.image_fields:
-            urls.append((field, getattr(obj,field).url[host_index:]))
+            try:
+                urls.append((field, getattr(obj,field).url[host_index:]))
+            except ValueError: # No image attached
+                pass
         return urls
     @classmethod
     def objects(cls):
-        return cls.model.objects.all()
+        if cls.object_filter:
+            return cls.model.objects.filter(**cls.object_filter)
+        else:
+            return cls.model.objects.all()
     def get_linklist(self):
         linklist = []
         for object in self.objects():

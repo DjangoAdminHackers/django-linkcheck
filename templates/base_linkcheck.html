@@ -1,21 +1,18 @@
-{% extends "admin/base_site.html" %}
-{% load adminmedia %}
-{% block coltype %}flex{% endblock %}
-{% block bodyclass %}change-list{% endblock %}
-{% block stylesheet %}{% admin_media_prefix %}css/changelists.css{% endblock %}
+{% extends "admin/change_list.html" %}
+
 {% block extrastyle %}
-{{ block.super }}
-<link rel="stylesheet" type="text/css" href="{{settings.MEDIA_URL}}/stylesheets/extra_admin.css" />
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{{settings.MEDIA_URL}}/stylesheets/extra_admin.css" />
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="/admin/">Home</a>&nbsp;&rsaquo;&nbsp;Link Checker</div>{% endblock %}
 {% block content %}
-<div id="content-main">
-    <h1>Link Checker</h1>
-    <div class="module filtered" id="changelist">
-        <div id="toolbartable">
-            {% block innercontent %}
-            {% endblock %}
+    <div id="content-main">
+        <h1>Link Checker</h1>
+        <div class="module filtered" id="changelist">
+            <div id="toolbartable">
+                {% block innercontent %}
+                {% endblock %}
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

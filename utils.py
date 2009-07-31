@@ -7,7 +7,7 @@ from django.test.client import Client
 
 from linkcheck.models import Link, Url
 
-from linkcheck_config import linklists
+from project.linkcheck_config import linklists #This needs some kind of autodiscovery mechanism
 
 from path import path # TODO fix dependency on Jason Orendorff's path.py
 
@@ -17,47 +17,52 @@ def check():
 
 def check_internal():
     for u in Url.objects.all():
-        if u.url.startswith('mailto'):
+        if u.url.startswith(r'http://') or u.url.startswith(r'https://'):
+            pass
+        elif u.url.startswith('mailto:'):
             u.status = None
             u.message = 'Email link (not checked)'
-        elif str(u.url)=='#' or str(u.url)=='':
+        elif str(u.url)=='':
             u.status = False
             u.message = 'Empty link'
         elif u.url.startswith('#'):
             u.status = None
             u.message = 'Link to same page (not checked)'
-        else:
-            if u.url.startswith('/media/'): #TODO fix hard-coded media url
-                u.last_checked = datetime.now()
-                if path(settings.MEDIA_ROOT+u.url[6:]).exists():
-                    u.message = 'Working document link'
-                    u.status = True
-                else:
-                    u.message = 'Missing Document'
-                    u.status = False
-            elif u.url.startswith('/'):
-                u.last_checked = datetime.now()
-                valid = False
-                for k,v in linklists.items():
-                    response = Client().get(u.url)
-                    if response.status_code == 200: # TODO handle redirects.
-                        valid = True
-                if valid:
-                    u.message = 'Working internal link'
-                    u.status = True
-                else:
-                    u.message = 'Broken internal link'
-                    u.status = False
-            elif u.url.startswith('http://'):
-                pass
+        elif u.url.startswith('/media/'): #TODO fix hard-coded media url
+            u.last_checked = datetime.now()
+            if path(settings.MEDIA_ROOT+u.url[6:]).exists(): #TODO fix hard-coded media prefix length
+                u.message = 'Working document link'
+                u.status = True
             else:
-                u.message = 'Invalid URL'
+                u.message = 'Missing Document'
                 u.status = False
+        elif u.url.startswith('/'):
+            u.last_checked = datetime.now()
+            valid = False
+            for k,v in linklists.items():
+                response = Client().get(u.url)
+                if response.status_code == 200:
+                    valid = True
+                elif response.status_code == 302: # TODO handle redirects
+                    u.status = None
+                    u.message = 'Temporary Redirect'
+                elif response.status_code == 301: # TODO handle redirects
+                    u.status = False
+                    u.message = 'Redirect - please update'
+            if valid:
+                u.message = 'Working internal link'
+                u.status = True
+            else:
+                u.message = 'Broken internal link'
+                u.status = False
+        else:
+            u.message = 'Invalid URL'
+            u.status = False
         u.save()
 
 def check_external():
     for u in Url.objects.all():
-        if u.url.startswith('http://'):
+        if u.url.startswith(r'http://') or u.url.startswith(r'https://'):
             if settings.DEBUG:
                 check_every = timedelta(hours=60) #TODO fix hardcoded values
             else:
@@ -65,16 +70,17 @@ def check_external():
             if u.last_checked==None or u.last_checked<=(datetime.now()-check_every):
                 u.last_checked = datetime.now()
                 try:
-                    response = urlopen(u.url)
+                    response = urlopen(u.url.rsplit('#')[0]) # Remove URL fragment identifiers
                     u.message = ' '.join([str(response.code), response.msg])
                     u.status = True
                 except URLError, e:
                     if hasattr(e, 'reason'):
                         u.message = 'Unreachable: '+str(e.reason)
-                    elif hasattr(e, 'code'):
+                    elif hasattr(e, 'code') and e.code!=301:
                         u.message = 'Error: '+str(e.code)
                     else:
-                        assert False
+                        u.message = 'Redirect. Check manually: '+str(e.code)
+                        u.status = None
                     u.status = False
             else:
                 pass
