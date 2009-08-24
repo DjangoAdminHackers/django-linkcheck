@@ -1,24 +1,14 @@
-from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from filebrowser.signals import delete_signal, rename_signal
-
-def handle_rename(sender, **kwargs):
-    old_path = kwargs['old_path'][len(settings.MEDIA_ROOT):]
-    new_path = kwargs['new_path'][len(settings.MEDIA_ROOT):]
-
-def handle_delete(sender, **kwargs):
-    path = kwargs['path'][len(settings.MEDIA_ROOT):]
-    
-rename_signal.connect(handle_rename)
-delete_signal.connect(handle_delete)
+# See signals module for an example of keeping urls and links updated automatically
+#import signals 
 
 class Url(models.Model):
     url = models.CharField(max_length=255, unique=True)
     last_checked = models.DateTimeField(max_length=1024, blank=True, null=True)
-    status = models.BooleanField()
+    status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField()
     @property

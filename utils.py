@@ -1,3 +1,4 @@
+import os.path
 from datetime import datetime, timedelta
 from urllib2 import urlopen, URLError
 
@@ -8,8 +9,6 @@ from django.test.client import Client
 from linkcheck.models import Link, Url
 
 from project.linkcheck_config import linklists #This needs some kind of autodiscovery mechanism
-
-from path import path # TODO fix dependency on Jason Orendorff's path.py
 
 def check():
     check_internal()
@@ -30,7 +29,7 @@ def check_internal():
             u.message = 'Link to same page (not checked)'
         elif u.url.startswith('/media/'): #TODO fix hard-coded media url
             u.last_checked = datetime.now()
-            if path(settings.MEDIA_ROOT+u.url[6:]).exists(): #TODO fix hard-coded media prefix length
+            if os.path.exists(settings.MEDIA_ROOT+u.url[6:]): #TODO fix hard-coded media prefix length
                 u.message = 'Working document link'
                 u.status = True
             else:
