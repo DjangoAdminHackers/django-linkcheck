@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>andybak/django-linkcheck @ GitHub</title>
+	
+	<style type="text/css">
+		body {
+  		margin-top: 1.0em;
+  		background-color: #b4adef;
+		  font-family: "Helvetica,Arial,FreeSans"; 
+  		color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 700px;
+    }
+		h1 { font-size: 3.8em; color: #4b5210; margin-bottom: 3px; }
+		h1 .small { font-size: 0.4em; }
+		h1 a { text-decoration: none }
+		h2 { font-size: 1.5em; color: #4b5210; }
+    h3 { text-align: center; color: #4b5210; }
+    a { color: #4b5210; }
+    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .download { float: right; }
+		pre { background: #000; color: #fff; padding: 15px;}
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    .footer { text-align:center; padding-top:30px; font-style: italic; }
+	</style>
+	
+</head>
+
+<body>
+  <a href="http://github.com/andybak/django-linkcheck"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+  
+  <div id="container">
+
+    <div class="download">
+      <a href="http://github.com/andybak/django-linkcheck/zipball/master">
+        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
+      <a href="http://github.com/andybak/django-linkcheck/tarball/master">
+        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
+    </div>
+      
+    <h1><a href="http://github.com/andybak/django-linkcheck">django-linkcheck</a> 
+      <span class="small">by <a href="http://github.com/andybak">andybak</a></span></h1>
+
+    <div class="description">
+      An app that will analyze and report on links in any model that you register with it. 
+    </div>
+
+    <p>http://cms.andybak.webfactional.com/media/linkcheck.jpg
+
+A fairly flexible app that will analyze and report on links in any model that you register with it. Links can be bare (urls or image and file fields) or embedded in HTML (linkcheck handles the parsing). It's fairly easy to override methods of the Linkcheck object should you need to do anything more complicated (like generate URLs from slug fields etc).
+ 
+The current version does all the finding and checking of links as a bulk job you can run from cron but it's fairly easy to hook up signals to your model's save and delete to keep the data updated once an initial sweep has been done.
+
+Another future enhancement would be the ability to automatically fix links when the related object is changed. 
+
+This is working code but it currently comes with a few caveats:
+
+  # It's been extracted from my homespun CMS and in some places that still shows.
+  # No tests :(
+  # Few comments or docstrings :(
+  # The documentation was rather a rush job :(
+
+Yes I'm a bad person. I'm putting this out there because doing so might inspire someone - hopefully me - to fix the above issues.</p><h2>Dependencies</h2>
+<p>Jquery (my base admin template already links to it. If your's doesn't then add it to base_linkcheck.html
+</p>
+<h2>Install</h2>
+<p>1. Install app to somewhere on your Python path
+2. Edit examples/linkcheck_config.py to include references to all your models that might contain links.
+3. Add something along the lines of linklists.py to every app you referenced in linkcheck_config.py
+4. Import linkcheck_config.py from your root urls.
+5. Syncdb
+6. Run findlinks management command or the utils.find()
+7. Run checklinks management command or the utils.check()
+8. Add (r'^admin/linkcheck/', include('linkcheck.urls')) to your root url config
+9. View /admin/linkcheck/ from your browser
+</p>
+<h2>License</h2>
+<p>New BSD License</p>
+<h2>Authors</h2>
+<p>andybak (andy@andybak.net)<br/><br/>      </p>
+<h2>Contact</h2>
+<p>Andy Baker (andy@andybak.net)<br/>      </p>
+
+
+    <h2>Download</h2>
+    <p>
+      You can download this project in either
+      <a href="http://github.com/andybak/django-linkcheck/zipball/master">zip</a> or
+      <a href="http://github.com/andybak/django-linkcheck/tarball/master">tar</a> formats.
+    </p>
+    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
+      by running:
+      <pre>$ git clone git://github.com/andybak/django-linkcheck</pre>
+    </p>
+      
+    <div class="footer">
+      get the source code on GitHub : <a href="http://github.com/andybak/django-linkcheck">andybak/django-linkcheck</a>
+    </div>
+    
+  </div>
+
+  <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-108138-23");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+</html>
