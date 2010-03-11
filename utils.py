@@ -1,100 +1,148 @@
 import os.path
 from datetime import datetime, timedelta
-from urllib2 import urlopen, URLError
+from urllib2 import urlopen, URLError, HTTPError
 
 from django.conf import settings
 from django.db import connection
 from django.test.client import Client
+from django.test.client import ClientHandler
 
+from reversion.revisions import RevisionManagementError
 from linkcheck.models import Link, Url
 
-from project.linkcheck_config import linklists #This needs some kind of autodiscovery mechanism
+#This needs some kind of autodiscovery mechanism
+from linkcheck.models import all_linklists
 
-def check():
-    check_internal()
-    check_external()
+class LinkCheckHandler(ClientHandler):
+    '''remove reversion.middleware.RevisionMiddleware for test Client'''
+    def load_middleware(self):
+        super(LinkCheckHandler, self).load_middleware()
+        for method_list in [self._request_middleware, self._view_middleware ,
+            self._response_middleware, self._exception_middleware]:
+            for i, method in enumerate(method_list):
+                if method.__str__().count('reversion.middleware.RevisionMiddleware'):
+                    method_list.pop(i)
 
-def check_internal():
-    for u in Url.objects.all():
-        if u.url.startswith(r'http://') or u.url.startswith(r'https://'):
-            pass
-        elif u.url.startswith('mailto:'):
-            u.status = None
-            u.message = 'Email link (not checked)'
-        elif str(u.url)=='':
-            u.status = False
-            u.message = 'Empty link'
-        elif u.url.startswith('#'):
-            u.status = None
-            u.message = 'Link to same page (not checked)'
-        elif u.url.startswith('/media/'): #TODO fix hard-coded media url
-            u.last_checked = datetime.now()
-            if os.path.exists(settings.MEDIA_ROOT+u.url[6:]): #TODO fix hard-coded media prefix length
-                u.message = 'Working document link'
-                u.status = True
-            else:
-                u.message = 'Missing Document'
-                u.status = False
-        elif u.url.startswith('/'):
-            u.last_checked = datetime.now()
-            valid = False
-            for k,v in linklists.items():
-                response = Client().get(u.url)
-                if response.status_code == 200:
-                    valid = True
-                elif response.status_code == 302: # TODO handle redirects
-                    u.status = None
-                    u.message = 'Temporary Redirect'
-                elif response.status_code == 301: # TODO handle redirects
-                    u.status = False
-                    u.message = 'Redirect - please update'
-            if valid:
-                u.message = 'Working internal link'
-                u.status = True
-            else:
-                u.message = 'Broken internal link'
-                u.status = False
-        else:
-            u.message = 'Invalid URL'
-            u.status = False
+def check(internal_recheck_interval, external_recheck_interval, limit):
+    check_internal_links(internal_recheck_interval, limit)
+    check_external_links(external_recheck_interval, limit)
+
+def check_link(u, external=False):
+    if external:
+        uv = UrlValidator(u.url).verify_external()
+    else:
+        uv = UrlValidator(u.url).verify_internal()
+    u.status        = uv.status
+    u.message       = uv.message
+    u.last_checked  = datetime.now()
+    u.save()
+    
+def check_internal_links(internal_recheck_interval=300, limit=None):
+    compare_date = datetime.now() - timedelta(seconds=internal_recheck_interval)
+
+    #select urls where still_exists = True AND last_checked <= compare_date AND DOES NOT begin with http:// or https://
+
+    urls = Url.objects.filter(still_exists__exact='TRUE').exclude(last_checked__gt=compare_date).exclude(url__regex=r'^https?://')
+    #if limit is specified set the limit
+    if limit and limit > -1:
+        urls = urls[:limit]
+
+    for u in urls:
+        check_link(u, external=False)
+
+def check_external_links(external_recheck_interval=86400, limit=None):
+    compare_date = datetime.now() - timedelta(seconds=external_recheck_interval)
+
+    #select Urls which begin with (http:// or https://) and still_exists=TRUE AND last_checked lt compare date
+    urls = Url.objects.filter(url__regex=r'https?://', still_exists__exact='TRUE').exclude(last_checked__gt=compare_date)
+
+    #if limit is specified set the limit
+    if limit and limit > -1:
+        urls = urls[:limit]
+
+    for u in urls:        
+        check_link(u, external=True)
+
+def update_urls(urls, content_type, object_id):
+    # url structure = (field, link text, url)
+    for url in urls:
+        u, created = Url.objects.get_or_create(url=url[2])
+        l, created = Link.objects.get_or_create(url=u, field=url[0], text=url[1], content_type=content_type, object_id=object_id)
+        u.still_exists = True
         u.save()
 
-def check_external():
-    for u in Url.objects.all():
-        if u.url.startswith(r'http://') or u.url.startswith(r'https://'):
-            if settings.DEBUG:
-                check_every = timedelta(hours=60) #TODO fix hardcoded values
-            else:
-                check_every = timedelta(hours=15) #TODO fix hardcoded values
-            if u.last_checked==None or u.last_checked<=(datetime.now()-check_every):
-                u.last_checked = datetime.now()
-                try:
-                    response = urlopen(u.url.rsplit('#')[0]) # Remove URL fragment identifiers
-                    u.message = ' '.join([str(response.code), response.msg])
-                    u.status = True
-                except URLError, e:
-                    if hasattr(e, 'reason'):
-                        u.message = 'Unreachable: '+str(e.reason)
-                    elif hasattr(e, 'code') and e.code!=301:
-                        u.message = 'Error: '+str(e.code)
-                    else:
-                        u.message = 'Redirect. Check manually: '+str(e.code)
-                        u.status = None
-                    u.status = False
-            else:
-                pass
-        u.save()
-
-def find():
-    results = {}
+def find_all_links(all_linklists):
+    all_links_dict = {}
     Url.objects.all().update(still_exists=False)
-    for k,v in linklists.items():
-        results[k] = v().get_linklist()
-        for item in results[k]:
-            for url in (item['urls']+item['images']):
-                u, created = Url.objects.get_or_create(url=url[1])
-                l, created = Link.objects.get_or_create(url=u, field=url[0], content_type=v.content_type(), object_id=item['object'].id)
-                u.still_exists = True
-                u.save()
+    for linklist_name, linklist_cls in all_linklists.items():
+        content_type = linklist_cls.content_type()
+        linklists = linklist_cls().get_linklist()
+        for linklist in linklists:
+            object_id = linklist['object'].id
+            urls = linklist['urls']+linklist['images']
+            if urls:
+                update_urls(urls, content_type, object_id)
+        all_links_dict[linklist_name] = linklists
     Url.objects.filter(still_exists=False).delete()
-    return results
+
+class UrlValidator():
+    def __init__(self, uri):
+        self.uri     = uri
+        self.status  = False
+        self.message = "Not Tested"
+
+    def verify_internal(self):
+        self.status = False
+        self.message = 'Invalid URL'
+        try:
+            if not self.uri:
+                self.message = 'Empty link'
+            elif self.uri.startswith('mailto:'):
+                self.status = None
+                self.message = 'Email link (not checked)'
+            elif self.uri.startswith('#'):
+                self.status = None
+                self.message = 'Link to same page (not checked)'
+            elif self.uri.startswith('/media/'): #TODO fix hard-coded media self.uri
+                if os.path.exists(settings.MEDIA_ROOT+self.uri[6:]): #TODO fix hard-coded media prefix length
+                    self.message = 'Working document link'
+                    self.status = True
+                else:
+                    self.message = 'Missing Document'
+            elif self.uri.startswith('/'):
+                c = Client()
+                c.handler = LinkCheckHandler()
+                response = c.get(self.uri, follow=True)
+                if response.status_code == 200:
+                    self.message = 'Working internal link'
+                    self.status = True
+                elif (response.status_code == 302 or response.status_code == 301):
+                    self.status = None
+                    self.message = 'Redirect %d' % (response.status_code, )
+                else:
+                    self.message = 'Broken internal link'
+        except:
+            pass
+        
+        return self
+
+    def verify_external(self):
+        self.status = False
+        try:
+            response = urlopen(self.uri.rsplit('#')[0]) # Remove URL fragment identifiers
+            self.message = ' '.join([str(response.code), response.msg])
+            self.status = True
+        except HTTPError, e:
+            if hasattr(e, 'code') and hasattr(e, 'msg'):
+                self.message = ' '.join([str(e.code), e.msg])
+            else:
+                self.message = "Unknown Error"
+        except URLError, e:
+            if hasattr(e, 'reason'):
+                self.message = 'Unreachable: '+str(e.reason)
+            elif hasattr(e, 'code') and e.code!=301:
+                self.message = 'Error: '+str(e.code)
+            else:
+                self.message = 'Redirect. Check manually: '+str(e.code)
+
+        return self
