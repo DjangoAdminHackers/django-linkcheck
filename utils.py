@@ -14,14 +14,54 @@ from linkcheck.models import Link, Url
 from linkcheck.models import all_linklists
 
 class LinkCheckHandler(ClientHandler):
-    '''remove reversion.middleware.RevisionMiddleware for test Client'''
+    #customize the ClientHandler to allow us removing some middlewares
     def load_middleware(self):
+        self.ignore_keywords = ['reversion.middleware','CommonMiddleware','MaintenanceModeMiddleware']
         super(LinkCheckHandler, self).load_middleware()
-        for method_list in [self._request_middleware, self._view_middleware ,
-            self._response_middleware, self._exception_middleware]:
-            for i, method in enumerate(method_list):
-                if method.__str__().count('reversion.middleware.RevisionMiddleware'):
-                    method_list.pop(i)
+        new_request_middleware = []
+        #############################_request_middleware#################################
+        for method in self._request_middleware:
+            ignored = False
+            for keyword in self.ignore_keywords:
+                if method.__str__().count(keyword):
+                    ignored = True
+                    break
+            if not ignored:
+                new_request_middleware.append(method)
+        self._request_middleware = new_request_middleware
+        #############################_view_middleware#################################
+        new_view_middleware = []
+        for method in self._view_middleware:
+            ignored = False
+            for keyword in self.ignore_keywords:
+                if method.__str__().count(keyword):
+                    ignored = True
+                    break
+            if not ignored:
+                new_view_middleware.append(method)
+        self._view_middleware = new_view_middleware
+        #############################_response_middleware#################################
+        new_response_middleware = []
+        for method in self._response_middleware:
+            ignored = False
+            for keyword in self.ignore_keywords:
+                if method.__str__().count(keyword):
+                    ignored = True
+                    break
+            if not ignored:
+                new_response_middleware.append(method)
+        self._response_middleware = new_response_middleware
+        #############################_exception_middleware#################################
+        new_exception_middleware = []
+        for method in self._exception_middleware:
+            ignored = False
+            for keyword in self.ignore_keywords:
+                if method.__str__().count(keyword):
+                    ignored = True
+                    break
+            if not ignored:
+                new_exception_middleware.append(method)
+        self._exception_middleware = new_exception_middleware
 
 def check(internal_recheck_interval, external_recheck_interval, limit):
     check_internal_links(internal_recheck_interval, limit)
@@ -36,7 +76,7 @@ def check_link(u, external=False):
     u.message       = uv.message
     u.last_checked  = datetime.now()
     u.save()
-    
+
 def check_internal_links(internal_recheck_interval=300, limit=None):
     compare_date = datetime.now() - timedelta(seconds=internal_recheck_interval)
 
@@ -60,7 +100,7 @@ def check_external_links(external_recheck_interval=86400, limit=None):
     if limit and limit > -1:
         urls = urls[:limit]
 
-    for u in urls:        
+    for u in urls:
         check_link(u, external=True)
 
 def update_urls(urls, content_type, object_id):
@@ -123,7 +163,7 @@ class UrlValidator():
                     self.message = 'Broken internal link'
         except:
             pass
-        
+
         return self
 
     def verify_external(self):
