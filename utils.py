@@ -12,6 +12,7 @@ from linkcheck.models import Link, Url
 
 #This needs some kind of autodiscovery mechanism
 from linkcheck.models import all_linklists
+from linkcheck.settings import SITE_DOMAINS
 
 class LinkCheckHandler(ClientHandler):
     #customize the ClientHandler to allow us removing some middlewares
@@ -168,6 +169,11 @@ class UrlValidator():
 
     def verify_external(self):
         self.status = False
+        internal_exceptions = SITE_DOMAINS
+        for ex in internal_exceptions:
+            if ex and self.uri.startswith(ex):
+                self.uri = self.uri.replace(ex, '', 1)
+                return self.verify_internal()
         try:
             response = urlopen(self.uri.rsplit('#')[0]) # Remove URL fragment identifiers
             self.message = ' '.join([str(response.code), response.msg])
