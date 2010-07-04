@@ -1,4 +1,5 @@
 from sgmllib import SGMLParser
+from HTMLParser import HTMLParser
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -38,6 +39,23 @@ class ImageLister(Lister):
         if src:
             self.urls.append(('', src[0]))
 
+class AnchorLister(HTMLParser):
+    def __init__(self):
+        self.names = []
+        HTMLParser.__init__(self)
+    def reset(self):
+        HTMLParser.reset(self)
+        self.names = []
+    def handle_starttag(self, tag, attributes):
+        print tag, attributes
+        name = [v for k, v in attributes if k=='id']
+        if name:
+            self.names.append(name[0])
+        if tag == 'a':
+            name = [v for k, v in attributes if k=='name']
+            if name:
+                self.names.append(name[0])
+
 def parse(obj, field, parser):
     html = getattr(obj,field)
     if html:
@@ -54,6 +72,12 @@ def parse_urls(obj, field):
 def parse_images(obj, field):
     parser = ImageLister()
     return parse(obj, field, parser)
+
+def parse_anchors(content):
+    parser = AnchorLister()
+    parser.feed(content)
+    parser.close()
+    return parser.names
 
 class Linklist(object):
     html_fields = []

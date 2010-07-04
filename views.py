@@ -2,6 +2,7 @@ from itertools import groupby
 from operator import itemgetter
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.admin.views.decorators import staff_member_required
@@ -52,10 +53,14 @@ def report(request):
                 object = content_type.model_class().objects.get(pk=ok)
             except content_type.model_class().DoesNotExist:
                 object = None
+            try:
+                admin_url = object.get_admin_url()
+            except AttributeError:
+                admin_url = '%s%s/%s/%s/' % (reverse('admin:index'), content_type.app_label, content_type.model, ok)
             objects.append({
                 'object': object,
                 'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(), # convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
-                'admin_url': '/admin/%s/%s/%s/' % (content_type.app_label, content_type.model, ok) #TODO fix hardcoded admin url
+                'admin_url': admin_url,
             })
         content_types_list.append({
             'content_type': content_type,
@@ -69,11 +74,10 @@ def report(request):
 
     return render_to_response(
         'report.html',
-        {
-            'content_types_list': content_types_list,
-            'pages':              links,
-            'filter':             link_filter,
-            'qry_data':           rqst.urlencode(),
+            {'content_types_list': content_types_list,
+            'pages': links,
+            'filter': link_filter,
+            'qry_data': rqst.urlencode(),
             'report_type': report_type,
         },
         RequestContext(request),

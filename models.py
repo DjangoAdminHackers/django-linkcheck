@@ -28,11 +28,11 @@ class Url(models.Model):
             return 'empty'
         elif self.url.startswith('#'):
             return 'anchor'
-        elif self.url.startswith('/media/documents/images/'):
+        elif self.url.startswith('/media/documents/images/'): #TODO this needs to be configurable.
             return 'image'
-        elif self.url.startswith('/media/documents/'):
+        elif self.url.startswith('/media/documents/'): #TODO this needs to be configurable.
             return 'document'
-        elif self.url.startswith('/media/'): #TODO this needs to be configurable. Can't use MEDIA_URL as it might include the server
+        elif self.url.startswith('/media/'): #TODO Can't use MEDIA_URL as it sometimes can include the hostname
             return 'other media'
         else:
             return 'unknown'
@@ -56,13 +56,13 @@ class Url(models.Model):
     def __unicode__(self):
         return self.url
 
-    def check(self):
-        from utils import UrlValidator
+    def check(self, **kwargs):
+        from linkcheck.utils import UrlValidator
         external = EXTERNAL_REGEX.match(self.url)
         if external:
-            uv = UrlValidator(self.url).verify_external()
+            uv = UrlValidator(self.url, **kwargs).verify_external()
         else:
-            uv = UrlValidator(self.url).verify_internal()
+            uv = UrlValidator(self.url, **kwargs).verify_internal()
         self.status        = uv.status
         self.message       = uv.message
         self.last_checked  = datetime.now()

@@ -1,3 +1,9 @@
+# This file works with django-cron.
+# It's use is optional.
+# Use any means you like to run scheduled jobs.
+# Note - you only need to run scheduled jobs if you want to check external links are still working
+# Internal links are handled automatically via signals.
+
 from django_cron import cronScheduler
 from django_cron import Job
 

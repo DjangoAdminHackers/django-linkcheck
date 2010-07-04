@@ -51,7 +51,7 @@
                             <th style='width: 20%;'>Field to Edit</th>
                             <th style='width: 20%;'>Status</th>
                             {% for link in object.link_list %}
-                                <tr class="status-{{link.url.colour}}">
+                                <tr>
                                     <td style='width: 40%;'><a href='{{link.url}}' target='_blank'>{{link.url}}</a></td>
                                     <td style='width: 20%;'>{% if link.text = "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
                                     <td style='width: 20%;'>{{link.field}}</td>

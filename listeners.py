@@ -41,11 +41,14 @@ for linklist_name, linklist_cls in all_linklists.items():
             links = linklist['urls']+linklist['images']
         for link in links:
             # url structure = (field, link text, url)
-            u, created = Url.objects.get_or_create(url=link[2])
+            url = link[2]
+            if url.startswith('#'):
+                url = instance.get_absolute_url() + url
+            u, created = Url.objects.get_or_create(url=url)
             l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
             new_links.append(l.id)
             u.still_exists = True
-            u.check()
+            u.check(instance=instance)
         gone_links = old_links.exclude(id__in=new_links)
         gone_links.delete()
     listeners.append(check_instance_links)
