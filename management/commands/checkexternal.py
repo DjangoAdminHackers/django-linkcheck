@@ -1,9 +1,9 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
 
-from linkcheck.utils import check_external_links
-from linkcheck.settings import EXTERNAL_RECHECK_INTERVAL
-from linkcheck.settings import MAX_CHECKS_PER_RUN
+from linkcheck.utils import check_links
+from linkcheck.linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
+from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -24,6 +24,10 @@ class Command(BaseCommand):
             limit = options['limit']
         else:
             limit = MAX_CHECKS_PER_RUN
-        print "Checking external links that haven't run for %s seconds. Will run maximum of %s checks this run." % (externalinterval, limit)
-        return check_external_links(externalinterval, limit)
+
+        print "Checking all external links that haven't been tested for %s seconds." % externalinterval
+        if limit!=-1:
+            print "Will run maximum of %s checks this run." % limit
+
+        return check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
 

@@ -3,10 +3,13 @@ from HTMLParser import HTMLParser
 
 from django.contrib.contenttypes.models import ContentType
 
+
 class Lister(SGMLParser):
     def reset(self):
         SGMLParser.reset(self)
         self.urls = []
+
+
 class URLLister(Lister):
     def __init__(self):
         self.in_a = False
@@ -28,16 +31,19 @@ class URLLister(Lister):
         if self.in_a:
             self.text += data
     def end_a(self):
-        self.urls.append((self.text[:256], self.url))
+        if self.url:
+            self.urls.append((self.text[:256], self.url))
         self.in_a = False
         self.text = ''
         self.url = ''
+
 
 class ImageLister(Lister):
     def start_img(self, attrs):                     
         src = [v for k, v in attrs if k=='src'] 
         if src:
             self.urls.append(('', src[0]))
+
 
 class AnchorLister(HTMLParser):
     def __init__(self):
@@ -47,7 +53,6 @@ class AnchorLister(HTMLParser):
         HTMLParser.reset(self)
         self.names = []
     def handle_starttag(self, tag, attributes):
-        print tag, attributes
         name = [v for k, v in attributes if k=='id']
         if name:
             self.names.append(name[0])
@@ -55,6 +60,7 @@ class AnchorLister(HTMLParser):
             name = [v for k, v in attributes if k=='name']
             if name:
                 self.names.append(name[0])
+
 
 def parse(obj, field, parser):
     html = getattr(obj,field)
@@ -65,13 +71,16 @@ def parse(obj, field, parser):
     else:
         return []
 
+
 def parse_urls(obj, field):
     parser = URLLister()
     return parse(obj, field, parser)
 
+
 def parse_images(obj, field):
     parser = ImageLister()
     return parse(obj, field, parser)
+
 
 def parse_anchors(content):
     parser = AnchorLister()
@@ -79,11 +88,13 @@ def parse_anchors(content):
     parser.close()
     return parser.names
 
+
 class Linklist(object):
     html_fields = []
     url_fields = []
     image_fields = []
     object_filter = None
+    object_exclude = None
     def __get(self, name, obj, default=None):
         try:
             attr = getattr(self, name)
@@ -113,10 +124,12 @@ class Linklist(object):
         return urls
     @classmethod
     def objects(cls):
+        objects = cls.model.objects.all()
         if cls.object_filter:
-            return cls.model.objects.filter(**cls.object_filter).distinct()
-        else:
-            return cls.model.objects.all()
+            objects = objects.filter(**cls.object_filter).distinct()
+        if cls.object_exclude:
+            objects = objects.exclude(**cls.object_exclude).distinct()
+        return objects
     def get_linklist(self, extra_filter={}):
         linklist = []
         objects = self.objects()

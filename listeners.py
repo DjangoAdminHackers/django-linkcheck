@@ -1,8 +1,6 @@
-# The filebrowser integration requires a customized version of django-filebrowser that is out of sync with their current trunk
-# When I get a chance I'll update to trunk and submit the customizations for approval
-# Until then this is purely for academic interest
-
 import os.path
+from threading import Thread
+
 from django.conf import settings
 from django.db.models import signals as model_signals
 
@@ -26,31 +24,40 @@ for linklist_name, linklist_cls in all_linklists.items():
             existing Link/Urls are checked
             disappering Links are deleted
         '''
-        from linkcheck.models import Url
-        from linkcheck.models import Link
-        content_type = linklist_cls.content_type()
-        new_links = []
-        old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
+        def do_check_instance_links(sender, instance, linklist_cls=linklist_cls):
+            from linkcheck.models import Url
+            from linkcheck.models import Link
+            import linkcheck.notifications
+            try:
+                linkcheck.notifications.still_updating = True
+                content_type = linklist_cls.content_type()
+                new_links = []
+                old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
 
-        linklists = linklist_cls().get_linklist(extra_filter={'pk':instance.pk,})
-        if not linklists:
-            # This object is no longer watched by linkcheck according to object_filter
-            links = []
-        else:
-            linklist = linklists[0]
-            links = linklist['urls']+linklist['images']
-        for link in links:
-            # url structure = (field, link text, url)
-            url = link[2]
-            if url.startswith('#'):
-                url = instance.get_absolute_url() + url
-            u, created = Url.objects.get_or_create(url=url)
-            l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
-            new_links.append(l.id)
-            u.still_exists = True
-            u.check(instance=instance)
-        gone_links = old_links.exclude(id__in=new_links)
-        gone_links.delete()
+                linklists = linklist_cls().get_linklist(extra_filter={'pk':instance.pk,})
+                if not linklists:
+                    # This object is no longer watched by linkcheck according to object_filter
+                    links = []
+                else:
+                    linklist = linklists[0]
+                    links = linklist['urls']+linklist['images']
+                for link in links:
+                    # url structure = (field, link text, url)
+                    url = link[2]
+                    if url.startswith('#'):
+                        url = instance.get_absolute_url() + url
+                    u, created = Url.objects.get_or_create(url=url)
+                    l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
+                    new_links.append(l.id)
+                    u.still_exists = True
+                    u.check()
+                gone_links = old_links.exclude(id__in=new_links)
+                gone_links.delete()
+            finally:
+                linkcheck.notifications.still_updating = False
+            
+        t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls,))
+        t.start()
     listeners.append(check_instance_links)
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
 
@@ -89,10 +96,11 @@ for linklist_name, linklist_cls in all_linklists.items():
     listeners.append(instance_pre_save)
     model_signals.pre_save.connect(listeners[-1], sender=linklist_cls.model)
 
-    def instance_post_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
+    def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
         from linkcheck.models import Url
         current_url = instance.get_absolute_url()
-        if kwargs['created']:
+        active = linklist.objects().filter(pk=instance.pk).count()
+        if kwargs['created'] or (not active):
             new_urls = Url.objects.filter(url__startswith=current_url)
         else:
             new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)

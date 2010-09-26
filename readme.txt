@@ -2,7 +2,7 @@ http://ixxy.co.uk/media/documents/images/linkcheck.jpg
 
 A fairly flexible app that will analyze and report on links in any model that you register with it. Links can be bare (urls or image and file fields) or embedded in HTML (linkcheck handles the parsing). It's fairly easy to override methods of the Linkcheck object should you need to do anything more complicated (like generate URLs from slug fields etc).
  
-You should run it's management command via cron to check external links. Internal links should be automatically handled by signals.
+You should run it's management command via cron or similar to check external links regularly to see if their status changes. All links are checked automatically when objects are saved. This is handled by signals.
 
 =Basic usage=
 
