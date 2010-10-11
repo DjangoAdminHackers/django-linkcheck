@@ -72,7 +72,7 @@ def report(request):
         del rqst['page']
 
     return render_to_response(
-        'report.html',
+        'linkcheck/report.html',
             {'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
