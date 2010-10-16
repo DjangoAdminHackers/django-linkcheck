@@ -37,7 +37,7 @@ Basic usage
 The file 'notifications.py' is completely optional. It works with
 admin-notifications_ to display a notification about broken links as
 shown in the screenshot above.
-.. admin-notifications: http://github.com/andybak/django-admin-notifications
+.. _admin-notifications: http://github.com/andybak/django-admin-notifications
 
 We are aware that this documentation is on the brief side of things so any
 suggestions for elaboration or clarification would be gratefully accepted.
