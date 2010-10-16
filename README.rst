@@ -18,11 +18,13 @@ Basic usage
 
 #. Install app to somewhere on your Python path
 
-#. Add something along the lines of ``examples/linklists.py`` to every app that:
+#. Add something along the lines of ``examples/linklists.py`` to every app that
+   either:
 
-  #) either produces content that could contain links or images
-  #) can be the target of a link (and if so should provide a get_absolute_url
-     method so we can grab it's url)
+  #) has models that contain content (e.g. url/image fields, chunks of markup
+     or anything that gets transformed into a IMG or HREF when displayed
+  #) can be the target of a link - i.e. is addressed by a url - in this case
+     make sure it has an instance method named 'get_absolute_url'
 
 #. Syncdb
 
@@ -32,4 +34,10 @@ Basic usage
 
 #. View ``/admin/linkcheck/`` from your browser
 
-#. Tell us about the bugs you've found or to complain how bad the documentation is!
+The file 'notifications.py' is completely optional. It works with
+admin-notifications_ to display a notification about broken links as
+shown in the screenshot above.
+.. admin-notifications: http://github.com/andybak/django-admin-notifications
+
+We are aware that this documentation is on the brief side of things so any
+suggestions for elaboration or clarification would be gratefully accepted.
