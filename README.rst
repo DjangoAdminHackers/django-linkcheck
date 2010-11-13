@@ -42,3 +42,8 @@ shown in the screenshot above.
 
 We are aware that this documentation is on the brief side of things so any
 suggestions for elaboration or clarification would be gratefully accepted.
+
+django-filebrowser integration
+------------------------------
+
+If django-filebrowser is present on your path then linkcheck will listen to the post-upload, delete and rename signals and update itself according
