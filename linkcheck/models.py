@@ -3,10 +3,12 @@ import imp
 import os.path
 from datetime import datetime
 from datetime import timedelta
-from urllib2 import urlopen
-from urllib2 import URLError
-from urllib2 import HTTPError
+from httplib import BadStatusLine
 from HTMLParser import HTMLParseError
+from urllib2 import HTTPError
+from urllib2 import URLError
+from urllib2 import urlopen
+from urllib2 import Request as urllib2Request
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -23,7 +25,13 @@ from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 
+class HeadRequest(urllib2Request):
+    def get_method(self):
+        return "HEAD"
+
 class Url(models.Model):
+    # A URL represents a distinct URL.
+    # Urls can have many links pointing to them
     url = models.CharField(max_length=255, unique=True)
     last_checked = models.DateTimeField(max_length=1024, blank=True, null=True)
     status = models.NullBooleanField()
@@ -151,7 +159,9 @@ class Url(models.Model):
             if self.last_checked and (self.last_checked > external_recheck_datetime):
                 return self.status
             try:
-                response = urlopen(self.url.rsplit('#')[0]) # Remove URL fragment identifiers
+                url = self.url.rsplit('#')[0] # Remove URL fragment identifiers
+                req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
+                response = urlopen(req)
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
 
@@ -170,6 +180,9 @@ class Url(models.Model):
                         # The external web page is mal-formatted
                         self.message = 'Cannot validate this anchor'
                         self.status = None
+
+            except BadStatusLine:
+                    self.message = "Bad Status Line"
 
             except HTTPError, e:
                 if hasattr(e, 'code') and hasattr(e, 'msg'):
@@ -190,6 +203,8 @@ class Url(models.Model):
         return self.status
 
 class Link(models.Model):
+    # A link represents a URL in a field in a specific model
+    # Many links can point to the same URL
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')

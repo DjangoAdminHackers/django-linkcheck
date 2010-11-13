@@ -1,13 +1,18 @@
 import os.path
+import sys
 from threading import Thread
 
 from django.conf import settings
 from django.db.models import signals as model_signals
 
-from filebrowser.views import filebrowser_post_upload
-from filebrowser.views import filebrowser_post_rename
-from filebrowser.views import filebrowser_post_delete
-from filebrowser.settings import DIRECTORY
+try:
+    from filebrowser.views import filebrowser_post_upload
+    from filebrowser.views import filebrowser_post_rename
+    from filebrowser.views import filebrowser_post_delete
+    from filebrowser.settings import DIRECTORY
+    FILEBROWSER_PRESENT = True
+except ImportError:
+    FILEBROWSER_PRESENT = False
 
 from linkcheck.models import all_linklists
 
@@ -15,6 +20,7 @@ listeners = []
 
 #1, register listeners for the objects that contain Links
 for linklist_name, linklist_cls in all_linklists.items():
+    
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
         '''
         When an object is saved:
@@ -25,9 +31,11 @@ for linklist_name, linklist_cls in all_linklists.items():
             disappering Links are deleted
         '''
         def do_check_instance_links(sender, instance, linklist_cls=linklist_cls):
+            
             from linkcheck.models import Url
             from linkcheck.models import Link
             import linkcheck.notifications
+
             try:
                 linkcheck.notifications.still_updating = True
                 content_type = linklist_cls.content_type()
@@ -35,12 +43,14 @@ for linklist_name, linklist_cls in all_linklists.items():
                 old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
 
                 linklists = linklist_cls().get_linklist(extra_filter={'pk':instance.pk,})
+
                 if not linklists:
                     # This object is no longer watched by linkcheck according to object_filter
                     links = []
                 else:
                     linklist = linklists[0]
                     links = linklist['urls']+linklist['images']
+                    
                 for link in links:
                     # url structure = (field, link text, url)
                     url = link[2]
@@ -51,13 +61,20 @@ for linklist_name, linklist_cls in all_linklists.items():
                     new_links.append(l.id)
                     u.still_exists = True
                     u.check()
+                    
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
+                
             finally:
                 linkcheck.notifications.still_updating = False
-            
-        t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls,))
-        t.start()
+
+        # Don't run in a separate thread if we are running tests
+        if len(sys.argv)>1 and sys.argv[1] == 'test':
+            do_check_instance_links(sender, instance, linklist_cls,)
+        else:
+            t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls,))
+            t.start()
+
     listeners.append(check_instance_links)
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
 
@@ -93,22 +110,35 @@ for linklist_name, linklist_cls in all_linklists.items():
         except:
             #log.debug('new instance, post_save is in charge of this')
             pass
+
     listeners.append(instance_pre_save)
     model_signals.pre_save.connect(listeners[-1], sender=linklist_cls.model)
 
+
     def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
+
         from linkcheck.models import Url
+        
         current_url = instance.get_absolute_url()
-        active = linklist.objects().filter(pk=instance.pk).count()
-        if kwargs['created'] or (not active):
-            new_urls = Url.objects.filter(url__startswith=current_url)
-        else:
-            new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
-        if new_urls:
-            for url in new_urls:
-                url.check()
+
+        # We assume returning None from get_absolute_url means that this instance doesn't have a URL
+        # Not sure if we should do the same for '' as this could refer to '/'
+        if current_url!=None:
+
+            active = linklist.objects().filter(pk=instance.pk).count()
+
+            if kwargs['created'] or (not active):
+                new_urls = Url.objects.filter(url__startswith=current_url)
+            else:
+                new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
+
+            if new_urls:
+                for url in new_urls:
+                    url.check()
+
     listeners.append(instance_post_save)
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
+
 
     def instance_pre_delete(sender, instance, ModelCls=linklist_cls.model,  **kwargs):
         from linkcheck.models import Url
@@ -122,6 +152,10 @@ for linklist_name, linklist_cls in all_linklists.items():
     model_signals.pre_delete.connect(listeners[-1], sender=linklist_cls.model)
 
 
+################################################
+# Integrate with django-filebrowser if present #
+################################################
+
 def handle_upload(sender, path=None, **kwargs):
     from linkcheck.models import Url
     url = os.path.join(settings.RELATIVE_MEDIA_URL, kwargs['file'].url_relative)
@@ -131,7 +165,7 @@ def handle_upload(sender, path=None, **kwargs):
         url_qs.update(status=True, message='Working document link')
         msg = "Please note. Uploading %s has corrected %s broken link%s. See the Link Manager for more details" % (url, count, 's' if count>1 else '')
         sender.user.message_set.create(message=msg)
-filebrowser_post_upload.connect(handle_upload)
+
 
 def handle_rename(sender, path=None, **kwargs):
     from linkcheck.models import Url
@@ -163,7 +197,7 @@ def handle_rename(sender, path=None, **kwargs):
     if new_count:
         msg = "Please note. Renaming %s has corrected %s broken link%s. See the Link Manager for more details" % (new_url, new_count, 's' if new_count>1 else '')
         sender.user.message_set.create(message=msg)
-filebrowser_post_rename.connect(handle_rename)
+
 
 def handle_delete(sender, path=None, **kwargs):
     from linkcheck.models import Url
@@ -174,10 +208,16 @@ def handle_delete(sender, path=None, **kwargs):
         url_qs.update(status=False, message='Missing Document')
         msg = "Warning. Deleting %s has caused %s link%s to break. Please use the Link Manager to fix them" % (url, count, 's' if count>1 else '')
         sender.user.message_set.create(message=msg)
-filebrowser_post_delete.connect(handle_delete)
+
+
+if FILEBROWSER_PRESENT:
+    filebrowser_post_upload.connect(handle_upload)
+    filebrowser_post_rename.connect(handle_rename)
+    filebrowser_post_delete.connect(handle_delete)
+
 
 def isdir(filename):
-    '''!!!only used for filebroser'''
+    '''!!!only used for filebrowser'''
     if filename.count('.'):
         return False
     else:

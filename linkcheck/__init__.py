@@ -90,11 +90,13 @@ def parse_anchors(content):
 
 
 class Linklist(object):
+
     html_fields = []
     url_fields = []
     image_fields = []
     object_filter = None
     object_exclude = None
+
     def __get(self, name, obj, default=None):
         try:
             attr = getattr(self, name)
@@ -103,25 +105,38 @@ class Linklist(object):
         if callable(attr):
             return attr(obj)
         return attr
+
     def urls(self, obj):
         urls = []
+
+        # Look for HREFS in HTML fields
         for field in self.html_fields:
             urls += [(field, text, url) for text, url in parse_urls(obj,field)]
+
+        # Now add in the URL fields
         for field in self.url_fields:
             urls.append((field, '', getattr(obj ,field)))
+            
         return urls
+
     def images(self, obj):
         from django.conf import settings
         urls = []
         host_index = settings.MEDIA_URL[:-1].rfind('/')
+        
+        # Look for IMGs in HTML fields
         for field in self.html_fields:
             urls += [(field, text, url) for text, url in parse_images(obj,field)]
+
+        # Now add in the image fields
         for field in self.image_fields:
             try:
                 urls.append((field, '', getattr(obj,field).url[host_index:]))
             except ValueError: # No image attached
                 pass
+            
         return urls
+
     @classmethod
     def objects(cls):
         objects = cls.model.objects.all()
@@ -130,6 +145,7 @@ class Linklist(object):
         if cls.object_exclude:
             objects = objects.exclude(**cls.object_exclude).distinct()
         return objects
+    
     def get_linklist(self, extra_filter={}):
         linklist = []
         objects = self.objects()
@@ -142,6 +158,7 @@ class Linklist(object):
                 'images': self.images(object),
             })
         return linklist
+    
     @classmethod
     def content_type(cls):
         return ContentType.objects.get_for_model(cls.model)
