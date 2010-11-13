@@ -1,0 +1,14 @@
+0.5.0
+
+Start this changelog
+Added some more comments throughout
+Fixed dependency on django-filebrowser by wrapping it in an exception check
+Handle get_absolute_url returning None
+Use HEAD requests for checking external URLs
+Handle HREF="#" correctly
+Cleaner display of hashtag links in reports
+Handle 'Bad Status Line' responses from remote servers.
+Don't spawn a thread if running from tests as this prevents the new thread from seeing the same database transaction as the parent thread
+Fix some tests from prior to the big refactor. nb Tests are still incomplete and many are broken :(
+document filebrowser dependency
+
