@@ -129,7 +129,10 @@ class Url(models.Model):
                 if response.status_code == 200:
                     self.message = 'Working internal link'
                     self.status = True
-                    if self.url.count('#'):
+                    # see if the internal link points an anchor
+                    if self.url[-1] == '#': # special case, point to #
+                        self.message = 'Working internal hash anchor'
+                    elif self.url.count('#'):
                         anchor = self.url.split('#')[1]
                         from linkcheck import parse_anchors
                         names = parse_anchors(response.content)
@@ -211,6 +214,18 @@ class Link(models.Model):
     field = models.CharField(max_length=128)
     url = models.ForeignKey(Url, related_name="links")
     text = models.CharField(max_length=256, default='')
+
+    @property
+    def display_url(self):
+        # when page /test/ has a anchor link to /test/#anchor, we display it
+        # as "#anchor" rather than "/test/#anchor"
+        if self.url.url.count('#'):
+            url_part, anchor_part = self.url.url.split('#')
+            absolute_url = self.content_object.get_absolute_url()
+            if url_part == absolute_url:
+                return '#' + anchor_part
+        return self.url.url
+
 
 def link_post_delete(sender, instance, **kwargs):
     url = instance.url
