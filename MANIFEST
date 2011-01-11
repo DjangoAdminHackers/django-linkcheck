@@ -19,6 +19,7 @@ linkcheck/management/commands/checkexternal.py
 linkcheck/management/commands/checkinternal.py
 linkcheck/management/commands/checklinks.py
 linkcheck/management/commands/findlinks.py
+linkcheck/management/commands/unignore_links.py
 linkcheck/templates/linkcheck/base_linkcheck.html
 linkcheck/templates/linkcheck/paginator.xhtml
 linkcheck/templates/linkcheck/report.html
