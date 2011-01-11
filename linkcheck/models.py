@@ -18,6 +18,7 @@ from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
 
+from linkcheck_settings import MAX_URL_LENGTH
 from linkcheck_settings import MEDIA_PREFIX
 from linkcheck_settings import SITE_DOMAINS
 from linkcheck_settings import EXTERNAL_REGEX_STRING
@@ -31,9 +32,9 @@ class HeadRequest(urllib2Request):
 
 class Url(models.Model):
     # A URL represents a distinct URL.
-    # Urls can have many links pointing to them
-    url = models.CharField(max_length=255, unique=True)
-    last_checked = models.DateTimeField(max_length=1024, blank=True, null=True)
+    # A single Url can have multiple Links associated with it
+    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True) # See http://www.boutell.com/newfaq/misc/urllength.html
+    last_checked = models.DateTimeField(blank=True, null=True)
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField()
@@ -44,16 +45,12 @@ class Url(models.Model):
             return 'external'
         if self.url.startswith('mailto'):
             return 'mailto'
-        elif str(self.url)=='#' or str(self.url)=='':
+        elif str(self.url)=='':
             return 'empty'
         elif self.url.startswith('#'):
             return 'anchor'
-        elif self.url.startswith('/media/documents/images/'): #TODO this needs to be configurable.
-            return 'image'
-        elif self.url.startswith('/media/documents/'): #TODO this needs to be configurable.
-            return 'document'
-        elif self.url.startswith('/media/'): #TODO Can't use MEDIA_URL as it sometimes can include the hostname
-            return 'other media'
+        elif self.url.startswith(MEDIA_PREFIX):
+            return 'file'
         else:
             return 'unknown'
 
@@ -76,20 +73,26 @@ class Url(models.Model):
     def __unicode__(self):
         return self.url
 
-    def check(self, check_internal=True, check_external=True):
-        from linkcheck.utils import LinkCheckHandler
+    @property
+    def external(self):
+        return EXTERNAL_REGEX.match(self.url)
 
-        external_recheck_interval = EXTERNAL_RECHECK_INTERVAL
-        external_recheck_datetime = datetime.now() - timedelta(seconds=external_recheck_interval)
+    def check(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
+
+        from linkcheck.utils import LinkCheckHandler
+        external_recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
         self.status  = False
 
         # Remove current domain from URLs as the test client chokes when trying to test them during a page save
         # They shouldn't generally exist but occasionally slip through
         # If settings.SITE_DOMAINS isn't set then use settings.SITE_DOMAIN
         # but also check for variants: example.org, www.example.org, test.example.org
+        
         original_url = None # used to restore the original url afterwards
+
         if SITE_DOMAINS: #if the setting is present
             internal_exceptions = SITE_DOMAINS
+
         else: # try using SITE_DOMAIN
             root_domain = settings.SITE_DOMAIN
             if root_domain.startswith('www.'):
@@ -97,13 +100,13 @@ class Url(models.Model):
             elif root_domain.startswith('test.'):
                 root_domain = root_domain[5:]
             internal_exceptions = ['http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain]
+            
         for ex in internal_exceptions:
             if ex and self.url.startswith(ex):
                 original_url = self.url
                 self.url = self.url.replace(ex, '', 1)
 
-
-        if check_internal and not(EXTERNAL_REGEX.match(self.url)):
+        if check_internal and (not self.external):
             if not(self.url):
                 self.message = 'Empty link'
 
@@ -117,7 +120,7 @@ class Url(models.Model):
 
             elif self.url.startswith(MEDIA_PREFIX):
                 if os.path.exists(settings.MEDIA_ROOT+self.url[len(MEDIA_PREFIX)-1:]): #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
-                    self.message = 'Working document link'
+                    self.message = 'Working file link'
                     self.status = True
                 else:
                     self.message = 'Missing Document'
@@ -157,18 +160,33 @@ class Url(models.Model):
             self.last_checked  = datetime.now()
             self.save()
 
-        elif check_external and EXTERNAL_REGEX.match(self.url):
+        elif check_external and self.external:
 
             if self.last_checked and (self.last_checked > external_recheck_datetime):
                 return self.status
+            
             try:
-                url = self.url.rsplit('#')[0] # Remove URL fragment identifiers
-                req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
-                response = urlopen(req)
+                
+                # Remove URL fragment identifiers
+                url = self.url.rsplit('#')[0]
+                
+                if self.url.count('#'):
+                    # We have to get the content so we can check the anchors
+                    response = urlopen(url)
+                else:
+                    # Might as well just do a HEAD request
+                    req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
+                    try:
+                        response = urlopen(req)
+                    except ValueError:
+                        # ...except sometimes it triggers a bug in urllib2
+                        response = urlopen(url)
+                        
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
 
                 if self.url.count('#'):
+                    
                     anchor = self.url.split('#')[1]
                     from linkcheck import parse_anchors
                     try:
@@ -179,10 +197,12 @@ class Url(models.Model):
                         else:
                             self.message = 'Broken external hash anchor'
                             self.status = False
+                            
                     except HTMLParseError:
                         # The external web page is mal-formatted
-                        self.message = 'Cannot validate this anchor'
-                        self.status = None
+                        # I reckon a broken anchor on an otherwise good URL should count as a pass
+                        self.message = "Page OK but anchor can't be checked"
+                        self.status = True
 
             except BadStatusLine:
                     self.message = "Bad Status Line"
@@ -206,14 +226,15 @@ class Url(models.Model):
         return self.status
 
 class Link(models.Model):
-    # A link represents a URL in a field in a specific model
-    # Many links can point to the same URL
+    # A Link represents a specific URL in a specific field in a specific model
+    # Multiple Links can reference a single Url
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     field = models.CharField(max_length=128)
     url = models.ForeignKey(Url, related_name="links")
     text = models.CharField(max_length=256, default='')
+    ignore = models.BooleanField(default=False)
 
     @property
     def display_url(self):

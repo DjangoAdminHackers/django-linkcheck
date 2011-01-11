@@ -2,60 +2,171 @@
 {% block extrahead %}
 {{ block.super }}
 <script type="text/javascript">
-    function clean() {
-        tables = $('table.links');
-        tables.each(function(i) {
-            $(this).parent().show();
-            if ($(this).find('tr:visible').size()==0) {
-                $(this).parent().hide();
-            }
-        })
-    }
 
     $(document).ready(function() {
-        filter();
-        $(".filters").change(function(){
-            filter();
+
+        $(".ignore").submit(function(){
+            var url = this.action;
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    var link = data['link'];
+                    $('tr#link'+link).hide('medium');
+                    var ignored_count = parseInt($('#ignored_count').text())
+                    ignored_count++;
+                    $('#ignored_count').text(ignored_count)
+                }
+            });
+            return false;
         });
+
+        $(".unignore").submit(function(){
+            $.ajax({
+                url: this.action,
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    var link = data['link'];
+                    $('tr#link'+link).hide('medium');
+                    var ignored_count = parseInt($('#ignored_count').text())
+                    ignored_count--;
+                    $('#ignored_count').text(ignored_count)
+                }
+            });
+            return false;
+        });
+
+        $(".recheck").submit(function(){
+            $.ajax({
+                url: this.action,
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    var links = data['links']
+                    for (var link in links) {
+                        $('tr#link'+links[link]).find('td.link_message').text(data['message']).css('color', data['colour']);
+                    }
+                }
+            });
+            return false;
+        });
+
     });
+
+
 
 </script>
 
 <style type="text/css">
-    #changelist table tbody td:first-child {
-        text-align: left!important;
+
+    .objecttype {
+        width: 99%!important;
+        margin-bottom: 30px; 
+        border: 0 !important;
     }
+    
+    .objecttype td {
+        border: 0;
+    }
+    
+    .module {
+        width: 100%!important;
+        border: 0 !important;
+    }
+
+    .object {
+        width: 100%!important;
+        margin: 0;
+        padding: 35px 0 0 0;
+    }
+
+    .links {
+        width: 100%!important;
+        background-color: white;
+        border: 1px solid #ddd;
+        margin: 10px 0 0 0;
+    }
+    
+    .links td, .links tr {
+        border: 1px solid #ddd;
+    }
+    
+    .links th {
+        border: 0!important;
+    }
+    
+    td.actioncell {
+        border-left: 0 !important;
+        width: 60px !important;
+    }
+    
+    #linkcheck-nav {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    #linkcheck-nav a {
+        text-decoration: underline;
+    }
+    
+
 </style>
 {% endblock %}
-{% block innercontent %}
-<div style='width: 100%; margin-left: auto; margin-right: auto; text-align: center;'>
-<form action="." method="get"><strong>Show: </strong>
-    <label>Good links</label>: <input type="radio" class="filters" name="filters" value="show_valid" onclick="form.submit()" {% ifequal filter 'show_valid' %}checked="CHECKED"{% endifequal %}>&nbsp;&nbsp;
-    <label>Broken links</label>: <input type="radio" class="filters" name="filters" value="show_invalid" onclick="form.submit()" {% ifequal filter 'show_invalid' %}checked="CHECKED"{% endifequal %}>&nbsp;&nbsp;
-    <label>Untested links</label>: <input type="radio" class="filters" name="filters" value="show_unchecked" onclick="form.submit()" {% ifequal filter 'show_unchecked' %}checked="CHECKED"{% endifequal %}>&nbsp;&nbsp;
-</form>
 
-</div>
+{% block innercontent %}
+
+    <div id="linkcheck-nav">
+        <strong>Show:</strong>&nbsp;&nbsp;
+        {% ifequal filter 'show_valid' %}Good links{% else %}<a href="?filters=show_valid">Good links</a>{% endifequal %}&nbsp;&nbsp;
+        {% ifequal filter 'show_invalid' %}Broken links{% else %}<a href="?filters=show_invalid">Broken links</a>{% endifequal %}&nbsp;&nbsp;
+        {% ifequal filter 'show_unchecked' %}{% else %}<a href="?filters=show_unchecked">Untested links</a>{% endifequal %}&nbsp;&nbsp;
+        {% ifequal filter 'ignored' %}Ignored links{% else %}<a href="?filters=ignored">Ignored links</a>{% endifequal %}
+            (<span id="ignored_count">{{ ignored_count }}</span>)
+        <br />
+    </div>
 
     {% for content_type in content_types_list %}
-        <table id="links" style='width: 80%!important; background-color: white; margin-left: 20px;'>
+        <table class="objecttype">
             <tr class="type-header"><td style='padding: 0;'><h2>{{content_type.content_type.name|title}} Objects</h2>
                 {% for object in content_type.object_list %}
-                    <div style='margin: 0; padding: 35px 0 0 0;'>
+                    <div class="object">
                         <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
                         <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">view {{content_type.content_type.name}}</a>&nbsp;&nbsp;
                         <a href='{{object.admin_url}}' style="text-decoration: underline;">edit {{content_type.content_type.name}}</a>
-                        <table class="links" style='width: 100%!important; margin-top: 10px; border: 1px solid #eee;'>
+                        <table class="links">
                             <th style='width: 40%;'>Destination</th>
                             <th style='width: 20%;'>Linked Text</th>
                             <th style='width: 20%;'>Field to Edit</th>
                             <th style='width: 20%;'>Status</th>
+                            <th></th>
+                            <th></th>
                             {% for link in object.link_list %}
-                                <tr>
-                                    <td style='width: 40%;'><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
-                                    <td style='width: 20%;'>{% if link.text = "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
-                                    <td style='width: 20%;'>{{link.field}}</td>
-                                    <td style='width: 20%; font-weight: bold; color: {{link.url.colour}};'>{{link.url.get_message}}</td>
+                                <tr id="link{{ link.id }}">
+                                    <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
+                                    <td>{% if link.text = "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
+                                    <td>{{link.field}}</td>
+                                    <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
+                                    <td class="actioncell">
+                                        {% if not link.url.status %}
+                                            <form class="recheck" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}recheck={{ link.id }}"><input type="submit" value="Recheck" /></form>    
+                                        {% endif %}
+                                    </td>
+                                    <td class="actioncell">
+                                        {% if not link.url.status %}
+                                            {% if link.url.external %}
+                                                {% if not link.ignore %}
+                                                    <form class="ignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}ignore={{ link.id }}"><input type="submit" value="Ignore" /></form>                                            
+                                                {% else %}
+                                                    <form class="unignore" href="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}unignore={{ link.id }}"><input type="submit" value="Unignore" /></form>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -63,7 +174,6 @@
                 {% endfor %}
             </td></tr>
         </table>
-        <p>&nbsp;</p>
     {% endfor %}
     {% if content_types_list %}
         {% include "linkcheck/paginator.xhtml" %}

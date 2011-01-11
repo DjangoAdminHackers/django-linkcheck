@@ -15,19 +15,19 @@ from linkcheck.linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
 from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
 
 class RunLinkCheckFind(Job):
-        run_every = 86400
+        run_every = 10080
         def job(self):  
             find_all_links(all_linklists)
 cronScheduler.register(RunLinkCheckFind)
 
 class RunLinkCheckInternal(Job):
-        run_every = 86400
+        run_every = 10080
         def job(self):
             check_links(limit=MAX_CHECKS_PER_RUN, check_external=False)
 cronScheduler.register(RunLinkCheckInternal)
 
 class RunLinkCheckExternal(Job):
-        run_every = 86400
+        run_every = 10080
         def job(self):  
             check_links(external_recheck_interval=EXTERNAL_RECHECK_INTERVAL, limit=MAX_CHECKS_PER_RUN, check_internal=False)
 cronScheduler.register(RunLinkCheckExternal)

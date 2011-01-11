@@ -60,8 +60,9 @@ class LinkCheckHandler(ClientHandler):
                 new_exception_middleware.append(method)
         self._exception_middleware = new_exception_middleware
 
-def check_links(external_recheck_interval=86400, limit=-1, check_internal=True, check_external=True):
-    recheck_datetime = datetime.now() - timedelta(seconds=external_recheck_interval)
+def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
+
+    recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
     
     urls = Url.objects.filter(still_exists__exact='TRUE').exclude(last_checked__gt=recheck_datetime)
 
@@ -97,3 +98,5 @@ def find_all_links(all_linklists):
         all_links_dict[linklist_name] = linklists
     Url.objects.filter(still_exists=False).delete()
 
+def unignore():
+    Link.objects.update(ignore=False)

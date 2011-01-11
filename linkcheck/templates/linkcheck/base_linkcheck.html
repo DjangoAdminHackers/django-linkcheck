@@ -1,14 +1,11 @@
 {% extends "admin/change_list.html" %}
-{% load pagination_tags %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="/admin/">Home</a>&nbsp;&rsaquo;&nbsp;Link Checker</div>{% endblock %}
 {% block content %}
     <div id="content-main" class="nomargintop">
         <h1>Link Checker</h1>
-        <div class="module filtered" id="changelist">
-            <div id="toolbartable">
-                {% block innercontent %}
-                {% endblock %}
-            </div>
+        <div class="module">
+            {% block innercontent %}
+            {% endblock %}
         </div>
     </div>
 {% endblock %}
