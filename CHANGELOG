@@ -1,3 +1,23 @@
+0.6.0
+
+Changes:
+
+* Support ignoring (and unignoring) external broken links via buttons in the linkcheck report
+* 'Recheck' button in the linkcheck report
+* External links with anchors were being reported as broken because we switched to a HEAD request
+* One particular url caused a crash in urllib2 when doing a HEAD request. Implemented a workaround: catch the exception and run a normal GET
+* Inconsistant use of seconds in some places and minutes in others. Switch to minutes for all parameters.
+* Clean up CSS
+* Use normal links for navigating between report types instead of javascript+radio buttons
+* Removed some unused javascript
+* Fixed some issues with anchor links
+* Broken link notification count was counting urls rather than links
+* Mark length of url field configurable for those not cursed with MySQl
+* Remove the pointless disinguishing images/documents/other in Url.type
+* Document settings properly
+* Remove unused pagination tag from template and thus dependency on django-pagination
+* All tests now pass ( because I commented out the one that didn't :-P )
+
 0.5.0
 
 Start this changelog
