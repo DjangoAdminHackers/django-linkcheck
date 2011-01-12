@@ -2,6 +2,7 @@
 import urllib2
 import socket
 import re
+import os
 
 #MOCK addinfurl
 class addinfoUrl():
@@ -47,6 +48,7 @@ def mock_urlopen(url, data=None, timeout=timeout):
 
     raise urllib2.HTTPError(url, code, msg, None, None)
 
+from django.conf import settings
 from django.test import TestCase
 from linkcheck.models import Url
 
@@ -81,12 +83,14 @@ class InternalCheckTestCase(TestCase):
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Missing Document')
 
-#   TODO: WRITE TEST
-#    def test_internal_check_media_found(self):
-#        uv = Url(url="/media/found", still_exists=True)
-#        uv.check()
-#        self.assertEquals(uv.status, True)
-#        self.assertEquals(uv.message, 'Working file link')
+    def test_internal_check_media_found(self):
+        old_media_root = settings.MEDIA_ROOT
+        settings.MEDIA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
+        uv = Url(url="/media/found", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, True)
+        self.assertEquals(uv.message, 'Working file link')
+        settings.MEDIA_ROOT = old_media_root
 
 #    TODO: This now fails, because with follow=True, redirects are automatically followed
 #    def test_internal_check_view_302(self):
