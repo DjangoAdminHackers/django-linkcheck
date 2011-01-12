@@ -1,4 +1,3 @@
-#from urllib2 import HTTPError
 import urllib2
 import socket
 import re
@@ -77,21 +76,6 @@ class InternalCheckTestCase(TestCase):
         self.assertEquals(uv.status, None)
         self.assertEquals(uv.message, 'Link to within the same page (not automatically checked)')
 
-    def test_internal_check_media_missing(self):
-        uv = Url(url="/media/not_found", still_exists=True)
-        uv.check()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Missing Document')
-
-    def test_internal_check_media_found(self):
-        old_media_root = settings.MEDIA_ROOT
-        settings.MEDIA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
-        uv = Url(url="/media/found", still_exists=True)
-        uv.check()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working file link')
-        settings.MEDIA_ROOT = old_media_root
-
 #    TODO: This now fails, because with follow=True, redirects are automatically followed
 #    def test_internal_check_view_302(self):
 #        uv = Url(url="/admin/linkcheck", still_exists=True)
@@ -124,6 +108,34 @@ class InternalCheckTestCase(TestCase):
         #uv.check()
         #self.assertEquals(uv.status, None)
         #self.assertEquals(uv.message, "")
+
+
+class InternalMediaCheckTestCase(TestCase):
+    def setUp(self):
+        self.old_media_root = settings.MEDIA_ROOT
+        settings.MEDIA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media')
+
+    def tearDown(self):
+        settings.MEDIA_ROOT = self.old_media_root
+
+    def test_internal_check_media_missing(self):
+        uv = Url(url="/media/not_found", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, False)
+        self.assertEquals(uv.message, 'Missing Document')
+
+    def test_internal_check_media_found(self):
+        uv = Url(url="/media/found", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, True)
+        self.assertEquals(uv.message, 'Working file link')
+
+    def test_internal_check_media_utf8(self):
+        uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, True)
+        self.assertEquals(uv.message, 'Working file link')
+
 
 class ExternalCheckTestCase(TestCase):
     def test_external_check_200(self):
