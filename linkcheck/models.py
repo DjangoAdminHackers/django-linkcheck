@@ -126,6 +126,8 @@ class Url(models.Model):
                     self.message = 'Missing Document'
 
             elif self.url.startswith('/'):
+                old_prepend_setting = settings.PREPEND_WWW
+                settings.PREPEND_WWW = False
                 c = Client()
                 c.handler = LinkCheckHandler()
                 response = c.get(self.url, follow=True)
@@ -151,6 +153,7 @@ class Url(models.Model):
                     self.message = 'This link redirects: code %d (not automatically checked)' % (response.status_code, )
                 else:
                     self.message = 'Broken internal link'
+                settings.PREPEND_WWW = old_prepend_setting
             else:
                 self.message = 'Invalid URL'
 
