@@ -13,6 +13,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django import forms
+from django.conf import settings
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
 from linkcheck.models import Link
@@ -121,6 +123,7 @@ def report(request):
             {'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
+            'media':  forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, 'js/jquery.min.js')]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),

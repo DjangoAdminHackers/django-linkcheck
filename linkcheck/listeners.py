@@ -163,7 +163,7 @@ def handle_upload(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=True, message='Working document link')
-        msg = "Please note. Uploading %s has corrected %s broken link%s. See the Link Manager for more details" % (url, count, 's' if count>1 else '')
+        msg = "Please note. Uploading %s has corrected %s broken link%s. See the Link Manager for more details" % (url, count, count>1 and 's' or '')
         sender.user.message_set.create(message=msg)
 
 
@@ -179,7 +179,7 @@ def handle_rename(sender, path=None, **kwargs):
     old_count = old_url_qs.count()
     if old_count:
         old_url_qs.update(status=False, message='Missing Document')
-        msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, 's' if old_count>1 else '')
+        msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, old_count>1 and 's' or '')
         sender.user.message_set.create(message=msg)
         
     # the new directory may fix some invalid links, so we make a check here.
@@ -195,7 +195,7 @@ def handle_rename(sender, path=None, **kwargs):
         if new_count:
             new_url_qs.update(status=True, message='Working document link')
     if new_count:
-        msg = "Please note. Renaming %s has corrected %s broken link%s. See the Link Manager for more details" % (new_url, new_count, 's' if new_count>1 else '')
+        msg = "Please note. Renaming %s has corrected %s broken link%s. See the Link Manager for more details" % (new_url, new_count, new_count>1 and 's' or '')
         sender.user.message_set.create(message=msg)
 
 
@@ -206,7 +206,7 @@ def handle_delete(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=False, message='Missing Document')
-        msg = "Warning. Deleting %s has caused %s link%s to break. Please use the Link Manager to fix them" % (url, count, 's' if count>1 else '')
+        msg = "Warning. Deleting %s has caused %s link%s to break. Please use the Link Manager to fix them" % (url, count, count>1 and 's' or '')
         sender.user.message_set.create(message=msg)
 
 
