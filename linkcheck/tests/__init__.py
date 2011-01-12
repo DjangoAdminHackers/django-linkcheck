@@ -1,4 +1,3 @@
-import unittest
 #from urllib2 import HTTPError
 import urllib2
 import socket
@@ -48,13 +47,16 @@ def mock_urlopen(url, data=None, timeout=timeout):
 
     raise urllib2.HTTPError(url, code, msg, None, None)
 
-
-#replace urllib2.urlopen with mock method
-urllib2.urlopen = mock_urlopen
-
+from django.test import TestCase
 from linkcheck.models import Url
 
-class InternalCheckTestCase(unittest.TestCase):
+class InternalCheckTestCase(TestCase):
+    urls = 'linkcheck.tests.test_urls'
+
+    def setUp(self):
+        #replace urllib2.urlopen with mock method
+        urllib2.urlopen = mock_urlopen
+
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
         uv.check()
@@ -81,22 +83,23 @@ class InternalCheckTestCase(unittest.TestCase):
 
 #   TODO: WRITE TEST
 #    def test_internal_check_media_found(self):
-#        uv = Url(url="/media/not_found", still_exists=True)
+#        uv = Url(url="/media/found", still_exists=True)
+#        uv.check()
 #        self.assertEquals(uv.status, True)
-#        self.assertEquals(uv.message, 'Working document link')
+#        self.assertEquals(uv.message, 'Working file link')
 
-#    TODO: This now fails. Is it because we disabled CommonMiddleware?
+#    TODO: This now fails, because with follow=True, redirects are automatically followed
 #    def test_internal_check_view_302(self):
 #        uv = Url(url="/admin/linkcheck", still_exists=True)
 #        uv.check()
 #        self.assertEquals(uv.status, None)
 #        self.assertEquals(uv.message, 'This link redirects: code 302 (not automatically checked)')
 
-#   TODO: WRITE TEST that will not return 302 from Client
-#    def test_internal_check_admin_found(self):
-#        uv = Url(url="/admin", still_exists=True)
-#        self.assertEquals(uv.status, True)
-#        self.assertEquals(uv.message, 'Working document link')
+    def test_internal_check_admin_found(self):
+        uv = Url(url="/admin/", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, True)
+        self.assertEquals(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link", still_exists=True)
@@ -118,7 +121,7 @@ class InternalCheckTestCase(unittest.TestCase):
         #self.assertEquals(uv.status, None)
         #self.assertEquals(uv.message, "")
 
-class ExternalCheckTestCase(unittest.TestCase):
+class ExternalCheckTestCase(TestCase):
     def test_external_check_200(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
         uv.check()
