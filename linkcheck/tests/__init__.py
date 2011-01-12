@@ -45,11 +45,10 @@ def mock_urlopen(url, data=None, timeout=timeout):
         msg  = msg_dict.get(code, 'Something Happened')
         if code == "200":
             return addinfoUrl(url, code, msg)
-        
-    raise urllib2.HTTPError(url, code, msg, None, None)
-        
 
-    
+    raise urllib2.HTTPError(url, code, msg, None, None)
+
+
 #replace urllib2.urlopen with mock method
 urllib2.urlopen = mock_urlopen
 
