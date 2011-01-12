@@ -55,7 +55,7 @@ urllib2.urlopen = mock_urlopen
 
 from linkcheck.models import Url
 
-class CheckTestCase(unittest.TestCase):
+class InternalCheckTestCase(unittest.TestCase):
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
         uv.check()
@@ -111,12 +111,6 @@ class CheckTestCase(unittest.TestCase):
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Invalid URL')
 
-    def test_external_check_404(self):
-        uv = Url(url="http://localhost/404", still_exists=True)
-        uv.check()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, "Unreachable: (61, 'Connection refused')")
-
     def test_same_page_anchor(self):
         # TODO Make this test
         pass
@@ -125,19 +119,21 @@ class CheckTestCase(unittest.TestCase):
         #self.assertEquals(uv.status, None)
         #self.assertEquals(uv.message, "")
 
+class ExternalCheckTestCase(unittest.TestCase):
     def test_external_check_200(self):
-        # TODO fix this test
-        pass
-        #uv = Url(url="http://localhost/200", still_exists=True)
-        #uv.check()
-        #self.assertEquals(uv.status, True)
-        #self.assertEquals(uv.message, '200 OK')
-
+        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, True)
+        self.assertEquals(uv.message, '200 OK')
 
     def test_external_check_301(self):
-        # TODO fix this test
-        pass
-        #uv = Url(url="http://localhost/301", still_exists=True)
-        #uv.check()
-        #self.assertEquals(uv.status, False)
-        #self.assertEquals(uv.message, '301 Moved Permanently')
+        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, False)
+        self.assertEquals(uv.message, '301 Moved Permanently')
+
+    def test_external_check_404(self):
+        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=404", still_exists=True)
+        uv.check()
+        self.assertEquals(uv.status, False)
+        self.assertEquals(uv.message, '404 Not Found')
