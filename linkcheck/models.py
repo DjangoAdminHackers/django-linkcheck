@@ -5,10 +5,7 @@ from datetime import datetime
 from datetime import timedelta
 from httplib import BadStatusLine
 from HTMLParser import HTMLParseError
-from urllib2 import HTTPError
-from urllib2 import URLError
-from urllib2 import urlopen
-from urllib2 import Request as urllib2Request
+import urllib2
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -26,7 +23,7 @@ from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 
-class HeadRequest(urllib2Request):
+class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
@@ -77,6 +74,14 @@ class Url(models.Model):
     def external(self):
         return EXTERNAL_REGEX.match(self.url)
 
+    def url_unquoted(self):
+        try:
+            # URLs should be ascii encodable
+            url = self.url.encode('ascii')
+        except UnicodeEncodeError:
+            url = self.url
+        return urllib2.unquote(url).decode('utf8')
+
     def check(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
 
         from linkcheck.utils import LinkCheckHandler
@@ -119,7 +124,8 @@ class Url(models.Model):
                 self.message = 'Link to within the same page (not automatically checked)'
 
             elif self.url.startswith(MEDIA_PREFIX):
-                if os.path.exists(settings.MEDIA_ROOT+self.url[len(MEDIA_PREFIX)-1:]): #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
+                #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
+                if os.path.exists(settings.MEDIA_ROOT + self.url_unquoted()[len(MEDIA_PREFIX)-1:]):
                     self.message = 'Working file link'
                     self.status = True
                 else:
@@ -175,15 +181,15 @@ class Url(models.Model):
 
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
-                    response = urlopen(url)
+                    response = urllib2.urlopen(url)
                 else:
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
-                        response = urlopen(req)
+                        response = urllib2.urlopen(req)
                     except ValueError:
                         # ...except sometimes it triggers a bug in urllib2
-                        response = urlopen(url)
+                        response = urllib2.urlopen(url)
 
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
@@ -210,13 +216,13 @@ class Url(models.Model):
             except BadStatusLine:
                     self.message = "Bad Status Line"
 
-            except HTTPError, e:
+            except urllib2.HTTPError, e:
                 if hasattr(e, 'code') and hasattr(e, 'msg'):
                     self.message = ' '.join([str(e.code), e.msg])
                 else:
                     self.message = "Unknown Error"
 
-            except URLError, e:
+            except urllib2.URLError, e:
                 if hasattr(e, 'reason'):
                     self.message = 'Unreachable: '+str(e.reason)
                 elif hasattr(e, 'code') and e.code!=301:
