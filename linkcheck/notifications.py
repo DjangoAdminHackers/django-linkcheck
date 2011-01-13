@@ -1,9 +1,7 @@
 import admin_notifications
 
-from models import Link
-
-# a global variable, showing whether linkcheck is still working
-still_updating = False
+from linkcheck.models import Link
+from linkcheck.listeners import still_updating
 
 def notification():
     if still_updating:

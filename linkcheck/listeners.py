@@ -14,9 +14,11 @@ try:
 except ImportError:
     FILEBROWSER_PRESENT = False
 
-from linkcheck.models import all_linklists
+from linkcheck.models import all_linklists, Url, Link
 
 listeners = []
+# a global variable, showing whether linkcheck is still working
+still_updating = False
 
 #1, register listeners for the objects that contain Links
 for linklist_name, linklist_cls in all_linklists.items():
@@ -31,13 +33,9 @@ for linklist_name, linklist_cls in all_linklists.items():
             disappering Links are deleted
         '''
         def do_check_instance_links(sender, instance, linklist_cls=linklist_cls):
-            
-            from linkcheck.models import Url
-            from linkcheck.models import Link
-            import linkcheck.notifications
 
             try:
-                linkcheck.notifications.still_updating = True
+                still_updating = True
                 content_type = linklist_cls.content_type()
                 new_links = []
                 old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
@@ -66,7 +64,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 gone_links.delete()
                 
             finally:
-                linkcheck.notifications.still_updating = False
+                still_updating = False
 
         # Don't run in a separate thread if we are running tests
         if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
@@ -80,7 +78,6 @@ for linklist_name, linklist_cls in all_linklists.items():
 
     def delete_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
         '''delete all its links when an object is deleted'''
-        from linkcheck.models import Link
         content_type = linklist_cls.content_type()
         old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
         old_links.delete()
@@ -89,7 +86,6 @@ for linklist_name, linklist_cls in all_linklists.items():
 
 #2, register listeners for the objects that are targets of Links
     def instance_pre_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
-        from linkcheck.models import Url
         current_url = instance.get_absolute_url()
         try:
             previous = ModelCls.objects.get(pk=instance.pk)
@@ -117,8 +113,6 @@ for linklist_name, linklist_cls in all_linklists.items():
 
     def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
 
-        from linkcheck.models import Url
-        
         current_url = instance.get_absolute_url()
 
         # We assume returning None from get_absolute_url means that this instance doesn't have a URL
@@ -141,7 +135,6 @@ for linklist_name, linklist_cls in all_linklists.items():
 
 
     def instance_pre_delete(sender, instance, ModelCls=linklist_cls.model,  **kwargs):
-        from linkcheck.models import Url
         instance.linkcheck_deleting = True
         deleted_url = instance.get_absolute_url()
         if deleted_url:
@@ -157,7 +150,6 @@ for linklist_name, linklist_cls in all_linklists.items():
 ################################################
 
 def handle_upload(sender, path=None, **kwargs):
-    from linkcheck.models import Url
     url = os.path.join(settings.RELATIVE_MEDIA_URL, kwargs['file'].url_relative)
     url_qs = Url.objects.filter(url=url).filter(status=False)
     count = url_qs.count()
@@ -168,7 +160,6 @@ def handle_upload(sender, path=None, **kwargs):
 
 
 def handle_rename(sender, path=None, **kwargs):
-    from linkcheck.models import Url
     old_url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['filename'])
     new_url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['new_filename'])
     # rename a file will cause the urls to it invalid
@@ -200,7 +191,6 @@ def handle_rename(sender, path=None, **kwargs):
 
 
 def handle_delete(sender, path=None, **kwargs):
-    from linkcheck.models import Url
     url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['filename'])
     url_qs = Url.objects.filter(url=url).filter(status=True)
     count = url_qs.count()
