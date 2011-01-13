@@ -87,7 +87,7 @@ class Url(models.Model):
         # They shouldn't generally exist but occasionally slip through
         # If settings.SITE_DOMAINS isn't set then use settings.SITE_DOMAIN
         # but also check for variants: example.org, www.example.org, test.example.org
-        
+
         original_url = None # used to restore the original url afterwards
 
         if SITE_DOMAINS: #if the setting is present
@@ -100,7 +100,7 @@ class Url(models.Model):
             elif root_domain.startswith('test.'):
                 root_domain = root_domain[5:]
             internal_exceptions = ['http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain]
-            
+
         for ex in internal_exceptions:
             if ex and self.url.startswith(ex):
                 original_url = self.url
@@ -126,6 +126,8 @@ class Url(models.Model):
                     self.message = 'Missing Document'
 
             elif self.url.startswith('/'):
+                old_prepend_setting = settings.PREPEND_WWW
+                settings.PREPEND_WWW = False
                 c = Client()
                 c.handler = LinkCheckHandler()
                 response = c.get(self.url, follow=True)
@@ -151,6 +153,7 @@ class Url(models.Model):
                     self.message = 'This link redirects: code %d (not automatically checked)' % (response.status_code, )
                 else:
                     self.message = 'Broken internal link'
+                settings.PREPEND_WWW = old_prepend_setting
             else:
                 self.message = 'Invalid URL'
 
@@ -164,12 +167,12 @@ class Url(models.Model):
 
             if self.last_checked and (self.last_checked > external_recheck_datetime):
                 return self.status
-            
+
             try:
-                
+
                 # Remove URL fragment identifiers
                 url = self.url.rsplit('#')[0]
-                
+
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
                     response = urlopen(url)
@@ -181,12 +184,12 @@ class Url(models.Model):
                     except ValueError:
                         # ...except sometimes it triggers a bug in urllib2
                         response = urlopen(url)
-                        
+
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
 
                 if self.url.count('#'):
-                    
+
                     anchor = self.url.split('#')[1]
                     from linkcheck import parse_anchors
                     try:
@@ -197,7 +200,7 @@ class Url(models.Model):
                         else:
                             self.message = 'Broken external hash anchor'
                             self.status = False
-                            
+
                     except HTMLParseError:
                         # The external web page is mal-formatted
                         # I reckon a broken anchor on an otherwise good URL should count as a pass
