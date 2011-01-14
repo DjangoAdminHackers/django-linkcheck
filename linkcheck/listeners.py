@@ -69,7 +69,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 linkcheck.notifications.still_updating = False
 
         # Don't run in a separate thread if we are running tests
-        if len(sys.argv)>1 and sys.argv[1] == 'test':
+        if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
             do_check_instance_links(sender, instance, linklist_cls,)
         else:
             t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls,))

@@ -155,3 +155,12 @@ class ExternalCheckTestCase(TestCase):
         uv.check()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, '404 Not Found')
+
+
+class FindingLinksTestCase(TestCase):
+    def test_found_links(self):
+        from linkcheck.tests.sampleapp.models import Book
+        self.assertEqual(Url.objects.all().count(), 0)
+        Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
+        self.assertEqual(Url.objects.all().count(), 1)
+        self.assertEqual(Url.objects.all()[0].url, "http://www.example.org")

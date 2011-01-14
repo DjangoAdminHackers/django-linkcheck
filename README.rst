@@ -117,3 +117,11 @@ django-filebrowser integration
 ------------------------------
 
 If django-filebrowser is present on your path then linkcheck will listen to the post-upload, delete and rename signals and update itself according
+
+
+Running tests
+-------------
+
+Tests can be run standalone by using the runtests.py script in linkcheck root:
+    $ python runtests.py
+If you want to run linkcheck tests in the context of your project, you should include 'linkcheck.tests.sampleapp' in your INSTALLED_APPS setting.
