@@ -9,7 +9,6 @@ linkcheck/linkcheck_settings.py
 linkcheck/listeners.py
 linkcheck/models.py
 linkcheck/notifications.py
-linkcheck/tests.py
 linkcheck/urls.py
 linkcheck/utils.py
 linkcheck/views.py
