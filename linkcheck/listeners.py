@@ -52,12 +52,17 @@ for linklist_name, linklist_cls in all_linklists.items():
                 for link in links:
                     # url structure = (field, link text, url)
                     url = link[2]
+                    internal_hash = False
                     if url.startswith('#'):
+                        internal_hash = url
                         url = instance.get_absolute_url() + url
                     u, created = Url.objects.get_or_create(url=url)
                     l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
                     new_links.append(l.id)
                     u.still_exists = True
+                    if internal_hash:
+                        setattr(u, '_internal_hash', internal_hash)
+                        setattr(u, '_instance', instance)
                     u.check()
                     
                 gone_links = old_links.exclude(id__in=new_links)

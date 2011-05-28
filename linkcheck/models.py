@@ -131,6 +131,27 @@ class Url(models.Model):
                 else:
                     self.message = 'Missing Document'
 
+            elif getattr(self, '_internal_hash', False) and getattr(self, '_instance', None):
+                # This is a hash link pointing to itself
+                from linkcheck import parse_anchors
+                
+                hash = self._internal_hash
+                instance = self._instance
+                if hash == '#': # special case, point to #
+                    self.message = 'Working internal hash anchor'
+                    self.status = True
+                else:
+                    hash = hash[1:] #'#something' => 'something'
+                    html_content = ''
+                    for field in instance._linklist.html_fields:
+                        html_content += getattr(instance, field, '')
+                    names = parse_anchors(html_content)
+                    if hash in names:
+                        self.message = 'Working internal hash anchor'
+                        self.status = True
+                    else:
+                        self.message = 'Broken internal hash anchor'
+
             elif self.url.startswith('/'):
                 old_prepend_setting = settings.PREPEND_WWW
                 settings.PREPEND_WWW = False
@@ -294,6 +315,11 @@ for app in settings.INSTALLED_APPS:
         all_linklists.update(the_module.linklists)
     except AttributeError:
         pass
+
+#add a reference to the linklist in the model. This change is for internal hash link,
+#but might also be useful elsewhere in the future
+for key, linklist in all_linklists.items():
+    setattr(linklist.model, '_linklist', linklist)
 
 #-------------------------register listeners-------------------------
 
