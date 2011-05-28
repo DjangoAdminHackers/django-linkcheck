@@ -1,7 +1,7 @@
 django-linkcheck
 ================
 
-.. image:: http://ixxy.co.uk/media/documents/images/linkcheck.jpg
+.. image:: https://github.com/andybak/django-linkcheck/raw/master/linkcheck.jpg
 
 A fairly flexible app that will analyze and report on links in any model that
 you register with it. Links can be bare (urls or image and file fields) or
