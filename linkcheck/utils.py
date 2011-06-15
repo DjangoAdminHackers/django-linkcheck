@@ -76,7 +76,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 def update_urls(urls, content_type, object_id):
     # url structure = (field, link text, url)
     for field, link_text, url in urls:
-        if url.startswith('#'):
+        if url is not None and url.startswith('#'):
             instance = content_type.get_object_for_this_type(id=object_id)
             url = instance.get_absolute_url() + url
         u, created = Url.objects.get_or_create(url=url)
