@@ -18,11 +18,14 @@ setup(
         'linkcheck',
         'linkcheck.management',
         'linkcheck.management.commands',
+        'linkcheck.tests',
+        'linkcheck.tests.sampleapp',
     ],
     package_data={
         'linkcheck': [
             'templates/linkcheck/*.html',
             'templates/linkcheck/*.xhtml',
+            'tests/media/*',
         ]
     },
     classifiers=[
