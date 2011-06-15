@@ -4,20 +4,6 @@ from distutils.core import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-def package_data(package):
-    package_data = []
-    for dirpath, dirnames, filenames in os.walk(
-            os.path.join(os.path.dirname(__file__), package)):
-        for i, dirname in enumerate(dirnames):
-            if dirname.startswith('.'): del dirnames[i]
-        if '__init__.py' in filenames:
-            continue
-        elif filenames:
-            for f in filenames:
-                package_data.append(
-                    os.path.join(dirpath[len(package)+len(os.sep):], f))
-    return {package: package_data}
-
 setup(
     name='django-linkcheck',
     version='0.6.3',
@@ -33,7 +19,12 @@ setup(
         'linkcheck.management',
         'linkcheck.management.commands',
     ],
-    package_data=package_data('linkcheck'),
+    package_data={
+        'linkcheck': [
+            'templates/linkcheck/*.html',
+            'templates/linkcheck/*.xhtml',
+        ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
