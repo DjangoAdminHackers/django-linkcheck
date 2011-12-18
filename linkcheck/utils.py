@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from linkcheck.models import Link
 from linkcheck.models import Url
+from linkcheck_settings import MAX_URL_LENGTH
 
 class LinkCheckHandler(ClientHandler):
     #customize the ClientHandler to allow us removing some middlewares
@@ -79,7 +80,7 @@ def update_urls(urls, content_type, object_id):
         if url is not None and url.startswith('#'):
             instance = content_type.get_object_for_this_type(id=object_id)
             url = instance.get_absolute_url() + url
-        if len(url)>255: #we cannot handle url longer than 255 at the moment
+        if len(url)>MAX_URL_LENGTH: #we cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
         u, created = Url.objects.get_or_create(url=url)
         l, created = Link.objects.get_or_create(url=u, field=field, text=link_text, content_type=content_type, object_id=object_id)
