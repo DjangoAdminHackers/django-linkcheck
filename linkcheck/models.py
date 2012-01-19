@@ -228,8 +228,8 @@ class Url(models.Model):
                             self.message = 'Broken external hash anchor'
                             self.status = False
 
-                    except HTMLParseError:
-                        # The external web page is mal-formatted
+                    except:
+                        # The external web page is mal-formatted #or maybe other parse errors like encoding
                         # I reckon a broken anchor on an otherwise good URL should count as a pass
                         self.message = "Page OK but anchor can't be checked"
                         self.status = True
