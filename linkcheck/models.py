@@ -279,10 +279,14 @@ class Link(models.Model):
 
 
 def link_post_delete(sender, instance, **kwargs):
-    url = instance.url
-    count = url.links.all().count()
-    if count == 0:
-        url.delete()
+    try:
+        #it's possible the url is already gone.
+        url = instance.url
+        count = url.links.all().count()
+        if count == 0:
+            url.delete()
+    except:
+        pass
 model_signals.post_delete.connect(link_post_delete, sender=Link)
 
 
