@@ -280,12 +280,13 @@ class Link(models.Model):
 
 def link_post_delete(sender, instance, **kwargs):
     try:
-        #it's possible the url is already gone.
+        #url.delete() => link.delete() => link_post_delete
+        #in this case link.url is already deleted from db, so we need a try here.
         url = instance.url
         count = url.links.all().count()
         if count == 0:
             url.delete()
-    except:
+    except Url.DoesNotExist:
         pass
 model_signals.post_delete.connect(link_post_delete, sender=Link)
 
