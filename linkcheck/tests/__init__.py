@@ -48,6 +48,7 @@ def mock_urlopen(url, data=None, timeout=timeout):
     raise urllib2.HTTPError(url, code, msg, None, None)
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from linkcheck.models import Url
 
@@ -164,3 +165,13 @@ class FindingLinksTestCase(TestCase):
         Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
         self.assertEqual(Url.objects.all().count(), 1)
         self.assertEqual(Url.objects.all()[0].url, "http://www.example.org")
+
+class ReportViewTestCase(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        User.objects.create_superuser('admin', 'admin@example.org', 'password')
+
+    def test_report_view(self):
+        self.client.login(username='admin', password='password')
+        response = self.client.get(reverse('linkcheck.views.report'))
+        self.assertContains(response, "<h1>Link Checker</h1>")
