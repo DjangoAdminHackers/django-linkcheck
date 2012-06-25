@@ -7,16 +7,17 @@ from django.conf import settings
 
 if not settings.configured:
     settings.configure(
-        DATABASE_ENGINE='sqlite3',
+        DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         INSTALLED_APPS=[
-            'django.contrib.admin', 'django.contrib.sessions', 'django.contrib.contenttypes',
+            'django.contrib.admin', 'django.contrib.auth',
+            'django.contrib.sessions', 'django.contrib.contenttypes',
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
         ROOT_URLCONF = "",
         SITE_DOMAIN = "localhost"
     )
 
-from django.test.simple import run_tests
+from django.test.simple import DjangoTestSuiteRunner
 
 
 def runtests(*test_args):
@@ -24,7 +25,8 @@ def runtests(*test_args):
         test_args = ['linkcheck']
     parent = dirname(abspath(__file__))
     sys.path.insert(0, parent)
-    failures = run_tests(test_args, verbosity=1, interactive=True)
+    test_runner = DjangoTestSuiteRunner(verbosity=1, interactive=True)
+    failures = test_runner.run_tests(test_args)
     sys.exit(failures)
 
 
