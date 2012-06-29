@@ -228,8 +228,8 @@ class Url(models.Model):
                             self.message = 'Broken external hash anchor'
                             self.status = False
 
-                    except HTMLParseError:
-                        # The external web page is mal-formatted
+                    except:
+                        # The external web page is mal-formatted #or maybe other parse errors like encoding
                         # I reckon a broken anchor on an otherwise good URL should count as a pass
                         self.message = "Page OK but anchor can't be checked"
                         self.status = True
@@ -279,10 +279,15 @@ class Link(models.Model):
 
 
 def link_post_delete(sender, instance, **kwargs):
-    url = instance.url
-    count = url.links.all().count()
-    if count == 0:
-        url.delete()
+    try:
+        #url.delete() => link.delete() => link_post_delete
+        #in this case link.url is already deleted from db, so we need a try here.
+        url = instance.url
+        count = url.links.all().count()
+        if count == 0:
+            url.delete()
+    except Url.DoesNotExist:
+        pass
 model_signals.post_delete.connect(link_post_delete, sender=Link)
 
 
