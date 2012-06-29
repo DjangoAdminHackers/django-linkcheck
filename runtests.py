@@ -8,12 +8,13 @@ from django.conf import settings
 if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
+        STATIC_URL = '/static/',
         INSTALLED_APPS=[
             'django.contrib.admin', 'django.contrib.auth',
             'django.contrib.sessions', 'django.contrib.contenttypes',
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
-        ROOT_URLCONF = "",
+        ROOT_URLCONF = "linkcheck.tests.test_urls",
         SITE_DOMAIN = "localhost"
     )
 
