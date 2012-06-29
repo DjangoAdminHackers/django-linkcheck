@@ -6,6 +6,7 @@ try:
 except:
     from django.utils import simplejson
     
+from django.contrib.admin.templatetags.adminmedia import admin_media_prefix
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
@@ -118,12 +119,13 @@ def report(request):
     if ('page' in rqst):
         del rqst['page']
 
+    admin_static = admin_media_prefix() or settings.STATIC_URL
     return render_to_response(
         'linkcheck/report.html',
             {'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
-            'media':  forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, 'js/jquery.min.js')]),
+            'media':  forms.Media(js=['%s%s' % (admin_static, 'js/jquery.min.js')]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
