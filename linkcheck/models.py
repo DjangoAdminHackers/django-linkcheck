@@ -1,6 +1,8 @@
 import re
 import imp
 import os.path
+import sys
+
 from datetime import datetime
 from datetime import timedelta
 from httplib import BadStatusLine
@@ -23,6 +25,10 @@ from linkcheck_settings import EXTERNAL_REGEX_STRING
 from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
 
 logger = logging.getLogger('linkcheck')
+
+TIMEOUT = None
+if sys.version_info >= (2,6): #timeout arg of urlopen is available
+    TIMEOUT = 10
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 
@@ -205,16 +211,25 @@ class Url(models.Model):
 
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
-                    response = urllib2.urlopen(url)
+                    if TIMEOUT:
+                        response = urllib2.urlopen(url, timeout=TIMEOUT)
+                    else:
+                        response = urllib2.urlopen(url)
                 else:
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
-                        response = urllib2.urlopen(req)
+                        if TIMEOUT:
+                            response = urllib2.urlopen(req, timeout=TIMEOUT)
+                        else:
+                            response = urllib2.urlopen(req)
                     except ValueError:
                         # ...except sometimes it triggers a bug in urllib2
-                        response = urllib2.urlopen(url)
-
+                        if TIMEOUT:
+                            response = urllib2.urlopen(url, timeout=TIMEOUT)
+                        else:
+                            response = urllib2.urlopen(url)
+                            
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
 
