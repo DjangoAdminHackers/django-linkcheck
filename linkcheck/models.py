@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta
 from httplib import BadStatusLine
 from HTMLParser import HTMLParseError
+import logging
 import urllib2
 
 from django.conf import settings
@@ -20,6 +21,8 @@ from linkcheck_settings import MEDIA_PREFIX
 from linkcheck_settings import SITE_DOMAINS
 from linkcheck_settings import EXTERNAL_REGEX_STRING
 from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
+
+logger = logging.getLogger('linkcheck')
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 
@@ -191,7 +194,7 @@ class Url(models.Model):
             self.save()
 
         elif check_external and self.external:
-
+            logger.info('checking external link: %s' % self.url)
             if self.last_checked and (self.last_checked > external_recheck_datetime):
                 return self.status
 
