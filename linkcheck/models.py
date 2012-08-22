@@ -268,6 +268,9 @@ class Url(models.Model):
                     self.message = 'Error: '+str(e.code)
                 else:
                     self.message = 'Redirect. Check manually: '+str(e.code)
+            except Exception, e:
+                self.message = 'Other Error: %s' % e
+
             self.last_checked  = datetime.now()
             self.save()
 
