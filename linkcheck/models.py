@@ -23,12 +23,13 @@ from linkcheck_settings import MEDIA_PREFIX
 from linkcheck_settings import SITE_DOMAINS
 from linkcheck_settings import EXTERNAL_REGEX_STRING
 from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
+from linkcheck_settings import LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
 
 logger = logging.getLogger('linkcheck')
 
-TIMEOUT = None
+TIMEOUT_SUPPORT = False
 if sys.version_info >= (2,6): #timeout arg of urlopen is available
-    TIMEOUT = 10
+    TIMEOUT_SUPPORT = True
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 
@@ -211,22 +212,31 @@ class Url(models.Model):
 
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
-                    if TIMEOUT:
-                        response = urllib2.urlopen(url, timeout=TIMEOUT)
+                    if TIMEOUT_SUPPORT:
+                        response = urllib2.urlopen(
+                            url,
+                            timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                        )
                     else:
                         response = urllib2.urlopen(url)
                 else:
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
-                        if TIMEOUT:
-                            response = urllib2.urlopen(req, timeout=TIMEOUT)
+                        if TIMEOUT_SUPPORT:
+                            response = urllib2.urlopen(
+                                req,
+                                timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                            )
                         else:
                             response = urllib2.urlopen(req)
                     except ValueError:
                         # ...except sometimes it triggers a bug in urllib2
-                        if TIMEOUT:
-                            response = urllib2.urlopen(url, timeout=TIMEOUT)
+                        if TIMEOUT_SUPPORT:
+                            response = urllib2.urlopen(
+                                url,
+                                timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                            )
                         else:
                             response = urllib2.urlopen(url)
                             
