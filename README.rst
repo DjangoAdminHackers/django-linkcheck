@@ -92,6 +92,14 @@ Default: 255
 The length of the URL field. Defaults to 255 for compatibility with MySQL (see http://docs.djangoproject.com/en/dev/ref/databases/#notes-on-specific-fields )
 
 
+LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default: 10
+
+The timeout in seconds for each connection attempts. Sometimes it is useful to limit check time per connection in order to hold at bay the total check time.
+
+
 SITE_DOMAIN and LINKCHECK_SITE_DOMAINS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
