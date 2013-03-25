@@ -5,8 +5,6 @@ try:
     import simplejson
 except:
     from django.utils import simplejson
-    
-from django.contrib.admin.templatetags.adminmedia import admin_media_prefix
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
@@ -19,6 +17,14 @@ from django.conf import settings
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
 from linkcheck.models import Link
+
+try:
+    from django.contrib.admin.templatetags.adminmedia import admin_media_prefix
+    # For backwards compatibility allow either of these but prefer admin_media_prefix
+    admin_static = admin_media_prefix() or settings.STATIC_URL
+except ImportError:
+    # However - admin_media_prefix was removed in Django 1.5
+    admin_static = settings.STATIC_URL
 
 
 @staff_member_required
@@ -119,7 +125,7 @@ def report(request):
     if ('page' in rqst):
         del rqst['page']
 
-    admin_static = admin_media_prefix() or settings.STATIC_URL
+
     return render_to_response(
         'linkcheck/report.html',
             {'content_types_list': content_types_list,
