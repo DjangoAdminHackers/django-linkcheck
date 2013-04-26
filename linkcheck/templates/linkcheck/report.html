@@ -162,7 +162,7 @@
                                                 {% if not link.ignore %}
                                                     <form class="ignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}ignore={{ link.id }}"><input type="submit" value="Ignore" /></form>                                            
                                                 {% else %}
-                                                    <form class="unignore" href="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}unignore={{ link.id }}"><input type="submit" value="Unignore" /></form>
+                                                    <form class="unignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}unignore={{ link.id }}"><input type="submit" value="Unignore" /></form>
                                                 {% endif %}
                                             {% endif %}
                                         {% endif %}

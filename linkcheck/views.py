@@ -1,3 +1,5 @@
+from django.views.decorators.csrf import csrf_exempt
+
 from itertools import groupby
 from operator import itemgetter
 
@@ -28,6 +30,7 @@ except ImportError:
 
 
 @staff_member_required
+@csrf_exempt
 def report(request):
     
     outerkeyfunc = itemgetter('content_type_id')
