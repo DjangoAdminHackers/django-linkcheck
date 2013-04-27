@@ -1,0 +1,13 @@
+<pre>
+class {{ meta.object_name }}Linklist(Linklist):
+    model = {{ meta.object_name }}
+    {% if active_field %}object_filter = {'active':True}{% endif %}
+    {% if html_fields %}html_fields = [{% for f in html_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
+    {% if image_fields %}image_fields = [{% for f in image_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
+    {% if url_fields %}url_fields = [{% for f in url_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
+    {% if not is_target %}hidden_in_mce = True{% endif %}
+    
+linklists = {
+   '{{ meta.object_name }}': {{ meta.object_name }}Linklist,
+}
+</pre>
