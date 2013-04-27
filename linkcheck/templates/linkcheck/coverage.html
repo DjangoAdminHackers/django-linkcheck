@@ -1,0 +1,20 @@
+{% extends "linkcheck/base_linkcheck.html" %}
+{% block extrahead %}
+{% endblock %}
+
+{% block innercontent %}
+    <table>
+        <tr>
+            <th>Model</th>
+            <th>Covered</th>
+        </tr>
+        {% for m in all_model_list %}
+            <tr>
+                <td>{{ m.0 }}</td>
+                <td style="font-weight: bold;color:{% if m.1 %}green{% else %}red{% endif %};">
+                    {{ m.1 }}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

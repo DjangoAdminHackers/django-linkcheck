@@ -16,9 +16,18 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django import forms
 from django.conf import settings
+from django.db import models
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
-from linkcheck.models import Link
+from linkcheck.models import Link, all_linklists
+try:
+    from sorl.thumbnail import ImageField
+except:
+    ImageField = None
+try:
+    from mcefield.custom_fields import MCEField
+except:
+    MCEField = None
 
 try:
     from django.contrib.admin.templatetags.adminmedia import admin_media_prefix
@@ -27,6 +36,50 @@ try:
 except ImportError:
     # However - admin_media_prefix was removed in Django 1.5
     admin_static = settings.STATIC_URL
+
+def is_intresting_field(field):
+    ''' linkcheck checks URLField, MCEField, ImageField'''
+    if isinstance(field, models.URLField):
+        return True
+    if isinstance(field, models.ImageField):
+        return True
+    if ImageField and isinstance(field, ImageField):
+        return True
+    if MCEField and isinstance(field, MCEField):
+        return True
+    return False
+
+
+def is_model_covered(klass):
+    for linklist in all_linklists.items():
+        if linklist[1].model == klass:
+            return True
+    return False
+
+
+@staff_member_required
+def coverage(request):
+    '''
+    Check which models are covered by linkcheck
+    This view assumes the key for link
+    '''
+    all_model_list = []
+    for app in models.get_apps():
+        model_list = models.get_models(app)
+        for model in model_list:
+            should_append = False
+            for field in model._meta.fields:                    
+                if is_intresting_field(field):
+                    should_append=True
+            if should_append:
+                all_model_list.append(
+                    ('%s.%s' % (model._meta.app_label, model._meta.object_name), is_model_covered(model))
+                )
+    return render_to_response('linkcheck/coverage.html',{
+            'all_model_list': all_model_list, 
+        },
+        RequestContext(request),
+    )
 
 
 @staff_member_required
