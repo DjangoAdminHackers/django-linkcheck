@@ -17,6 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
+from django.utils.timezone import now
 
 from linkcheck_settings import MAX_URL_LENGTH
 from linkcheck_settings import MEDIA_PREFIX
@@ -95,7 +96,7 @@ class Url(models.Model):
     def check(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
 
         from linkcheck.utils import LinkCheckHandler
-        external_recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
+        external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
         self.status  = False
 
         # Remove current domain from URLs as the test client chokes when trying to test them during a page save
@@ -197,7 +198,7 @@ class Url(models.Model):
             if original_url: # restore the original url before saving
                 self.url = original_url
 
-            self.last_checked  = datetime.now()
+            self.last_checked  = now()
             self.save()
 
         elif check_external and self.external:
@@ -281,7 +282,7 @@ class Url(models.Model):
             except Exception, e:
                 self.message = 'Other Error: %s' % e
 
-            self.last_checked  = datetime.now()
+            self.last_checked  = now()
             self.save()
 
         return self.status
