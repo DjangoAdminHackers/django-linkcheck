@@ -1,10 +1,23 @@
+from django.db import models
 from django.test.client import ClientHandler
+from django.template.loader import render_to_string
+
 from datetime import datetime
 from datetime import timedelta
 
 from linkcheck.models import Link
 from linkcheck.models import Url
 from linkcheck_settings import MAX_URL_LENGTH
+from linkcheck.models import  all_linklists
+
+try:
+    from sorl.thumbnail import ImageField
+except:
+    ImageField = None
+try:
+    from mcefield.custom_fields import MCEField
+except:
+    MCEField = None
 
 class LinkCheckHandler(ClientHandler):
     #customize the ClientHandler to allow us removing some middlewares
@@ -103,3 +116,90 @@ def find_all_links(all_linklists):
 
 def unignore():
     Link.objects.update(ignore=False)
+
+
+##Utilities for testing models coverage
+def is_intresting_field(field):
+    ''' linkcheck checks URLField, MCEField, ImageField'''
+    if is_url_field(field) or is_image_field(field) or is_mce_field(field):
+        return True
+    return False
+
+def is_url_field(field):
+    if isinstance(field, models.URLField):
+        return True
+
+def is_image_field(field):
+    if isinstance(field, models.ImageField):
+        return True
+    if ImageField and isinstance(field, ImageField):
+        return True
+
+def is_mce_field(field):
+    if MCEField and isinstance(field, MCEField):
+        return True
+
+def has_active_field(klass):
+    for field in klass._meta.fields:
+        if field.name=='active' and isinstance(field, models.BooleanField):
+            return True
+
+def get_type_fields(klass, the_type):
+    check_funcs = {
+        'mce': is_mce_field, 
+        'url': is_url_field, 
+        'image': is_image_field, 
+    }
+    check_func = check_funcs[the_type]
+    fields = []
+    for field in klass._meta.fields:
+        if check_func(field):
+            fields.append(field)
+    return fields
+    
+def is_model_covered(klass):
+    for linklist in all_linklists.items():
+        if linklist[1].model == klass:
+            return True
+    return False
+
+def get_suggested_linklist(klass):
+    meta = klass._meta
+    is_target = bool(getattr(klass, 'get_absolute_url', False))
+    html_fields = get_type_fields(klass, 'mce')
+    url_fields = get_type_fields(klass, 'url')
+    image_fields = get_type_fields(klass, 'image')
+    active_field = has_active_field(klass)
+    context = {
+        'is_target': is_target, 
+        'meta': meta, 
+        'html_fields': html_fields, 
+        'url_fields': url_fields, 
+        'image_fields': image_fields, 
+        'active_field': active_field, 
+    }
+    return render_to_string('linkcheck/suggested_linklist.html', context)
+
+def get_coverage_data():
+    '''
+    Check which models are covered by linkcheck
+    This view assumes the key for link
+    '''
+    all_model_list = []
+    for app in models.get_apps():
+        model_list = models.get_models(app)
+        for model in model_list:
+            should_append = False
+            for field in model._meta.fields:                    
+                if is_intresting_field(field):
+                    should_append=True
+            if should_append:
+                all_model_list.append(
+                    (
+                     '%s.%s' % (model._meta.app_label, model._meta.object_name), 
+                     is_model_covered(model),
+                     get_suggested_linklist(model),
+                    )
+                )
+    return all_model_list
+

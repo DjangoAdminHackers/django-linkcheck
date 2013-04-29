@@ -1,4 +1,6 @@
 <pre>
+from {{ meta.app_label }}.models import {{ meta.object_name }}
+
 class {{ meta.object_name }}Linklist(Linklist):
     model = {{ meta.object_name }}
     {% if active_field %}object_filter = {'active':True}{% endif %}
@@ -8,6 +10,6 @@ class {{ meta.object_name }}Linklist(Linklist):
     {% if not is_target %}hidden_in_mce = True{% endif %}
     
 linklists = {
-   '{{ meta.object_name }}': {{ meta.object_name }}Linklist,
+    '{{ meta.object_name }}': {{ meta.object_name }}Linklist,
 }
 </pre>
