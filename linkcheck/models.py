@@ -17,7 +17,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
-from django.utils.timezone import now
+try:
+    from django.utils.timezone import now
+except ImportError:
+    now = datetime.now 
 
 from linkcheck_settings import MAX_URL_LENGTH
 from linkcheck_settings import MEDIA_PREFIX
