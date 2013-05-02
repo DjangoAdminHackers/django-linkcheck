@@ -89,68 +89,65 @@ for linklist_name, linklist_cls in all_linklists.items():
     listeners.append(delete_instance_links)
     model_signals.post_delete.connect(listeners[-1], sender=linklist_cls.model)
 
-#2, register listeners for the objects that are targets of Links
-    def instance_pre_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
-        if not getattr(instance, 'get_absolute_url', None):
-            return
-        current_url = instance.get_absolute_url()
-        try:
-            previous = ModelCls.objects.get(pk=instance.pk)
-            #log.debug('instance exists modifying')
-            previous_url = previous.get_absolute_url()
-            if previous_url == current_url:
-                #log.debug('url did not change, return')
-                return
-            else:
-                #log.debug('url changed')
-                old_urls = Url.objects.filter(url__startswith=previous_url)
+#2, register listeners for the objects that are targets of Links, only when get_absolute_url() is defined for the model. 
+    if getattr(linklist_cls.model, 'get_absolute_url', None):
+        def instance_pre_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
+            current_url = instance.get_absolute_url()
+            try:
+                previous = ModelCls.objects.get(pk=instance.pk)
+                #log.debug('instance exists modifying')
+                previous_url = previous.get_absolute_url()
+                if previous_url == current_url:
+                    #log.debug('url did not change, return')
+                    return
+                else:
+                    #log.debug('url changed')
+                    old_urls = Url.objects.filter(url__startswith=previous_url)
+                    if old_urls:
+                        old_urls.update(status=False, message='Broken internal link')
+                    new_urls = Url.objects.filter(url__startswith=current_url)
+                    if new_urls:
+                        # mark these urls' status as False, so that post_save will check them
+                        new_urls.update(status=False, message='Should be checked now!')
+            except:
+                #log.debug('new instance, post_save is in charge of this')
+                pass
+    
+        listeners.append(instance_pre_save)
+        model_signals.pre_save.connect(listeners[-1], sender=linklist_cls.model)
+    
+    
+        def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
+            current_url = instance.get_absolute_url()
+    
+            # We assume returning None from get_absolute_url means that this instance doesn't have a URL
+            # Not sure if we should do the same for '' as this could refer to '/'
+            if current_url!=None:
+    
+                active = linklist.objects().filter(pk=instance.pk).count()
+    
+                if kwargs['created'] or (not active):
+                    new_urls = Url.objects.filter(url__startswith=current_url)
+                else:
+                    new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
+    
+                if new_urls:
+                    for url in new_urls:
+                        url.check()
+    
+        listeners.append(instance_post_save)
+        model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
+    
+    
+        def instance_pre_delete(sender, instance, ModelCls=linklist_cls.model,  **kwargs):
+            instance.linkcheck_deleting = True
+            deleted_url = instance.get_absolute_url()
+            if deleted_url:
+                old_urls = Url.objects.filter(url__startswith=deleted_url).exclude(status=False)
                 if old_urls:
                     old_urls.update(status=False, message='Broken internal link')
-                new_urls = Url.objects.filter(url__startswith=current_url)
-                if new_urls:
-                    # mark these urls' status as False, so that post_save will check them
-                    new_urls.update(status=False, message='Should be checked now!')
-        except:
-            #log.debug('new instance, post_save is in charge of this')
-            pass
-
-    listeners.append(instance_pre_save)
-    model_signals.pre_save.connect(listeners[-1], sender=linklist_cls.model)
-
-
-    def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
-        if not getattr(instance, 'get_absolute_url', None):
-            return
-        current_url = instance.get_absolute_url()
-
-        # We assume returning None from get_absolute_url means that this instance doesn't have a URL
-        # Not sure if we should do the same for '' as this could refer to '/'
-        if current_url!=None:
-
-            active = linklist.objects().filter(pk=instance.pk).count()
-
-            if kwargs['created'] or (not active):
-                new_urls = Url.objects.filter(url__startswith=current_url)
-            else:
-                new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
-
-            if new_urls:
-                for url in new_urls:
-                    url.check()
-
-    listeners.append(instance_post_save)
-    model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
-
-
-    def instance_pre_delete(sender, instance, ModelCls=linklist_cls.model,  **kwargs):
-        instance.linkcheck_deleting = True
-        deleted_url = instance.get_absolute_url()
-        if deleted_url:
-            old_urls = Url.objects.filter(url__startswith=deleted_url).exclude(status=False)
-            if old_urls:
-                old_urls.update(status=False, message='Broken internal link')
-    listeners.append(instance_pre_delete)
-    model_signals.pre_delete.connect(listeners[-1], sender=linklist_cls.model)
+        listeners.append(instance_pre_delete)
+        model_signals.pre_delete.connect(listeners[-1], sender=linklist_cls.model)
 
 
 ################################################
