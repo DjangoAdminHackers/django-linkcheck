@@ -190,9 +190,13 @@ def get_coverage_data():
         model_list = models.get_models(app)
         for model in model_list:
             should_append = False
-            for field in model._meta.fields:                    
-                if is_intresting_field(field):
-                    should_append=True
+            if getattr(model, 'get_absolute_url', None):
+                should_append = True
+            else:
+                for field in model._meta.fields:                    
+                    if is_intresting_field(field):
+                        should_append=True
+                        break
             if should_append:
                 all_model_list.append(
                     (
