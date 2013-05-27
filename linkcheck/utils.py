@@ -73,6 +73,10 @@ class LinkCheckHandler(ClientHandler):
             if not ignored:
                 new_exception_middleware.append(method)
         self._exception_middleware = new_exception_middleware
+        print 'reversion' in str(self._request_middleware)
+        print 'reversion' in str(self._view_middleware)
+        print 'reversion' in str(self._response_middleware)
+        print 'reversion' in str(self._exception_middleware)
 
 def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
 
