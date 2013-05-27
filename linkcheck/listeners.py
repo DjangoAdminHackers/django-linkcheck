@@ -97,6 +97,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 previous = ModelCls.objects.get(pk=instance.pk)
                 #log.debug('instance exists modifying')
                 previous_url = previous.get_absolute_url()
+                setattr(instance, '__previous_url', previous_url)
                 if previous_url == current_url:
                     #log.debug('url did not change, return')
                     return
@@ -119,10 +120,10 @@ for linklist_name, linklist_cls in all_linklists.items():
     
         def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
             current_url = instance.get_absolute_url()
-    
+            previous_url = getattr(instance, '__previous_url')
             # We assume returning None from get_absolute_url means that this instance doesn't have a URL
             # Not sure if we should do the same for '' as this could refer to '/'
-            if current_url!=None:
+            if current_url!=None and current_url != previous_url:
     
                 active = linklist.objects().filter(pk=instance.pk).count()
     
