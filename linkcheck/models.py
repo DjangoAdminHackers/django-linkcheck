@@ -36,10 +36,15 @@ if sys.version_info >= (2,6): #timeout arg of urlopen is available
     TIMEOUT_SUPPORT = True
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
+METHOD_NOT_ALLOWED = 405
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
+
+class GetRequest(urllib2.Request):
+    def get_method(self):
+        return "GET"
 
 class Url(models.Model):
     # A URL represents a distinct URL.
@@ -148,7 +153,7 @@ class Url(models.Model):
             elif getattr(self, '_internal_hash', False) and getattr(self, '_instance', None):
                 # This is a hash link pointing to itself
                 from linkcheck import parse_anchors
-                
+
                 hash = self._internal_hash
                 instance = self._instance
                 if hash == '#': # special case, point to #
@@ -234,16 +239,20 @@ class Url(models.Model):
                             )
                         else:
                             response = urllib2.urlopen(req)
-                    except ValueError:
+                    except (ValueError, urllib2.HTTPError) as error:
                         # ...except sometimes it triggers a bug in urllib2
+                        if hasattr(error, 'code') and error.code == METHOD_NOT_ALLOWED:
+                            req = GetRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
+                        else:
+                            req = url
                         if TIMEOUT_SUPPORT:
                             response = urllib2.urlopen(
-                                url,
+                                req,
                                 timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                             )
                         else:
-                            response = urllib2.urlopen(url)
-                            
+                            response = urllib2.urlopen(req)
+
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
 
