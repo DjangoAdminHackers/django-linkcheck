@@ -239,7 +239,8 @@ class Url(models.Model):
                             )
                         else:
                             response = urllib2.urlopen(req)
-                    except (ValueError, urllib2.HTTPError) as error:
+                    except (ValueError, urllib2.HTTPError):
+                        _, error, _ = sys.exc_info()
                         # ...except sometimes it triggers a bug in urllib2
                         if hasattr(error, 'code') and error.code == METHOD_NOT_ALLOWED:
                             req = GetRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
