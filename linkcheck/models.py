@@ -53,7 +53,7 @@ class Url(models.Model):
     last_checked = models.DateTimeField(blank=True, null=True)
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
-    still_exists = models.BooleanField()
+    still_exists = models.BooleanField(default=False)
 
     @property
     def type(self):
