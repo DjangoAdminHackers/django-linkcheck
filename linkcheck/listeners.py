@@ -155,8 +155,15 @@ for linklist_name, linklist_cls in all_linklists.items():
 # Integrate with django-filebrowser if present #
 ################################################
 
+def get_relative_media_url():
+    if settings.MEDIA_URL.startswith('http'):
+        relative_media_url = ('/'+'/'.join(settings.MEDIA_URL.split('/')[3:]))[:-1]
+    else:
+        relative_media_url = settings.MEDIA_URL
+        return relative_media_url
+
 def handle_upload(sender, path=None, **kwargs):
-    url = os.path.join(settings.RELATIVE_MEDIA_URL, kwargs['file'].url_relative)
+    url = os.path.join(get_relative_media_url(), kwargs['file'].url_relative)
     url_qs = Url.objects.filter(url=url).filter(status=False)
     count = url_qs.count()
     if count:
@@ -166,8 +173,8 @@ def handle_upload(sender, path=None, **kwargs):
 
 
 def handle_rename(sender, path=None, **kwargs):
-    old_url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['filename'])
-    new_url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['new_filename'])
+    old_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
+    new_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['new_filename'])
     # rename a file will cause the urls to it invalid
     # rename a directory will cause the urls to its files invalid
     old_url_qs = Url.objects.filter(url=old_url).filter(status=True)
@@ -197,7 +204,7 @@ def handle_rename(sender, path=None, **kwargs):
 
 
 def handle_delete(sender, path=None, **kwargs):
-    url = os.path.join(settings.RELATIVE_MEDIA_URL, DIRECTORY, path, kwargs['filename'])
+    url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
     url_qs = Url.objects.filter(url=url).filter(status=True)
     count = url_qs.count()
     if count:
