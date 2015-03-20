@@ -119,22 +119,28 @@ for linklist_name, linklist_cls in all_linklists.items():
     
     
         def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
-            current_url = instance.get_absolute_url()
-            previous_url = getattr(instance, '__previous_url', None)
-            # We assume returning None from get_absolute_url means that this instance doesn't have a URL
-            # Not sure if we should do the same for '' as this could refer to '/'
-            if current_url!=None and current_url != previous_url:
-    
-                active = linklist.objects().filter(pk=instance.pk).count()
-    
-                if kwargs['created'] or (not active):
-                    new_urls = Url.objects.filter(url__startswith=current_url)
-                else:
-                    new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
-    
-                if new_urls:
-                    for url in new_urls:
-                        url.check()
+            def do_instance_post_save(sender, instance, ModelCls=ModelCls, linklist=linklist_cls, **kwargs):
+                current_url = instance.get_absolute_url()
+                previous_url = getattr(instance, '__previous_url', None)
+                # We assume returning None from get_absolute_url means that this instance doesn't have a URL
+                # Not sure if we should do the same for '' as this could refer to '/'
+                if current_url!=None and current_url != previous_url:
+        
+                    active = linklist.objects().filter(pk=instance.pk).count()
+        
+                    if kwargs['created'] or (not active):
+                        new_urls = Url.objects.filter(url__startswith=current_url)
+                    else:
+                        new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
+        
+                    if new_urls:
+                        for url in new_urls:
+                            url.check()
+            if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
+                do_instance_post_save(sender, instance, ModelCls, **kwargs)
+            else:
+                t = Thread(target=do_instance_post_save, args=(sender, instance, ModelCls,), kwargs=kwargs)
+                t.start()
     
         listeners.append(instance_post_save)
         model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
