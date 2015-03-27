@@ -195,6 +195,10 @@ class Url(models.Model):
                 c = Client()
                 c.handler = LinkCheckHandler()
                 response = c.get(self.url, follow=True)
+                #using test client will clear the RevisionContextManager stack. 
+                from reversion.revisions import revision_context_manager
+                revision_context_manager.start()
+
                 if response.status_code == 200:
                     self.message = 'Working internal link'
                     self.status = True
