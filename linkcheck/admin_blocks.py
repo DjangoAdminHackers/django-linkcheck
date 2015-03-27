@@ -1,4 +1,4 @@
-import admin_notifications
+import django_admin_blocks
 
 from linkcheck.models import Link
 from linkcheck.listeners import still_updating
@@ -13,4 +13,6 @@ def notification():
         else:
             return ''
 
-admin_notifications.register(notification)
+django_admin_blocks.register({
+    'errors': (notification,),
+})
