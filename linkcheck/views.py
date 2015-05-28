@@ -56,7 +56,7 @@ def report(request):
             link.save()
             if request.is_ajax():
                 json = simplejson.dumps({'link': ignore_link_id})
-                return HttpResponse(json, mimetype='application/javascript')
+                return HttpResponse(json, content_type='application/javascript')
         
         unignore_link_id = request.GET.get('unignore', None)
         if unignore_link_id != None:
@@ -65,7 +65,7 @@ def report(request):
             link.save()
             if request.is_ajax():
                 json = simplejson.dumps({'link': unignore_link_id})
-                return HttpResponse(json, mimetype='application/javascript')
+                return HttpResponse(json, content_type='application/javascript')
             
         recheck_link_id = request.GET.get('recheck', None)
         if recheck_link_id != None:
@@ -79,7 +79,7 @@ def report(request):
                     'message': url.message,
                     'colour': url.colour,
                 })
-                return HttpResponse(json, mimetype='application/javascript')
+                return HttpResponse(json, content_type='application/javascript')
 
     link_filter = request.GET.get('filters', 'show_invalid')
 
