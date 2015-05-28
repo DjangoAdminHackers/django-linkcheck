@@ -7,6 +7,7 @@ try:
     import simplejson
 except:
     from django.utils import simplejson
+from django.contrib.admin.templatetags.admin_static import static
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
@@ -145,7 +146,7 @@ def report(request):
             {'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
-            'media':  forms.Media(js=['%s%s' % (admin_static, 'js/jquery.min.js')]),
+            'media':  forms.Media(js=[static('admin/js/jquery.min.js')]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),

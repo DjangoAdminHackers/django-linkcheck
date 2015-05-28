@@ -13,11 +13,6 @@ You should run it's management command via cron or similar to check external
 links regularly to see if their status changes. All links are checked
 automatically when objects are saved. This is handled by signals.
 
-Requirements
------------
-
-If you want the Ajax 'recheck' and 'ignore' buttons to work then JQuery should be available in your admin templates as $. (I intend to fix this so it works using the jQuery that Django loads automatically)
-
 Basic usage
 -----------
 
