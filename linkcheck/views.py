@@ -71,7 +71,7 @@ def report(request):
         if recheck_link_id != None:
             link = Link.objects.get(id=recheck_link_id)
             url = link.url 
-            url.check(external_recheck_interval=0)
+            url.check_url(external_recheck_interval=0)
             links = [x[0] for x in url.links.values_list('id')]
             if request.is_ajax():
                 json = simplejson.dumps({

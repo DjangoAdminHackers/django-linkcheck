@@ -101,7 +101,7 @@ class Url(models.Model):
             url = self.url
         return urllib2.unquote(url).decode('utf8')
 
-    def check(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
+    def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
 
         from linkcheck.utils import LinkCheckHandler
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)

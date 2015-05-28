@@ -61,44 +61,44 @@ class InternalCheckTestCase(TestCase):
 
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, None)
         self.assertEquals(uv.message, 'Email link (not automatically checked)')
 
     def test_internal_check_blank(self):
         uv = Url(url="", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Empty link')
 
     def test_internal_check_anchor(self):
         uv = Url(url="#some_anchor", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, None)
         self.assertEquals(uv.message, 'Link to within the same page (not automatically checked)')
 
 #    TODO: This now fails, because with follow=True, redirects are automatically followed
 #    def test_internal_check_view_302(self):
 #        uv = Url(url="/admin/linkcheck", still_exists=True)
-#        uv.check()
+#        uv.check_url()
 #        self.assertEquals(uv.status, None)
 #        self.assertEquals(uv.message, 'This link redirects: code 302 (not automatically checked)')
 
     def test_internal_check_admin_found(self):
         uv = Url(url="/admin/", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, True)
         self.assertEquals(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Broken internal link')
 
     def test_internal_check_invalid_url(self):
         uv = Url(url="invalid/url", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Invalid URL')
 
@@ -106,7 +106,7 @@ class InternalCheckTestCase(TestCase):
         # TODO Make this test
         pass
         #uv = Url(url="#anchor", still_exists=True)
-        #uv.check()
+        #uv.check_url()
         #self.assertEquals(uv.status, None)
         #self.assertEquals(uv.message, "")
 
@@ -121,19 +121,19 @@ class InternalMediaCheckTestCase(TestCase):
 
     def test_internal_check_media_missing(self):
         uv = Url(url="/media/not_found", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, 'Missing Document')
 
     def test_internal_check_media_found(self):
         uv = Url(url="/media/found", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, True)
         self.assertEquals(uv.message, 'Working file link')
 
     def test_internal_check_media_utf8(self):
         uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, True)
         self.assertEquals(uv.message, 'Working file link')
 
@@ -141,19 +141,19 @@ class InternalMediaCheckTestCase(TestCase):
 class ExternalCheckTestCase(TestCase):
     def test_external_check_200(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, True)
         self.assertEquals(uv.message, '200 OK')
 
     def test_external_check_301(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, '301 Moved Permanently')
 
     def test_external_check_404(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=404", still_exists=True)
-        uv.check()
+        uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, '404 Not Found')
 

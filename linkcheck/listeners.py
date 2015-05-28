@@ -63,7 +63,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                     if internal_hash:
                         setattr(u, '_internal_hash', internal_hash)
                         setattr(u, '_instance', instance)
-                    u.check()
+                    u.check_url()
                     
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
@@ -135,7 +135,7 @@ for linklist_name, linklist_cls in all_linklists.items():
         
                     if new_urls:
                         for url in new_urls:
-                            url.check()
+                            url.check_url()
             if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
                 do_instance_post_save(sender, instance, ModelCls, **kwargs)
             else:
@@ -190,7 +190,7 @@ def handle_rename(sender, path=None, **kwargs):
         new_count = 0
         new_url_qs = Url.objects.filter(url__startswith=new_url).filter(status=False)
         for url in new_url_qs:
-            if url.check():
+            if url.check_url():
                 new_count += 1
     else:
         new_url_qs = Url.objects.filter(url=new_url).filter(status=False)
