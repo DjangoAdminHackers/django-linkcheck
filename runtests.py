@@ -3,7 +3,9 @@ import sys
 
 from os.path import dirname, abspath
 
+import django
 from django.conf import settings
+from django.test.runner import DiscoverRunner
 
 if not settings.configured:
     settings.configure(
@@ -15,10 +17,15 @@ if not settings.configured:
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
         ROOT_URLCONF = "linkcheck.tests.test_urls",
+        MIDDLEWARE_CLASSES=(
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        ),
         SITE_DOMAIN = "localhost"
     )
-
-from django.test.simple import DjangoTestSuiteRunner
 
 
 def runtests(*test_args):
@@ -26,10 +33,11 @@ def runtests(*test_args):
         test_args = ['linkcheck']
     parent = dirname(abspath(__file__))
     sys.path.insert(0, parent)
-    test_runner = DjangoTestSuiteRunner(verbosity=1, interactive=True)
+    test_runner = DiscoverRunner(verbosity=1, interactive=True)
     failures = test_runner.run_tests(test_args)
     sys.exit(failures)
 
 
 if __name__ == '__main__':
+    django.setup()
     runtests(*sys.argv[1:])
