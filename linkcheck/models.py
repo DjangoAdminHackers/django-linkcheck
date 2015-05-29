@@ -321,7 +321,7 @@ class Link(models.Model):
     def display_url(self):
         # when page /test/ has a anchor link to /test/#anchor, we display it
         # as "#anchor" rather than "/test/#anchor"
-        if self.url.url.count('#'):
+        if self.url.url.count('#') and hasattr(self.content_object, 'get_absolute_url'):
             url_part, anchor_part = self.url.url.split('#')
             absolute_url = self.content_object.get_absolute_url()
             if url_part == absolute_url:
