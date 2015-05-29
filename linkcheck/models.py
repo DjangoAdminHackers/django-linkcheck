@@ -11,12 +11,18 @@ import logging
 import urllib2
 
 from django.conf import settings
-from django.utils.importlib import import_module
-from django.contrib.contenttypes import generic
+try:
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -101,7 +107,7 @@ class Url(models.Model):
             url = self.url
         return urllib2.unquote(url).decode('utf8')
 
-    def check(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
+    def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
 
         from linkcheck.utils import LinkCheckHandler
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
@@ -305,7 +311,7 @@ class Link(models.Model):
     # Multiple Links can reference a single Url
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     field = models.CharField(max_length=128)
     url = models.ForeignKey(Url, related_name="links")
     text = models.CharField(max_length=256, default='')
