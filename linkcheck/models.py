@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 import imp
 import os.path
@@ -5,10 +7,7 @@ import sys
 
 from datetime import datetime
 from datetime import timedelta
-from httplib import BadStatusLine
-from HTMLParser import HTMLParseError
 import logging
-import urllib2
 
 from django.conf import settings
 try:
@@ -19,10 +18,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.http import urlunquote
 try:
     from importlib import import_module
 except ImportError:
     from django.utils.importlib import import_module
+from django.utils.six.moves import http_client
+from django.utils.six.moves.urllib.error import HTTPError, URLError
+from django.utils.six.moves.urllib.parse import unquote
+from django.utils.six.moves.urllib.request import Request, urlopen
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -34,12 +39,10 @@ try:
 except ImportError:
     USE_REVERSION = False
 
-from linkcheck_settings import MAX_URL_LENGTH
-from linkcheck_settings import MEDIA_PREFIX
-from linkcheck_settings import SITE_DOMAINS
-from linkcheck_settings import EXTERNAL_REGEX_STRING
-from linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
-from linkcheck_settings import LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+from .linkcheck_settings import (
+    MAX_URL_LENGTH, MEDIA_PREFIX, SITE_DOMAINS, EXTERNAL_REGEX_STRING,
+    EXTERNAL_RECHECK_INTERVAL, LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
+)
 
 logger = logging.getLogger('linkcheck')
 
@@ -50,11 +53,11 @@ if sys.version_info >= (2,6): #timeout arg of urlopen is available
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 METHOD_NOT_ALLOWED = 405
 
-class HeadRequest(urllib2.Request):
+class HeadRequest(Request):
     def get_method(self):
         return "HEAD"
 
-class GetRequest(urllib2.Request):
+class GetRequest(Request):
     def get_method(self):
         return "GET"
 
@@ -74,6 +77,8 @@ def html_decode(s):
         s = s.replace(code[1], code[0])
     return s
 
+
+@python_2_unicode_compatible
 class Url(models.Model):
     # A URL represents a distinct URL.
     # A single Url can have multiple Links associated with it
@@ -114,20 +119,12 @@ class Url(models.Model):
         else:
             return 'red'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.url
 
     @property
     def external(self):
         return EXTERNAL_REGEX.match(self.url)
-
-    def url_unquoted(self):
-        try:
-            # URLs should be ascii encodable
-            url = self.url.encode('ascii')
-        except UnicodeEncodeError:
-            url = self.url
-        return urllib2.unquote(url).decode('utf8')
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
 
@@ -172,7 +169,7 @@ class Url(models.Model):
 
             elif self.url.startswith(MEDIA_PREFIX):
                 #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
-                path = settings.MEDIA_ROOT + self.url_unquoted()[len(MEDIA_PREFIX)-1:]
+                path = settings.MEDIA_ROOT + urlunquote(self.url)[len(MEDIA_PREFIX)-1:]
                 decoded_path = html_decode(path)
                 if os.path.exists(path) or os.path.exists(decoded_path):
                     self.message = 'Working file link'
@@ -256,24 +253,24 @@ class Url(models.Model):
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
                     if TIMEOUT_SUPPORT:
-                        response = urllib2.urlopen(
+                        response = urlopen(
                             url,
                             timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                         )
                     else:
-                        response = urllib2.urlopen(url)
+                        response = urlopen(url)
                 else:
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
                         if TIMEOUT_SUPPORT:
-                            response = urllib2.urlopen(
+                            response = urlopen(
                                 req,
                                 timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                             )
                         else:
-                            response = urllib2.urlopen(req)
-                    except (ValueError, urllib2.HTTPError):
+                            response = urlopen(req)
+                    except (ValueError, HTTPError):
                         _, error, _ = sys.exc_info()
                         # ...except sometimes it triggers a bug in urllib2
                         if hasattr(error, 'code') and error.code == METHOD_NOT_ALLOWED:
@@ -281,12 +278,12 @@ class Url(models.Model):
                         else:
                             req = url
                         if TIMEOUT_SUPPORT:
-                            response = urllib2.urlopen(
+                            response = urlopen(
                                 req,
                                 timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                             )
                         else:
-                            response = urllib2.urlopen(req)
+                            response = urlopen(req)
 
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
@@ -310,23 +307,23 @@ class Url(models.Model):
                         self.message = "Page OK but anchor can't be checked"
                         self.status = True
 
-            except BadStatusLine:
+            except http_client.BadStatusLine:
                     self.message = "Bad Status Line"
 
-            except urllib2.HTTPError, e:
+            except HTTPError as e:
                 if hasattr(e, 'code') and hasattr(e, 'msg'):
                     self.message = ' '.join([str(e.code), e.msg])
                 else:
                     self.message = "Unknown Error"
 
-            except urllib2.URLError, e:
+            except URLError as e:
                 if hasattr(e, 'reason'):
                     self.message = 'Unreachable: '+str(e.reason)
                 elif hasattr(e, 'code') and e.code!=301:
                     self.message = 'Error: '+str(e.code)
                 else:
                     self.message = 'Redirect. Check manually: '+str(e.code)
-            except Exception, e:
+            except Exception as e:
                 self.message = 'Other Error: %s' % e
 
             self.last_checked  = now()
@@ -407,4 +404,4 @@ for key, linklist in all_linklists.items():
 
 #-------------------------register listeners-------------------------
 
-import listeners
+from . import listeners

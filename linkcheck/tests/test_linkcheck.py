@@ -1,4 +1,3 @@
-import urllib2
 import socket
 import re
 import os
@@ -7,6 +6,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.six.moves.urllib import request
+from django.utils.six.moves.urllib.error import HTTPError
+
 from linkcheck.models import Link, Url
 
 from .sampleapp.models import Author, Book
@@ -54,7 +56,7 @@ def mock_urlopen(url, data=None, timeout=timeout):
         if code == "200":
             return addinfoUrl(url, code, msg)
 
-    raise urllib2.HTTPError(url, code, msg, None, None)
+    raise HTTPError(url, code, msg, None, None)
 
 
 class InternalCheckTestCase(TestCase):
@@ -62,7 +64,7 @@ class InternalCheckTestCase(TestCase):
 
     def setUp(self):
         #replace urllib2.urlopen with mock method
-        urllib2.urlopen = mock_urlopen
+        request.urlopen = mock_urlopen
 
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)

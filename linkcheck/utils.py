@@ -5,10 +5,8 @@ from django.template.loader import render_to_string
 from datetime import datetime
 from datetime import timedelta
 
-from linkcheck.models import Link
-from linkcheck.models import Url
-from linkcheck_settings import MAX_URL_LENGTH
-from linkcheck.models import  all_linklists
+from linkcheck.models import all_linklists, Link, Url
+from .linkcheck_settings import MAX_URL_LENGTH
 
 try:
     from sorl.thumbnail import ImageField
