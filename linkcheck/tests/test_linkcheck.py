@@ -3,6 +3,15 @@ import socket
 import re
 import os
 
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.test import TestCase
+from linkcheck.models import Link, Url
+
+from .sampleapp.models import Author, Book
+
+
 #MOCK addinfurl
 class addinfoUrl():
     """class to add info() and getUrl(url=) methods to an open file."""
@@ -47,10 +56,6 @@ def mock_urlopen(url, data=None, timeout=timeout):
 
     raise urllib2.HTTPError(url, code, msg, None, None)
 
-from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-from linkcheck.models import Url
 
 class InternalCheckTestCase(TestCase):
     urls = 'linkcheck.tests.test_urls'
@@ -160,7 +165,6 @@ class ExternalCheckTestCase(TestCase):
 
 class FindingLinksTestCase(TestCase):
     def test_found_links(self):
-        from linkcheck.tests.sampleapp.models import Book
         self.assertEqual(Url.objects.all().count(), 0)
         Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
         self.assertEqual(Url.objects.all().count(), 1)
@@ -168,8 +172,16 @@ class FindingLinksTestCase(TestCase):
 
 class ReportViewTestCase(TestCase):
     def setUp(self):
-        from django.contrib.auth.models import User
         User.objects.create_superuser('admin', 'admin@example.org', 'password')
+
+    def test_display_url(self):
+        Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
+        Author.objects.create(name="John Smith", website="http://www.example.org#john")
+        self.assertEqual(Link.objects.count(), 2)
+        self.assertEqual(
+            set([l.display_url for l in Link.objects.all()]),
+            {'http://www.example.org', 'http://www.example.org#john'}
+        )
 
     def test_report_view(self):
         self.client.login(username='admin', password='password')
