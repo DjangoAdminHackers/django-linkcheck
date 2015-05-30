@@ -52,6 +52,22 @@ class GetRequest(urllib2.Request):
     def get_method(self):
         return "GET"
 
+def html_decode(s):
+    """
+    Returns the ASCII decoded version of the given HTML string. This does
+    NOT remove normal HTML tags like <p>.
+    """
+    html_codes = (
+            ("'", '&#39;'),
+            ('"', '&quot;'),
+            ('>', '&gt;'),
+            ('<', '&lt;'),
+            ('&', '&amp;')
+        )
+    for code in html_codes:
+        s = s.replace(code[1], code[0])
+    return s
+
 class Url(models.Model):
     # A URL represents a distinct URL.
     # A single Url can have multiple Links associated with it
@@ -150,7 +166,9 @@ class Url(models.Model):
 
             elif self.url.startswith(MEDIA_PREFIX):
                 #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
-                if os.path.exists(settings.MEDIA_ROOT + self.url_unquoted()[len(MEDIA_PREFIX)-1:]):
+                path = settings.MEDIA_ROOT + self.url_unquoted()[len(MEDIA_PREFIX)-1:]
+                decoded_path = html_decode(path)
+                if os.path.exists(path) or os.path.exists(decoded_path):
                     self.message = 'Working file link'
                     self.status = True
                 else:
@@ -183,6 +201,10 @@ class Url(models.Model):
                 c = Client()
                 c.handler = LinkCheckHandler()
                 response = c.get(self.url, follow=True)
+                #using test client will clear the RevisionContextManager stack. 
+                from reversion.revisions import revision_context_manager
+                revision_context_manager.start()
+
                 if response.status_code == 200:
                     self.message = 'Working internal link'
                     self.status = True
