@@ -180,7 +180,7 @@ class ReportViewTestCase(TestCase):
         self.assertEqual(Link.objects.count(), 2)
         self.assertEqual(
             set([l.display_url for l in Link.objects.all()]),
-            {'http://www.example.org', 'http://www.example.org#john'}
+            set(['http://www.example.org', 'http://www.example.org#john'])
         )
 
     def test_report_view(self):
