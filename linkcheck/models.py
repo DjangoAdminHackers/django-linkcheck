@@ -28,6 +28,12 @@ try:
 except ImportError:
     now = datetime.now 
 
+try:
+    from reversion.revisions import revision_context_manager
+    USE_REVERSION = True
+except ImportError:
+    USE_REVERSION = False
+
 from linkcheck_settings import MAX_URL_LENGTH
 from linkcheck_settings import MEDIA_PREFIX
 from linkcheck_settings import SITE_DOMAINS
@@ -201,9 +207,9 @@ class Url(models.Model):
                 c = Client()
                 c.handler = LinkCheckHandler()
                 response = c.get(self.url, follow=True)
-                #using test client will clear the RevisionContextManager stack. 
-                from reversion.revisions import revision_context_manager
-                revision_context_manager.start()
+                if USE_REVERSION:
+                    # using test client will clear the RevisionContextManager stack.
+                    revision_context_manager.start()
 
                 if response.status_code == 200:
                     self.message = 'Working internal link'
