@@ -1,7 +1,9 @@
+
 django-linkcheck
-================
+===================
 
 .. image:: https://travis-ci.org/DjangoAdminHackers/django-linkcheck.svg?branch=master
+    :target: https://travis-ci.org/DjangoAdminHackers/django-linkcheck
 
 .. image:: https://github.com/DjangoAdminHackers/django-linkcheck/raw/master/linkcheck.jpg
 
