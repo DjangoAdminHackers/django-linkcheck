@@ -46,10 +46,6 @@ from .linkcheck_settings import (
 
 logger = logging.getLogger('linkcheck')
 
-TIMEOUT_SUPPORT = False
-if sys.version_info >= (2,6): #timeout arg of urlopen is available
-    TIMEOUT_SUPPORT = True
-
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 METHOD_NOT_ALLOWED = 405
 
@@ -252,24 +248,18 @@ class Url(models.Model):
 
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
-                    if TIMEOUT_SUPPORT:
-                        response = urlopen(
-                            url,
-                            timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
-                        )
-                    else:
-                        response = urlopen(url)
+                    response = urlopen(
+                        url,
+                        timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                    )
                 else:
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
-                        if TIMEOUT_SUPPORT:
-                            response = urlopen(
-                                req,
-                                timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
-                            )
-                        else:
-                            response = urlopen(req)
+                        response = urlopen(
+                            req,
+                            timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                        )
                     except (ValueError, HTTPError):
                         _, error, _ = sys.exc_info()
                         # ...except sometimes it triggers a bug in urllib2
@@ -277,13 +267,10 @@ class Url(models.Model):
                             req = GetRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                         else:
                             req = url
-                        if TIMEOUT_SUPPORT:
-                            response = urlopen(
-                                req,
-                                timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
-                            )
-                        else:
-                            response = urlopen(req)
+                        response = urlopen(
+                            req,
+                            timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
+                        )
 
                 self.message = ' '.join([str(response.code), response.msg])
                 self.status = True
