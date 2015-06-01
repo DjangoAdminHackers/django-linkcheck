@@ -177,6 +177,22 @@ class FindingLinksTestCase(TestCase):
             ["<Url: http://www.example.org>", "<Url: http://www.example.org/logo.png>"]
         )
 
+    def test_empty_url_field(self):
+        """
+        Test that URLField empty content is excluded depending on ignore_empty list.
+        """
+        from linkcheck.models import all_linklists
+        all_linklists['Authors'].ignore_empty = ['website']
+        try:
+            Author.objects.create(name="William Shakespeare")
+            Author.objects.create(name="John Smith", website="http://www.example.org/smith")
+            self.assertEqual(Url.objects.all().count(), 1)
+        finally:
+            all_linklists['Authors'].ignore_empty = []
+        Author.objects.create(name="Alphonse Daudet")
+        # This time, the empty 'website' is extracted
+        self.assertEqual(Url.objects.all().count(), 2)
+
 
 class ReportViewTestCase(TestCase):
     def setUp(self):

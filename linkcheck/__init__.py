@@ -97,6 +97,7 @@ class Linklist(object):
 
     html_fields = []
     url_fields = []
+    ignore_empty = []
     image_fields = []
     # You can override object_filter and object_exclude in a linklist class. Just provide a dictionary to be used as a Django lookup filter.
     # Only objects that pass the filter will be queried for links. 
@@ -124,7 +125,10 @@ class Linklist(object):
 
         # Now add in the URL fields
         for field in self.url_fields:
-            urls.append((field, '', getattr(obj ,field)))
+            url_data = (field, '', getattr(obj ,field))
+            if field in self.ignore_empty and not url_data[2]:
+                continue
+            urls.append(url_data)
             
         return urls
 
