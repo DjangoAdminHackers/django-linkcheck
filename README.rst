@@ -1,6 +1,8 @@
 django-linkcheck
 ================
 
+.. image:: https://travis-ci.org/DjangoAdminHackers/django-linkcheck.svg?branch=master
+
 .. image:: https://github.com/DjangoAdminHackers/django-linkcheck/raw/master/linkcheck.jpg
 
 A fairly flexible app that will analyze and report on links in any model that
