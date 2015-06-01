@@ -5,10 +5,12 @@ django-linkcheck
 .. image:: https://travis-ci.org/DjangoAdminHackers/django-linkcheck.svg?branch=master
     :target: https://travis-ci.org/DjangoAdminHackers/django-linkcheck
 
+A fairly flexible app that will analyze and report on links in any model that
+you register with it. 
+
 .. image:: https://github.com/DjangoAdminHackers/django-linkcheck/raw/master/linkcheck.jpg
 
-A fairly flexible app that will analyze and report on links in any model that
-you register with it. Links can be bare (urls or image and file fields) or
+Links can be bare (urls or image and file fields) or
 embedded in HTML (linkcheck handles the parsing). It's fairly easy to override
 methods of the Linkcheck object should you need to do anything more
 complicated (like generate URLs from slug fields etc).
