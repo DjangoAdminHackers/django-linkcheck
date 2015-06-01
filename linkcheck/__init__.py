@@ -1,12 +1,11 @@
-from sgmllib import SGMLParser
 from HTMLParser import HTMLParser
 
 from django.contrib.contenttypes.models import ContentType
 
 
-class Lister(SGMLParser):
+class Lister(HTMLParser):
     def reset(self):
-        SGMLParser.reset(self)
+        HTMLParser.reset(self)
         self.urls = []
 
 
@@ -16,42 +15,47 @@ class URLLister(Lister):
         #self.in_img = False
         self.text = ''
         self.url = ''
-        SGMLParser.__init__(self)
-    def start_a(self, attrs):
-        self.in_a = True
-        href = [v for k, v in attrs if k=='href']
-        if href:
-            self.url = href[0]
-    def start_img(self, attrs):
-        if self.in_a:
+        HTMLParser.__init__(self)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+            href = [v for k, v in attrs if k == 'href']
+            if href:
+                self.in_a = True
+                self.url = href[0]
+        elif tag == 'img' and self.in_a:
             src = [v for k, v in attrs if k=='src']
             if src:
                 self.text += ' [image:%s] ' % src[0]
-    def handle_data(self, data):
-        if self.in_a:
-            self.text += data
-    def end_a(self):
-        if self.url:
+
+    def handle_endtag(self, tag):
+        if tag == 'a' and self.in_a:
             self.urls.append((self.text[:256], self.url))
-        self.in_a = False
         self.text = ''
         self.url = ''
 
+    def handle_data(self, data):
+        if self.in_a:
+            self.text += data
+
 
 class ImageLister(Lister):
-    def start_img(self, attrs):                     
-        src = [v for k, v in attrs if k=='src'] 
-        if src:
-            self.urls.append(('', src[0]))
+    def handle_starttag(self, tag, attrs):
+        if tag == 'img':
+            src = [v for k, v in attrs if k=='src']
+            if src:
+                self.urls.append(('', src[0]))
 
 
 class AnchorLister(HTMLParser):
     def __init__(self):
         self.names = []
         HTMLParser.__init__(self)
+
     def reset(self):
         HTMLParser.reset(self)
         self.names = []
+
     def handle_starttag(self, tag, attributes):
         name = [v for k, v in attributes if k=='id']
         if name:

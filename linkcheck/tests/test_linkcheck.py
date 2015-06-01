@@ -166,9 +166,15 @@ class ExternalCheckTestCase(TestCase):
 class FindingLinksTestCase(TestCase):
     def test_found_links(self):
         self.assertEqual(Url.objects.all().count(), 0)
-        Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
-        self.assertEqual(Url.objects.all().count(), 1)
-        self.assertEqual(Url.objects.all()[0].url, "http://www.example.org")
+        Book.objects.create(title='My Title', description="""
+            Here's a link: <a href="http://www.example.org">Example</a>,
+            and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
+        self.assertEqual(Url.objects.all().count(), 2)
+        self.assertQuerysetEqual(
+            Url.objects.all().order_by('url'),
+            ["<Url: http://www.example.org>", "<Url: http://www.example.org/logo.png>"]
+        )
+
 
 class ReportViewTestCase(TestCase):
     def setUp(self):
