@@ -13,7 +13,7 @@ setup(
     author='Andy Baker',
     author_email='andy@andybak.net',
     license='BSD',
-    url='http://github.com/andybak/django-linkcheck/',
+    url='https://github.com/DjangoAdminHackers/django-linkcheck',
     packages=[
         'linkcheck',
         'linkcheck.management',
