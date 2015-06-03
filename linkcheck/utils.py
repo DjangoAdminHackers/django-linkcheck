@@ -91,30 +91,46 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
 def update_urls(urls, content_type, object_id):
     # url structure = (field, link text, url)
+    new_urls = new_links = 0
     for field, link_text, url in urls:
         if url is not None and url.startswith('#'):
             instance = content_type.get_object_for_this_type(id=object_id)
             url = instance.get_absolute_url() + url
-        if len(url)>MAX_URL_LENGTH: #we cannot handle url longer than MAX_URL_LENGTH at the moment
+        if len(url) > MAX_URL_LENGTH:
+            # We cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
-        u, created = Url.objects.get_or_create(url=url)
-        l, created = Link.objects.get_or_create(url=u, field=field, text=link_text, content_type=content_type, object_id=object_id)
+        u, u_created = Url.objects.get_or_create(url=url)
+        l, l_created = Link.objects.get_or_create(
+            url=u, field=field, text=link_text, content_type=content_type, object_id=object_id
+        )
         u.still_exists = True
         u.save()
+        new_urls += u_created
+        new_links += l_created
+    return (new_urls, new_links)
 
 def find_all_links(all_linklists):
     all_links_dict = {}
+    urls_created = links_created = 0
     Url.objects.all().update(still_exists=False)
     for linklist_name, linklist_cls in all_linklists.items():
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
         for linklist in linklists:
             object_id = linklist['object'].id
-            urls = linklist['urls']+linklist['images']
+            urls = linklist['urls'] + linklist['images']
             if urls:
-                update_urls(urls, content_type, object_id)
+                new_urls, new_links = update_urls(urls, content_type, object_id)
+                urls_created += new_urls
+                links_created += new_links
         all_links_dict[linklist_name] = linklists
+    deleted = Url.objects.filter(still_exists=False).count()
     Url.objects.filter(still_exists=False).delete()
+    return {
+        'urls_deleted': deleted,
+        'urls_created': urls_created,
+        'links_created': links_created,
+    }
 
 def unignore():
     Link.objects.update(ignore=False)
