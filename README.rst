@@ -128,7 +128,7 @@ The length of the URL field. Defaults to 255 for compatibility with MySQL (see h
 
 
 LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Default: 10
 
@@ -167,4 +167,5 @@ Running tests
 
 Tests can be run standalone by using the runtests.py script in linkcheck root:
     $ python runtests.py
+
 If you want to run linkcheck tests in the context of your project, you should include 'linkcheck.tests.sampleapp' in your INSTALLED_APPS setting.
