@@ -59,7 +59,7 @@ Linklist classes
 ----------------
 
 The following class attributes can be added to your ``Linklist`` subclasses to
-customize the extracted links::
+customize the extracted links:
 
     ``object_filter``: a dictionary which will be passed as a filter argument to
     the ``filter`` applied to the default queryset of the target class. This
