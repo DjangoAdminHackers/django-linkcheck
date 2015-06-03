@@ -4,6 +4,7 @@
 * Python 3 is supported.
 * Django 1.7 / 1.8 compatibility added.
 * notifications.py is now based on django-admin-blocks.
+* Linklist classes now support an ignore_empty list to ignore empty URLField values.
 
 1.0 
 

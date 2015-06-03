@@ -55,6 +55,34 @@ shown in the screenshot above.
 We are aware that this documentation is on the brief side of things so any
 suggestions for elaboration or clarification would be gratefully accepted.
 
+Linklist classes
+----------------
+
+The following class attributes can be added to your ``Linklist`` subclasses to
+customize the extracted links::
+
+    ``object_filter``: a dictionary which will be passed as a filter argument to
+    the ``filter`` applied to the default queryset of the target class. This
+    allows you to filter the objects from which the links will be extracted.
+    (example: ``{'active': True}``)
+
+    ``object_exclude``: a dictionary which will be passed as a filter argument to
+    the ``exclude`` applied to the default queryset of the target class. As with
+    ``object_filter``, this allows you to exclude objects from which the links
+    will be extracted.
+
+    ``html_fields``: a list of field names which will be searched for links.
+
+    ``url_fields``: a list of ``URLField`` field names whose content will be
+    considered as links. If the field content is empty and the field name is
+    in ``ignore_empty``, the content is ignored.
+
+    ``ignore_empty``: a list of fields from ``url_fields``. See the explanation
+    above. (new in django-linkcheck 1.1)
+
+    ``image_fields``: a list of ``ImageField`` field names whose content will be
+    considered as links. Empty ``ImageField`` content is always ignored.
+
 Settings
 --------
 
