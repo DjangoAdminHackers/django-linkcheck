@@ -1,11 +1,14 @@
-import socket
-import re
+from datetime import datetime, timedelta
 import os
+import re
+import socket
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
 
@@ -163,6 +166,44 @@ class ExternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEquals(uv.status, False)
         self.assertEquals(uv.message, '404 Not Found')
+
+
+class ChecklinksTestCase(TestCase):
+    def setUp(self):
+        request.urlopen = mock_urlopen
+
+    def test_checklinks_command(self):
+        Book.objects.create(title='My Title', description="""
+            Here's a link: <a href="http://www.example.org">Example</a>,
+            and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
+
+        out = StringIO()
+        call_command('checklinks', stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 10080 minutes.\n"
+            "0 internal URLs and 0 external URLs have been checked.\n"
+        )
+
+        yesterday = datetime.now() - timedelta(days=1)
+        Url.objects.all().update(last_checked=yesterday)
+        out = StringIO()
+        call_command('checklinks', externalinterval=20, stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 20 minutes.\n"
+            "0 internal URLs and 2 external URLs have been checked.\n"
+        )
+
+        Url.objects.all().update(last_checked=yesterday)
+        out = StringIO()
+        call_command('checklinks', externalinterval=20, limit=1, stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 20 minutes.\n"
+            "Will run maximum of 1 checks this run.\n"
+            "0 internal URLs and 1 external URLs have been checked.\n"
+        )
 
 
 class FindingLinksTestCase(TestCase):
