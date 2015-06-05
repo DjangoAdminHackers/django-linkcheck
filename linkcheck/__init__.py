@@ -1,4 +1,7 @@
-from django.utils.html_parser import HTMLParser
+try:
+    from django.utils.html_parser import HTMLParser
+except:
+    from HTMLParser import HTMLParser
 
 from django.contrib.contenttypes.models import ContentType
 
