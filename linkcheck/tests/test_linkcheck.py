@@ -4,8 +4,10 @@ import os
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
 
@@ -192,6 +194,20 @@ class FindingLinksTestCase(TestCase):
         Author.objects.create(name="Alphonse Daudet")
         # This time, the empty 'website' is extracted
         self.assertEqual(Url.objects.all().count(), 2)
+
+    def test_findlinks_command(self):
+        from linkcheck.models import all_linklists
+        all_linklists['Authors'].url_fields = []
+        Author.objects.create(name="John Smith", website="http://www.example.org/smith")
+        all_linklists['Authors'].url_fields = ['website']
+
+        out = StringIO()
+        call_command('findlinks', stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Finding all new links...\n"
+            "1 new Url object(s), 1 new Link object(s), 0 Url object(s) deleted\n"
+        )
 
 
 class ReportViewTestCase(TestCase):
