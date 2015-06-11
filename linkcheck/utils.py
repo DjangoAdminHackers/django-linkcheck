@@ -76,6 +76,7 @@ class LinkCheckHandler(ClientHandler):
         #print 'reversion' in str(self._response_middleware)
         #print 'reversion' in str(self._exception_middleware)
 
+
 def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
 
     recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
@@ -88,6 +89,8 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
     for u in urls:
         u.check_url(check_internal=check_internal, check_external=check_external)
+    return len(urls)
+
 
 def update_urls(urls, content_type, object_id):
     # url structure = (field, link text, url)
