@@ -1,6 +1,7 @@
 1.1
 
-* Minimal software requirements are now Python 2.6 / Django 1.6.
+* Minimal software requirements are now Python 2.6 / Django 1.6 (and South 1.0 if
+  you still use Django 1.6).
 * Python 3 is supported.
 * Django 1.7 / 1.8 compatibility added.
 * notifications.py is now based on django-admin-blocks.
