@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import re
 import imp
 import os.path
-import sys
 
 from datetime import datetime
 from datetime import timedelta
@@ -260,8 +259,7 @@ class Url(models.Model):
                             req,
                             timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                         )
-                    except (ValueError, HTTPError):
-                        _, error, _ = sys.exc_info()
+                    except (ValueError, HTTPError) as error:
                         # ...except sometimes it triggers a bug in urllib2
                         if hasattr(error, 'code') and error.code == METHOD_NOT_ALLOWED:
                             req = GetRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
