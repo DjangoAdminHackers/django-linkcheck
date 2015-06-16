@@ -154,7 +154,6 @@ class ExternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
-        self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
