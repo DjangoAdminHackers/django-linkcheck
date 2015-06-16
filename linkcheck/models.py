@@ -82,6 +82,7 @@ class Url(models.Model):
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField(default=False)
+    redirect_to = models.CharField(max_length=MAX_URL_LENGTH, default='')
 
     @property
     def type(self):
@@ -310,8 +311,14 @@ class Url(models.Model):
                     self.message = 'Redirect. Check manually: '+str(e.code)
             except Exception as e:
                 self.message = 'Other Error: %s' % e
+            else:
+                if url != response.geturl():
+                    # Most probably a 301 redirect
+                    self.redirect_to = response.geturl()
+                elif self.redirect_to:
+                    self.redirect_to = ''
 
-            self.last_checked  = now()
+            self.last_checked = now()
             self.save()
 
         return self.status
