@@ -18,8 +18,8 @@ from .sampleapp.models import Author, Book
 
 
 #MOCK addinfurl
-class addinfoUrl():
-    """class to add info() and getUrl(url=) methods to an open file."""
+class addinfourl():
+    """class to add info() and geturl(url=) methods to an open file."""
 
     def __init__(self, url, code, msg):
         self.headers = None
@@ -33,7 +33,7 @@ class addinfoUrl():
     def getcode(self):
         return self.code
 
-    def getUrl(self):
+    def geturl(self):
         return self.url
 
 #
@@ -57,7 +57,7 @@ def mock_urlopen(url, data=None, timeout=timeout):
         code = m.group(0)
         msg  = msg_dict.get(code, 'Something Happened')
         if code == "200":
-            return addinfoUrl(url, code, msg)
+            return addinfourl(url, code, msg)
 
     raise HTTPError(url, code, msg, None, None)
 
@@ -72,53 +72,53 @@ class InternalCheckTestCase(TestCase):
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, None)
-        self.assertEquals(uv.message, 'Email link (not automatically checked)')
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'Email link (not automatically checked)')
 
     def test_internal_check_blank(self):
         uv = Url(url="", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Empty link')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Empty link')
 
     def test_internal_check_anchor(self):
         uv = Url(url="#some_anchor", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, None)
-        self.assertEquals(uv.message, 'Link to within the same page (not automatically checked)')
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
 #    TODO: This now fails, because with follow=True, redirects are automatically followed
 #    def test_internal_check_view_302(self):
 #        uv = Url(url="/admin/linkcheck", still_exists=True)
 #        uv.check_url()
-#        self.assertEquals(uv.status, None)
-#        self.assertEquals(uv.message, 'This link redirects: code 302 (not automatically checked)')
+#        self.assertEqual(uv.status, None)
+#        self.assertEqual(uv.message, 'This link redirects: code 302 (not automatically checked)')
 
     def test_internal_check_admin_found(self):
         uv = Url(url="/admin/", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working internal link')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Broken internal link')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Broken internal link')
 
     def test_internal_check_invalid_url(self):
         uv = Url(url="invalid/url", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Invalid URL')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Invalid URL')
 
     def test_same_page_anchor(self):
         # TODO Make this test
         pass
         #uv = Url(url="#anchor", still_exists=True)
         #uv.check_url()
-        #self.assertEquals(uv.status, None)
-        #self.assertEquals(uv.message, "")
+        #self.assertEqual(uv.status, None)
+        #self.assertEqual(uv.message, "")
 
 
 class InternalMediaCheckTestCase(TestCase):
@@ -132,40 +132,41 @@ class InternalMediaCheckTestCase(TestCase):
     def test_internal_check_media_missing(self):
         uv = Url(url="/media/not_found", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Missing Document')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Missing Document')
 
     def test_internal_check_media_found(self):
         uv = Url(url="/media/found", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working file link')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
 
     def test_internal_check_media_utf8(self):
         uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working file link')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
 
 
 class ExternalCheckTestCase(TestCase):
     def test_external_check_200(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, '200 OK')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, '301 Moved Permanently')
 
     def test_external_check_404(self):
         uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=404", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, '404 Not Found')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, '404 Not Found')
 
 
 class ChecklinksTestCase(TestCase):
