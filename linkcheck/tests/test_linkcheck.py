@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import LiveServerTestCase, TestCase
+from django.test.utils import override_settings
 from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
@@ -148,42 +149,43 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.message, 'Working file link')
 
 
-class ExternalCheckTestCase(TestCase):
+@override_settings(SITE_DOMAIN='example.com')
+class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
+        uv = Url(url="%s/http/200/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
+        uv = Url(url="%s/http/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.message.lower(), '301 moved permanently')
 
     def test_external_check_301_followed(self):
-        uv = Url(url="http://github.com", still_exists=True)
+        uv = Url(url="%s/http/redirect/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '301 OK')
-        self.assertEqual(uv.redirect_to, 'https://github.com/')
+        self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
     def test_external_check_302_followed(self):
         """
         For temporary redirects, we do not report any redirection in `redirect_to`.
         """
-        uv = Url(url="https://mail.google.com/mail/", still_exists=True)
+        uv = Url(url="%s/http/redirect/302/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_404(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=404", still_exists=True)
+        uv = Url(url="%s/whatever/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, '404 Not Found')
+        self.assertEqual(uv.message.lower(), '404 not found')
 
 
 class ChecklinksTestCase(TestCase):
