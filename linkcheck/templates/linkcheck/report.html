@@ -188,6 +188,9 @@
                                         {% endif %}
                                     </td>
                                 </tr>
+                                {% if link.url.redirect_to %}
+                                    <tr><td colspan="6">Redirects to: <a href="{{ link.url.redirect_to }}" target="_blank">{{ link.url.redirect_to }}</a></td></tr>
+                                {% endif %}
                             {% endfor %}
                         </table>
                     </div>

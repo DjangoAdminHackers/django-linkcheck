@@ -26,7 +26,7 @@ except ImportError:
 from django.utils.six.moves import http_client
 from django.utils.six.moves.urllib.error import HTTPError, URLError
 from django.utils.six.moves.urllib.parse import unquote
-from django.utils.six.moves.urllib.request import Request, urlopen
+from django.utils.six.moves.urllib.request import HTTPRedirectHandler, Request, build_opener
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -56,6 +56,15 @@ class GetRequest(Request):
     def get_method(self):
         return "GET"
 
+class RedirectHandler(HTTPRedirectHandler):
+    """With this custom handler, we'll be able to identify 301 redirections"""
+    def http_error_301(self, req, fp, code, *args):
+        result = HTTPRedirectHandler.http_error_301(self, req, fp, code, *args)
+        if result:
+            result.code = result.status = code
+        return result
+
+
 def html_decode(s):
     """
     Returns the ASCII decoded version of the given HTML string. This does
@@ -82,6 +91,7 @@ class Url(models.Model):
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField(default=False)
+    redirect_to = models.CharField(max_length=MAX_URL_LENGTH, default='')
 
     @property
     def type(self):
@@ -241,13 +251,13 @@ class Url(models.Model):
                 return self.status
 
             try:
-
+                opener = build_opener(RedirectHandler)
                 # Remove URL fragment identifiers
                 url = self.url.rsplit('#')[0]
 
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
-                    response = urlopen(
+                    response = opener.open(
                         url,
                         timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                     )
@@ -255,7 +265,7 @@ class Url(models.Model):
                     # Might as well just do a HEAD request
                     req = HeadRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                     try:
-                        response = urlopen(
+                        response = opener.open(
                             req,
                             timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                         )
@@ -265,7 +275,7 @@ class Url(models.Model):
                             req = GetRequest(url, headers={'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN})
                         else:
                             req = url
-                        response = urlopen(
+                        response = opener.open(
                             req,
                             timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                         )
@@ -310,8 +320,13 @@ class Url(models.Model):
                     self.message = 'Redirect. Check manually: '+str(e.code)
             except Exception as e:
                 self.message = 'Other Error: %s' % e
+            else:
+                if response.getcode() == 301 and response.geturl() != url:
+                    self.redirect_to = response.geturl()
+                elif self.redirect_to:
+                    self.redirect_to = ''
 
-            self.last_checked  = now()
+            self.last_checked = now()
             self.save()
 
         return self.status
