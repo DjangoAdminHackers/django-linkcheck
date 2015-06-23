@@ -144,7 +144,7 @@
         <strong>Show:</strong>&nbsp;&nbsp;
         {% ifequal filter 'show_valid' %}Good links{% else %}<a href="?filters=show_valid">Good links</a>{% endifequal %}&nbsp;&nbsp;
         {% ifequal filter 'show_invalid' %}Broken links{% else %}<a href="?filters=show_invalid">Broken links</a>{% endifequal %}&nbsp;&nbsp;
-        {% ifequal filter 'show_unchecked' %}{% else %}<a href="?filters=show_unchecked">Untested links</a>{% endifequal %}&nbsp;&nbsp;
+        {% ifequal filter 'show_unchecked' %}Untested links{% else %}<a href="?filters=show_unchecked">Untested links</a>{% endifequal %}&nbsp;&nbsp;
         {% ifequal filter 'ignored' %}Ignored links{% else %}<a href="?filters=ignored">Ignored links</a>{% endifequal %}
             (<span id="ignored_count">{{ ignored_count }}</span>)
         <br />
