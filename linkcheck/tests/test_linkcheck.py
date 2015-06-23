@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from datetime import datetime, timedelta
 import os
 import re
@@ -147,6 +150,11 @@ class InternalMediaCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
+        # Also when the url is not encoded
+        uv = Url(url="/media/rückmeldung", still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
 
 
 @override_settings(SITE_DOMAIN='example.com')
@@ -157,6 +165,17 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
+
+    def test_external_check_200_utf8(self):
+        uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        # Also when the url is not encoded
+        uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_301(self):
         uv = Url(url="%s/http/301/" % self.live_server_url, still_exists=True)
