@@ -288,6 +288,40 @@ class FindingLinksTestCase(TestCase):
         )
 
 
+class ObjectsUpdateTestCase(TestCase):
+    def test_update_object(self):
+        """
+        Test that updating a broken URL in an object also updates the
+        corresponding Link, and don't leak the old URL.
+        """
+        bad_url = "/broken/internal/link"
+        good_url = "/admin/"
+        author = Author.objects.create(name="John Smith", website=bad_url)
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=False).count(),
+            1
+        )
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=True).count(),
+            0
+        )
+        self.assertEqual(Url.objects.all().count(), 1)
+        self.assertEqual(Url.objects.all()[0].url, bad_url)
+        # Fix the link
+        author.website = good_url
+        author.save()
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=False).count(),
+            0
+        )
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=True).count(),
+            1
+        )
+        self.assertEqual(Url.objects.all().count(), 1)
+        self.assertEqual(Url.objects.all()[0].url, good_url)
+
+
 class ReportViewTestCase(TestCase):
     def setUp(self):
         User.objects.create_superuser('admin', 'admin@example.org', 'password')
