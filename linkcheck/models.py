@@ -17,7 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import signals as model_signals
 from django.test.client import Client
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils.encoding import iri_to_uri, python_2_unicode_compatible
 from django.utils.http import urlunquote
 try:
     from importlib import import_module
@@ -25,7 +25,6 @@ except ImportError:
     from django.utils.importlib import import_module
 from django.utils.six.moves import http_client
 from django.utils.six.moves.urllib.error import HTTPError, URLError
-from django.utils.six.moves.urllib.parse import unquote
 from django.utils.six.moves.urllib.request import HTTPRedirectHandler, Request, build_opener
 try:
     from django.utils.timezone import now
@@ -250,11 +249,16 @@ class Url(models.Model):
             if self.last_checked and (self.last_checked > external_recheck_datetime):
                 return self.status
 
+            opener = build_opener(RedirectHandler)
+            # Remove URL fragment identifiers
+            url = self.url.rsplit('#')[0]
+            # Check that non-ascii chars are properly encoded
             try:
-                opener = build_opener(RedirectHandler)
-                # Remove URL fragment identifiers
-                url = self.url.rsplit('#')[0]
+                url.encode('ascii')
+            except UnicodeEncodeError:
+                url = iri_to_uri(url)
 
+            try:
                 if self.url.count('#'):
                     # We have to get the content so we can check the anchors
                     response = opener.open(
