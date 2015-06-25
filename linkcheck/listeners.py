@@ -1,5 +1,6 @@
 import os.path
 import sys
+import time
 from threading import Thread
 
 from django.conf import settings
@@ -32,8 +33,12 @@ for linklist_name, linklist_cls in all_linklists.items():
             existing Link/Urls are checked
             disappering Links are deleted
         '''
-        def do_check_instance_links(sender, instance, linklist_cls=linklist_cls):
-
+        def do_check_instance_links(sender, instance, linklist_cls=linklist_cls, wait=False):
+            # On some installations, this wait time might be enough for the
+            # thread transaction to account for the object change (GH #41).
+            # A candidate for the future post_commit signal.
+            if wait:
+                time.sleep(0.1)
             try:
                 still_updating = True
                 content_type = linklist_cls.content_type()
@@ -73,9 +78,9 @@ for linklist_name, linklist_cls in all_linklists.items():
 
         # Don't run in a separate thread if we are running tests
         if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
-            do_check_instance_links(sender, instance, linklist_cls,)
+            do_check_instance_links(sender, instance, linklist_cls)
         else:
-            t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls,))
+            t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls, True))
             t.start()
 
     listeners.append(check_instance_links)
