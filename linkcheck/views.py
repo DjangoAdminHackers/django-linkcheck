@@ -11,8 +11,7 @@ from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
@@ -30,10 +29,9 @@ except ImportError:
 @staff_member_required
 def coverage(request):
     all_model_list = get_coverage_data()
-    return render_to_response('linkcheck/coverage.html',{
+    return render(request, 'linkcheck/coverage.html', {
             'all_model_list': all_model_list, 
         },
-        RequestContext(request),
     )
 
 
@@ -136,10 +134,8 @@ def report(request):
     if ('page' in rqst):
         del rqst['page']
 
-
-    return render_to_response(
-        'linkcheck/report.html',
-            {'content_types_list': content_types_list,
+    return render(request, 'linkcheck/report.html', {
+            'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
             'media':  forms.Media(js=[static('admin/js/jquery.min.js')]),
@@ -147,5 +143,4 @@ def report(request):
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
         },
-        RequestContext(request),
     )
