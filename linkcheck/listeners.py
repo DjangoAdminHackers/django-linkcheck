@@ -182,7 +182,7 @@ def get_relative_media_url():
         relative_media_url = ('/'+'/'.join(settings.MEDIA_URL.split('/')[3:]))[:-1]
     else:
         relative_media_url = settings.MEDIA_URL
-        return relative_media_url
+    return relative_media_url
 
 def handle_upload(sender, path=None, **kwargs):
     url = os.path.join(get_relative_media_url(), kwargs['file'].url_relative)
