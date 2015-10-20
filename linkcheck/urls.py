@@ -4,6 +4,6 @@ except:
     from django.conf.urls import *
 
 urlpatterns = patterns('linkcheck.views',
-   (r'^coverage/$', 'coverage'),
-   (r'^.*$', 'report'),
+   url(r'^coverage/$', 'coverage', name='linkcheck_coverage'),
+   url(r'^.*$', 'report', name='linkcheck_report'),
 )
