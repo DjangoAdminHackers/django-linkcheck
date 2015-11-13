@@ -1,3 +1,11 @@
+1.2
+
+* Added migration folders (missing in the 1.1 package). Also added support for
+  South migrations (compatibility).
+* When a link produces a 301 Moved Permanently redirection, the redirect target
+  is stored in Url.redirect_to and displayed in the link report.
+* Better support for URLs containing non-ASCII characters.
+
 1.1
 
 * Minimal software requirements are now Python 2.6 / Django 1.6 (and South 1.0 if
