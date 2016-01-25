@@ -16,6 +16,13 @@ matrix:
       env: DJANGO=django==1.8.8
     - python: 2.6
       env: DJANGO=django==1.9.1
+    # Python 3.4, LiveServerTestCase and SQLite fail randomly with transaction
+    # errors on Django < 1.8.
+    - python: 3.4
+      env: DJANGO=django==1.6.11
+    - python: 3.4
+      env: DJANGO=django==1.7.11
+
   fast_finish: true
 install:
   - travis_retry pip install $DJANGO
