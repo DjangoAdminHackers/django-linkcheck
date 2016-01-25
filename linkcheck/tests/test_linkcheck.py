@@ -91,15 +91,14 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
-#    TODO: This now fails, because with follow=True, redirects are automatically followed
-#    def test_internal_check_view_302(self):
-#        uv = Url(url="/admin/linkcheck", still_exists=True)
-#        uv.check_url()
-#        self.assertEqual(uv.status, None)
-#        self.assertEqual(uv.message, 'This link redirects: code 302 (not automatically checked)')
+    def test_internal_check_view_301(self):
+        uv = Url(url="/admin/linkcheck", still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'This link redirects: code 301 (not automatically checked)')
 
-    def test_internal_check_admin_found(self):
-        uv = Url(url="/admin/", still_exists=True)
+    def test_internal_check_found(self):
+        uv = Url(url="/public/", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
@@ -295,7 +294,7 @@ class ObjectsUpdateTestCase(TestCase):
         corresponding Link, and don't leak the old URL.
         """
         bad_url = "/broken/internal/link"
-        good_url = "/admin/"
+        good_url = "/public/"
         author = Author.objects.create(name="John Smith", website=bad_url)
         self.assertEqual(
             Link.objects.filter(ignore=False, url__status=False).count(),
