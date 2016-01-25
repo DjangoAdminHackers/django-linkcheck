@@ -1,9 +1,8 @@
+from django.conf import settings
 try:
     from django.utils.html_parser import HTMLParser
 except:
     from HTMLParser import HTMLParser
-
-from django.contrib.contenttypes.models import ContentType
 
 
 class Lister(HTMLParser):
@@ -136,7 +135,6 @@ class Linklist(object):
         return urls
 
     def images(self, obj):
-        from django.conf import settings
         urls = []
         host_index = settings.MEDIA_URL[:-1].rfind('/')
         
@@ -177,4 +175,5 @@ class Linklist(object):
     
     @classmethod
     def content_type(cls):
+        from django.contrib.contenttypes.models import ContentType
         return ContentType.objects.get_for_model(cls.model)
