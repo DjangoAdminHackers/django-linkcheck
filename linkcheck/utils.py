@@ -20,7 +20,8 @@ except ImportError:
 
 
 class LinkCheckHandler(ClientHandler):
-    #customize the ClientHandler to allow us removing some middlewares
+    
+    # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
         self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
@@ -204,12 +205,12 @@ def get_suggested_linklist(klass):
     image_fields = get_type_fields(klass, 'image')
     active_field = has_active_field(klass)
     context = {
-        'is_target': is_target, 
-        'meta': meta, 
-        'html_fields': html_fields, 
-        'url_fields': url_fields, 
-        'image_fields': image_fields, 
-        'active_field': active_field, 
+        'is_target': is_target,
+        'meta': meta,
+        'html_fields': html_fields,
+        'url_fields': url_fields,
+        'image_fields': image_fields,
+        'active_field': active_field,
     }
     return render_to_string('linkcheck/suggested_linklist.html', context)
 

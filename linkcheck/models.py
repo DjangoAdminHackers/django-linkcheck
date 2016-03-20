@@ -38,8 +38,12 @@ except ImportError:
     USE_REVERSION = False
 
 from .linkcheck_settings import (
-    MAX_URL_LENGTH, MEDIA_PREFIX, SITE_DOMAINS, EXTERNAL_REGEX_STRING,
-    EXTERNAL_RECHECK_INTERVAL, LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
+    MAX_URL_LENGTH,
+    MEDIA_PREFIX,
+    SITE_DOMAINS,
+    EXTERNAL_REGEX_STRING,
+    EXTERNAL_RECHECK_INTERVAL,
+    LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
 )
 
 logger = logging.getLogger('linkcheck')
@@ -87,9 +91,12 @@ def html_decode(s):
 
 @python_2_unicode_compatible
 class Url(models.Model):
-    # A URL represents a distinct URL.
-    # A single Url can have multiple Links associated with it
-    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True) # See http://www.boutell.com/newfaq/misc/urllength.html
+    
+    """
+    Represents a distinct URL found somewhere in the models registered with linkcheck
+    A single Url can have multiple Links associated with it.
+    """
+    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)  # See http://www.boutell.com/newfaq/misc/urllength.html
     last_checked = models.DateTimeField(blank=True, null=True)
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
@@ -341,8 +348,12 @@ class Url(models.Model):
 
 
 class Link(models.Model):
-    # A Link represents a specific URL in a specific field in a specific model
-    # Multiple Links can reference a single Url
+    """
+    A Link represents a specific URL in a specific field in a specific model
+    It can be come from a single field such as a URLField or a field containing multiple links
+    Such as a HTML or Rich Text field.
+    Multiple Links can reference a single Url
+    """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')

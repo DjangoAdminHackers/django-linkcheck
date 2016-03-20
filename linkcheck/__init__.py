@@ -101,11 +101,14 @@ class Linklist(object):
     url_fields = []
     ignore_empty = []
     image_fields = []
-    # You can override object_filter and object_exclude in a linklist class. Just provide a dictionary to be used as a Django lookup filter.
-    # Only objects that pass the filter will be queried for links. 
-    # This doesn't affect whether an object is regarded as a valid link target. Only as a source.
+    
+    # You can override object_filter and object_exclude in a linklist class.
+    # Just provide a dictionary to be used as a Django lookup filter.
+    # Only objects that pass the filter will be queried for links.
+    # This doesn't affect whether an object is regarded as a valid link target. Only as a link source.
     # Example usage in your linklists.py:
     # object_filter = {'active':True} - Would only check active objects for links
+    
     object_filter = None
     object_exclude = None
 
@@ -135,6 +138,7 @@ class Linklist(object):
         return urls
 
     def images(self, obj):
+        
         urls = []
         host_index = settings.MEDIA_URL[:-1].rfind('/')
         
@@ -146,7 +150,7 @@ class Linklist(object):
         for field in self.image_fields:
             try:
                 urls.append((field, '', getattr(obj,field).url[host_index:]))
-            except ValueError: # No image attached
+            except ValueError:  # No image attached
                 pass
             
         return urls
@@ -160,17 +164,23 @@ class Linklist(object):
             objects = objects.exclude(**cls.object_exclude).distinct()
         return objects
     
-    def get_linklist(self, extra_filter={}):
+    def get_linklist(self, extra_filter=None):
+        
+        extra_filter = extra_filter or {} 
+        
         linklist = []
         objects = self.objects()
+        
         if extra_filter:
             objects = objects.filter(**extra_filter)
-        for object in objects:
+            
+        for obj in objects:
             linklist.append({
-                'object': object,
-                'urls': self.urls(object),
-                'images': self.images(object),
+                'object': obj,
+                'urls': self.urls(obj),
+                'images': self.images(obj),
             })
+        
         return linklist
     
     @classmethod

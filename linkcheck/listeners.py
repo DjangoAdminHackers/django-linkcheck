@@ -14,11 +14,13 @@ try:
     FILEBROWSER_PRESENT = True
 except ImportError:
     FILEBROWSER_PRESENT = False
+    
 
 from linkcheck.models import all_linklists, Url, Link
 
 listeners = []
-# A global variable, showing whether linkcheck is still working
+
+# A global variable, showing whether linkcheck is busy
 still_updating = False
 
 
@@ -37,14 +39,17 @@ def add_message_compatible(request, msg, level=None):
 for linklist_name, linklist_cls in all_linklists.items():
     
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
-        '''
+        
+        """
         When an object is saved:
             new Link/Urls are created, checked
+            
         When an object is modified:
-            new Link/Urls are created, checked
-            existing Link/Urls are checked
-            disappering Links are deleted
-        '''
+            new link/urls are created, checked
+            existing link/urls are checked
+            Removed links are deleted
+        """
+        
         def do_check_instance_links(sender, instance, linklist_cls=linklist_cls, wait=False):
             # On some installations, this wait time might be enough for the
             # thread transaction to account for the object change (GH #41).
@@ -89,7 +94,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 still_updating = False
 
         # Don't run in a separate thread if we are running tests
-        if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
+        if len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
             do_check_instance_links(sender, instance, linklist_cls)
         else:
             t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls, True))
@@ -99,7 +104,9 @@ for linklist_name, linklist_cls in all_linklists.items():
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
 
     def delete_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
-        '''delete all its links when an object is deleted'''
+        """
+        Delete all links belonging to a model instance when that instance is deleted
+        """
         content_type = linklist_cls.content_type()
         old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
         old_links.delete()
@@ -176,9 +183,7 @@ for linklist_name, linklist_cls in all_linklists.items():
         model_signals.pre_delete.connect(listeners[-1], sender=linklist_cls.model)
 
 
-
 # Integrate with django-filebrowser if present
-
 
 def get_relative_media_url():
     if settings.MEDIA_URL.startswith('http'):
@@ -199,10 +204,17 @@ def handle_upload(sender, path=None, **kwargs):
 
 
 def handle_rename(sender, path=None, **kwargs):
+
+    def isdir(filename):
+        if filename.count('.'):
+            return False
+        else:
+            return True
+    
     old_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
     new_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['new_filename'])
-    # rename a file will cause the urls to it invalid
-    # rename a directory will cause the urls to its files invalid
+    # Renaming a file will cause it's urls to become invalid
+    # Renaming a directory will cause the urls of all it's contents to become invalid
     old_url_qs = Url.objects.filter(url=old_url).filter(status=True)
     if isdir(kwargs['filename']):
         old_url_qs = Url.objects.filter(url__startswith=old_url).filter(status=True)
@@ -212,7 +224,7 @@ def handle_rename(sender, path=None, **kwargs):
         msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, old_count>1 and 's' or '')
         add_message_compatible(request=sender, msg=msg)
         
-    # the new directory may fix some invalid links, so we make a check here.
+    # The new directory may fix some invalid links, so we also check for that
     if isdir(kwargs['new_filename']):
         new_count = 0
         new_url_qs = Url.objects.filter(url__startswith=new_url).filter(status=False)
@@ -230,6 +242,7 @@ def handle_rename(sender, path=None, **kwargs):
 
 
 def handle_delete(sender, path=None, **kwargs):
+
     url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
     url_qs = Url.objects.filter(url=url).filter(status=True)
     count = url_qs.count()
@@ -243,11 +256,3 @@ if FILEBROWSER_PRESENT:
     filebrowser_post_upload.connect(handle_upload)
     filebrowser_post_rename.connect(handle_rename)
     filebrowser_post_delete.connect(handle_delete)
-
-
-def isdir(filename):
-    '''!!!only used for filebrowser'''
-    if filename.count('.'):
-        return False
-    else:
-        return True
