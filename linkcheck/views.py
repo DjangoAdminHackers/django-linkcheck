@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.admin.templatetags.admin_static import static
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -101,8 +102,9 @@ def report(request):
     # offset = (page - 1) * RESULTS_PER_PAGE
     links = paginated_links.page(page)
 
-    # This code groups links into nested lists by content type and object id   
-    # It's a bit nasty but we can't use groupby unless be get values() instead of a queryset because of the 'Object is not subscriptable' error
+    # This code groups links into nested lists by content type and object id
+    # It's a bit nasty but we can't use groupby unless be get values()
+    # instead of a queryset because of the 'Object is not subscriptable' error
     
     t = sorted(links.object_list.values(), key=outerkeyfunc)
     for tk, tg in groupby(t, outerkeyfunc):
@@ -113,9 +115,11 @@ def report(request):
             content_type = ContentType.objects.get(pk=tk)
             og = list(og)
             try:
-                object = content_type.model_class().objects.get(pk=ok)
-            except content_type.model_class().DoesNotExist:
                 object = None
+                if content_type.model_class():
+                    object = content_type.model_class().objects.get(pk=ok)
+            except ObjectDoesNotExist:
+                pass
             try:
                 admin_url = object.get_admin_url()
             except AttributeError:
