@@ -32,9 +32,8 @@ except ImportError:
 def coverage(request):
     all_model_list = get_coverage_data()
     return render(request, 'linkcheck/coverage.html', {
-            'all_model_list': all_model_list, 
-        },
-    )
+        'all_model_list': all_model_list,
+    })
 
 
 @staff_member_required

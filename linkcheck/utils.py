@@ -5,17 +5,19 @@ from django.template.loader import render_to_string
 from datetime import datetime
 from datetime import timedelta
 
-from linkcheck.models import all_linklists, Link, Url
+from .models import all_linklists, Link, Url
 from .linkcheck_settings import MAX_URL_LENGTH
 
 try:
     from sorl.thumbnail import ImageField
-except:
+except ImportError:
     ImageField = None
+
 try:
     from mcefield.custom_fields import MCEField
-except:
+except ImportError:
     MCEField = None
+
 
 class LinkCheckHandler(ClientHandler):
     #customize the ClientHandler to allow us removing some middlewares
@@ -143,8 +145,8 @@ def unignore():
 
 # Utilities for testing models coverage
 
-def is_intresting_field(field):
-    ''' linkcheck checks URLField, MCEField, ImageField'''
+def is_interesting_field(field):
+    """We currently check for URLField, MCEField, ImageField"""
     if is_url_field(field) or is_image_field(field) or is_mce_field(field):
         return True
     return False
@@ -169,7 +171,7 @@ def is_mce_field(field):
 
 def has_active_field(klass):
     for field in klass._meta.fields:
-        if field.name=='active' and isinstance(field, models.BooleanField):
+        if field.name == 'active' and isinstance(field, models.BooleanField):
             return True
 
 
@@ -213,10 +215,10 @@ def get_suggested_linklist(klass):
 
 
 def get_coverage_data():
-    '''
+    """
     Check which models are covered by linkcheck
     This view assumes the key for link
-    '''
+    """
     all_model_list = []
     for app in models.get_apps():
         model_list = models.get_models(app)
@@ -225,8 +227,8 @@ def get_coverage_data():
             if getattr(model, 'get_absolute_url', None):
                 should_append = True
             else:
-                for field in model._meta.fields:                    
-                    if is_intresting_field(field):
+                for field in model._meta.fields:
+                    if is_interesting_field(field):
                         should_append=True
                         break
             if should_append:
