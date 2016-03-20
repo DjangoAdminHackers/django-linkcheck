@@ -26,6 +26,7 @@ except ImportError:
     # However - admin_media_prefix was removed in Django 1.5
     admin_static = settings.STATIC_URL
 
+
 @staff_member_required
 def coverage(request):
     all_model_list = get_coverage_data()

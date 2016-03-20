@@ -6,8 +6,12 @@ from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--limit', '-l', type='int',
-            help='Specifies the maximum number (int) of links to be checked. Defaults to linkcheck_config setting.  Value less than 1 will check all'),
+        make_option(
+            '--limit',
+            '-l', type='int',
+            help='Specifies the maximum number (int) of links to be checked. Defaults to linkcheck_config setting. '
+                 'Value less than 1 will check all'
+        ),
     )
     help = 'Check and record internal link status'
 

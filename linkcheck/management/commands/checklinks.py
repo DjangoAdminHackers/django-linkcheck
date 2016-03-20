@@ -7,6 +7,7 @@ from linkcheck.utils import check_links
 
 
 class Command(BaseCommand):
+    
     option_list = BaseCommand.option_list + (
         make_option('--externalinterval', '-e', type='int',
             help='Specifies the length of time in minutes until external links are rechecked. '

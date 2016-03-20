@@ -44,16 +44,20 @@ from .linkcheck_settings import (
 
 logger = logging.getLogger('linkcheck')
 
+
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
 METHOD_NOT_ALLOWED = 405
+
 
 class HeadRequest(Request):
     def get_method(self):
         return "HEAD"
 
+
 class GetRequest(Request):
     def get_method(self):
         return "GET"
+
 
 class RedirectHandler(HTTPRedirectHandler):
     """With this custom handler, we'll be able to identify 301 redirections"""
@@ -335,6 +339,7 @@ class Url(models.Model):
 
         return self.status
 
+
 class Link(models.Model):
     # A Link represents a specific URL in a specific field in a specific model
     # Multiple Links can reference a single Url
@@ -371,10 +376,12 @@ def link_post_delete(sender, instance, **kwargs):
 model_signals.post_delete.connect(link_post_delete, sender=Link)
 
 
-#-------------------------auto discover of LinkLists-------------------------
+# Autodiscovery of linkLists
+
 
 class AlreadyRegistered(Exception):
     pass
+
 
 all_linklists = {}
 
@@ -401,11 +408,13 @@ for app in settings.INSTALLED_APPS:
     except AttributeError:
         pass
 
-#add a reference to the linklist in the model. This change is for internal hash link,
-#but might also be useful elsewhere in the future
+# Add a reference to the linklist in the model. This change is for internal hash link,
+# But might also be useful elsewhere in the future
+
 for key, linklist in all_linklists.items():
     setattr(linklist.model, '_linklist', linklist)
 
-#-------------------------register listeners-------------------------
+
+# Register listeners
 
 from . import listeners

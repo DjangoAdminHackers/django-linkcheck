@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 EXTERNAL_RECHECK_INTERVAL = getattr(settings, 'LINKCHECK_EXTERNAL_RECHECK_INTERVAL', 10080) # 1 week
 EXTERNAL_REGEX_STRING = getattr(settings, 'LINKCHECK_EXTERNAL_REGEX_STRING', r'^https?://')
 MAX_CHECKS_PER_RUN = getattr(settings, 'LINKCHECK_MAX_CHECKS_PER_RUN', -1)

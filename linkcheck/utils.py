@@ -112,6 +112,7 @@ def update_urls(urls, content_type, object_id):
         new_links += l_created
     return (new_urls, new_links)
 
+
 def find_all_links(all_linklists):
     all_links_dict = {}
     urls_created = links_created = 0
@@ -135,20 +136,24 @@ def find_all_links(all_linklists):
         'links_created': links_created,
     }
 
+
 def unignore():
     Link.objects.update(ignore=False)
 
 
-##Utilities for testing models coverage
+# Utilities for testing models coverage
+
 def is_intresting_field(field):
     ''' linkcheck checks URLField, MCEField, ImageField'''
     if is_url_field(field) or is_image_field(field) or is_mce_field(field):
         return True
     return False
 
+
 def is_url_field(field):
     if isinstance(field, models.URLField):
         return True
+
 
 def is_image_field(field):
     if isinstance(field, models.ImageField):
@@ -156,14 +161,17 @@ def is_image_field(field):
     if ImageField and isinstance(field, ImageField):
         return True
 
+
 def is_mce_field(field):
     if MCEField and isinstance(field, MCEField):
         return True
+
 
 def has_active_field(klass):
     for field in klass._meta.fields:
         if field.name=='active' and isinstance(field, models.BooleanField):
             return True
+
 
 def get_type_fields(klass, the_type):
     check_funcs = {
@@ -177,12 +185,14 @@ def get_type_fields(klass, the_type):
         if check_func(field):
             fields.append(field)
     return fields
+
     
 def is_model_covered(klass):
     for linklist in all_linklists.items():
         if linklist[1].model == klass:
             return True
     return False
+
 
 def get_suggested_linklist(klass):
     meta = klass._meta
@@ -200,6 +210,7 @@ def get_suggested_linklist(klass):
         'active_field': active_field, 
     }
     return render_to_string('linkcheck/suggested_linklist.html', context)
+
 
 def get_coverage_data():
     '''
@@ -227,4 +238,3 @@ def get_coverage_data():
                     )
                 )
     return all_model_list
-

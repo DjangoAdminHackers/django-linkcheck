@@ -5,6 +5,7 @@ from linkcheck.utils import find_all_links
 
 
 class Command(BaseCommand):
+    
     help = "Goes through all models registered with Linkcheck and records any links found"
 
     def handle(self, *args, **options):

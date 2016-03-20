@@ -18,7 +18,7 @@ except ImportError:
 from linkcheck.models import all_linklists, Url, Link
 
 listeners = []
-# a global variable, showing whether linkcheck is still working
+# A global variable, showing whether linkcheck is still working
 still_updating = False
 
 
@@ -32,7 +32,8 @@ def add_message_compatible(request, msg, level=None):
         request.user.message_set.create(message=msg)
 
 
-#1, register listeners for the objects that contain Links
+# 1. register listeners for the objects that contain Links
+
 for linklist_name, linklist_cls in all_linklists.items():
     
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
@@ -105,7 +106,9 @@ for linklist_name, linklist_cls in all_linklists.items():
     listeners.append(delete_instance_links)
     model_signals.post_delete.connect(listeners[-1], sender=linklist_cls.model)
 
-#2, register listeners for the objects that are targets of Links, only when get_absolute_url() is defined for the model. 
+
+# 2. register listeners for the objects that are targets of Links, only when get_absolute_url() is defined for the model
+    
     if getattr(linklist_cls.model, 'get_absolute_url', None):
         def instance_pre_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
             current_url = instance.get_absolute_url()
@@ -173,9 +176,9 @@ for linklist_name, linklist_cls in all_linklists.items():
         model_signals.pre_delete.connect(listeners[-1], sender=linklist_cls.model)
 
 
-################################################
-# Integrate with django-filebrowser if present #
-################################################
+
+# Integrate with django-filebrowser if present
+
 
 def get_relative_media_url():
     if settings.MEDIA_URL.startswith('http'):
@@ -183,6 +186,7 @@ def get_relative_media_url():
     else:
         relative_media_url = settings.MEDIA_URL
     return relative_media_url
+
 
 def handle_upload(sender, path=None, **kwargs):
     url = os.path.join(get_relative_media_url(), kwargs['file'].url_relative)
