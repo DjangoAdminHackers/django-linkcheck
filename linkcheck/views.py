@@ -16,6 +16,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
+from linkcheck.listeners import still_updating
 from linkcheck.models import Link
 from linkcheck.utils import get_coverage_data
 
@@ -148,3 +149,21 @@ def report(request):
             'ignored_count': Link.objects.filter(ignore=True).count(),
         },
     )
+
+
+def get_status_message():
+    if still_updating:
+        return "Still checking. Please refresh this page in a short while. "
+    else:
+        broken_links = Link.objects.filter(ignore=False, url__status=False).count()
+        if broken_links:
+            return (
+                "<span style='color: red;'>We've found {} broken link{}.</span><br>"
+                "<a href='{}'>View/fix broken links</a>".format(
+                    broken_links,
+                    "s" if broken_links > 1 else "",
+                    reverse('linkcheck_report'),
+                )
+            )
+        else:
+            return ''
