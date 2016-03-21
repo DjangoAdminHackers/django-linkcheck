@@ -126,11 +126,11 @@ class Linklist(object):
 
         # Look for HREFS in HTML fields
         for field in self.html_fields:
-            urls += [(field, text, url) for text, url in parse_urls(obj,field)]
+            urls += [(field, text, url) for text, url in parse_urls(obj, field)]
 
         # Now add in the URL fields
         for field in self.url_fields:
-            url_data = (field, '', getattr(obj ,field))
+            url_data = (field, '', getattr(obj, field))
             if field in self.ignore_empty and not url_data[2]:
                 continue
             urls.append(url_data)
