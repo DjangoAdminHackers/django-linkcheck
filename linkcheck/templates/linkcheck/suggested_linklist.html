@@ -1,4 +1,3 @@
-<pre>
 from {{ meta.app_label }}.models import {{ meta.object_name }}
 
 class {{ meta.object_name }}Linklist(Linklist):
@@ -7,9 +6,7 @@ class {{ meta.object_name }}Linklist(Linklist):
     {% if html_fields %}html_fields = [{% for f in html_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
     {% if image_fields %}image_fields = [{% for f in image_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
     {% if url_fields %}url_fields = [{% for f in url_fields %}'{{ f.name }}', {% endfor %}]{% endif %}
-    {% if not is_target %}hidden_in_mce = True{% endif %}
     
 linklists = {
     '{{ meta.object_name }}': {{ meta.object_name }}Linklist,
 }
-</pre>
