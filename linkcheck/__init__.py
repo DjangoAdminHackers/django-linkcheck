@@ -1,7 +1,7 @@
 from django.conf import settings
 try:
     from django.utils.html_parser import HTMLParser
-except:
+except ImportError:
     from HTMLParser import HTMLParser
 
 
@@ -14,7 +14,6 @@ class Lister(HTMLParser):
 class URLLister(Lister):
     def __init__(self):
         self.in_a = False
-        #self.in_img = False
         self.text = ''
         self.url = ''
         HTMLParser.__init__(self)
@@ -107,7 +106,7 @@ class Linklist(object):
     # Only objects that pass the filter will be queried for links.
     # This doesn't affect whether an object is regarded as a valid link target. Only as a link source.
     # Example usage in your linklists.py:
-    # object_filter = {'active':True} - Would only check active objects for links
+    # object_filter = {'active': True} - Would only check active objects for links
     
     object_filter = None
     object_exclude = None
@@ -121,43 +120,62 @@ class Linklist(object):
             return attr(obj)
         return attr
 
+    @staticmethod
+    def extract_url_from_field(obj, field_name):
+        val = getattr(obj, field_name)
+        try:
+            try:
+                url = val.url  # FileField and ImageField have a url property
+            except ValueError:  # And it throws an exception for empty fields
+                url = ''
+        except AttributeError:
+            url = val  # Assume the field returns the url directly
+        
+        return url
+
+    def get_urls_from_field_list(self, obj, field_list):
+        urls = []
+        for field_name in field_list:
+            url = self.extract_url_from_field(obj, field_name)
+            if field_name in self.ignore_empty and not url:
+                continue
+            urls.append((field_name, '', url))
+        return urls
+
     def urls(self, obj):
+        
         urls = []
 
         # Look for HREFS in HTML fields
-        for field in self.html_fields:
-            urls += [(field, text, url) for text, url in parse_urls(obj, field)]
+        for field_name in self.html_fields:
+            urls += [(field_name, text, url) for text, url in parse_urls(obj, field_name)]
 
         # Now add in the URL fields
-        for field in self.url_fields:
-            url_data = (field, '', getattr(obj, field))
-            if field in self.ignore_empty and not url_data[2]:
-                continue
-            urls.append(url_data)
-            
+        urls += self.get_urls_from_field_list(obj, self.url_fields)
+        
         return urls
-
+        
     def images(self, obj):
         
         urls = []
-        host_index = settings.MEDIA_URL[:-1].rfind('/')
         
         # Look for IMGs in HTML fields
-        for field in self.html_fields:
-            urls += [(field, text, url) for text, url in parse_images(obj,field)]
-
+        for field_name in self.html_fields:
+            urls += [(field_name, text, url) for text, url in parse_images(obj, field_name)]
+        
+        # hostname_length = settings.MEDIA_URL[:-1].rfind('/')
+        # url[hostname_length:]
+        
         # Now add in the image fields
-        for field in self.image_fields:
-            try:
-                urls.append((field, '', getattr(obj,field).url[host_index:]))
-            except ValueError:  # No image attached
-                pass
-            
+        urls += self.get_urls_from_field_list(obj, self.image_fields)
+        
         return urls
 
     @classmethod
     def objects(cls):
+        
         objects = cls.model.objects.all()
+        
         if cls.object_filter:
             objects = objects.filter(**cls.object_filter).distinct()
         if cls.object_exclude:

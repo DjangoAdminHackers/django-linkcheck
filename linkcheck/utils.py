@@ -64,10 +64,6 @@ class LinkCheckHandler(ClientHandler):
             if not ignored:
                 new_exception_middleware.append(method)
         self._exception_middleware = new_exception_middleware
-        #print 'reversion' in str(self._request_middleware)
-        #print 'reversion' in str(self._view_middleware)
-        #print 'reversion' in str(self._response_middleware)
-        #print 'reversion' in str(self._exception_middleware)
 
 
 def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
@@ -76,7 +72,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     
     urls = Url.objects.filter(still_exists__exact='TRUE').exclude(last_checked__gt=recheck_datetime)
 
-    #if limit is specified set the limit
+    # If limit is specified set the limit
     if limit and limit > -1:
         urls = urls[:limit]
 
@@ -86,7 +82,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
 
 def update_urls(urls, content_type, object_id):
-    # url structure = (field, link text, url)
+    # Url structure = (field, link text, url)
     new_urls = new_links = 0
     for field, link_text, url in urls:
         if url is not None and url.startswith('#'):
@@ -95,15 +91,19 @@ def update_urls(urls, content_type, object_id):
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
-        u, u_created = Url.objects.get_or_create(url=url)
-        l, l_created = Link.objects.get_or_create(
-            url=u, field=field, text=link_text, content_type=content_type, object_id=object_id
+        url, url_created = Url.objects.get_or_create(url=url)
+        link, link_created = Link.objects.get_or_create(
+            url=url,
+            field=field,
+            text=link_text,
+            content_type=content_type,
+            object_id=object_id,
         )
-        u.still_exists = True
-        u.save()
-        new_urls += u_created
-        new_links += l_created
-    return (new_urls, new_links)
+        url.still_exists = True
+        url.save()
+        new_urls += url_created
+        new_links += link_created
+    return new_urls, new_links
 
 
 def find_all_links(all_linklists):
