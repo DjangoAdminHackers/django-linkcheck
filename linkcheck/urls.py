@@ -4,5 +4,5 @@ from . import views
 
 urlpatterns = [
    url(r'^coverage/$', views.coverage, name='linkcheck_coverage'),
-   url(r'^.*/$', views.report, name='linkcheck_report'),
+   url(r'^.*$', views.report, name='linkcheck_report'),
 ]
