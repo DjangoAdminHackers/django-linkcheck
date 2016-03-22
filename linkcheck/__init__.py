@@ -131,7 +131,7 @@ class Linklist(object):
         except AttributeError:
             url = val  # Assume the field returns the url directly
         
-        return url
+        return url or ''  # Coerce None to ''
 
     def get_urls_from_field_list(self, obj, field_list):
         urls = []
