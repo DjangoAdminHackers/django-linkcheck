@@ -70,7 +70,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
     recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
     
-    urls = Url.objects.filter(still_exists__exact='TRUE').exclude(last_checked__gt=recheck_datetime)
+    urls = Url.objects.filter(still_exists=True).exclude(last_checked__gt=recheck_datetime)
 
     # If limit is specified set the limit
     if limit and limit > -1:
@@ -82,7 +82,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
 
 def update_urls(urls, content_type, object_id):
-    # Url structure = (field, link text, url)
+    # Structure of urls param is [(field, link text, url), ... ]
     new_urls = new_links = 0
     for field, link_text, url in urls:
         if url is not None and url.startswith('#'):

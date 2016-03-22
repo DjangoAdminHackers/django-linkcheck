@@ -20,9 +20,9 @@ class Command(BaseCommand):
 
     def execute(self, *args, **options):
         if options['externalinterval']:
-            externalinterval = options['externalinterval']
+            external_interval = options['externalinterval']
         else:
-            externalinterval = EXTERNAL_RECHECK_INTERVAL
+            external_interval = EXTERNAL_RECHECK_INTERVAL
             
         if options['limit']:
             limit = options['limit']
@@ -33,5 +33,5 @@ class Command(BaseCommand):
         if limit!=-1:
             print "Will run maximum of %s checks this run." % limit
 
-        return check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
+        return check_links(external_recheck_interval=external_interval, limit=limit, check_internal=False)
 

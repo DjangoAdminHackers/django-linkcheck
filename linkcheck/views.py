@@ -74,7 +74,7 @@ def report(request):
                 return HttpResponse(json_data, content_type='application/javascript')
             
         recheck_link_id = request.GET.get('recheck', None)
-        if recheck_link_id != None:
+        if recheck_link_id is not None:
             link = Link.objects.get(id=recheck_link_id)
             url = link.url 
             url.check_url(external_recheck_interval=0)

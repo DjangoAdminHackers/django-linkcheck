@@ -145,7 +145,7 @@ class Url(models.Model):
 
         from linkcheck.utils import LinkCheckHandler
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
-        self.status  = False
+        self.status = False
 
         # Remove current domain from URLs as the test client chokes when trying to test them during a page save
         # They shouldn't generally exist but occasionally slip through
@@ -183,7 +183,7 @@ class Url(models.Model):
                 self.message = 'Link to within the same page (not automatically checked)'
 
             elif self.url.startswith(MEDIA_PREFIX):
-                #TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
+                # TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
                 path = settings.MEDIA_ROOT + urlunquote(self.url)[len(MEDIA_PREFIX)-1:]
                 decoded_path = html_decode(path)
                 if os.path.exists(path) or os.path.exists(decoded_path):

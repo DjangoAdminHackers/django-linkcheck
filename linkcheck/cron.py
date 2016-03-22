@@ -20,21 +20,30 @@ from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
 
 
 class RunLinkCheckFind(Job):
+    
         run_every = WEEK
-        def job(self):  
+        
+        def job(self):
             find_all_links(all_linklists)
+
 cronScheduler.register(RunLinkCheckFind)
 
 
 class RunLinkCheckInternal(Job):
+    
         run_every = WEEK
+        
         def job(self):
             check_links(limit=MAX_CHECKS_PER_RUN, check_external=False)
+
 cronScheduler.register(RunLinkCheckInternal)
 
 
 class RunLinkCheckExternal(Job):
+    
         run_every = WEEK
-        def job(self):  
+        
+        def job(self): 
             check_links(external_recheck_interval=EXTERNAL_RECHECK_INTERVAL, limit=MAX_CHECKS_PER_RUN, check_internal=False)
+
 cronScheduler.register(RunLinkCheckExternal)
