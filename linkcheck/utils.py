@@ -166,6 +166,14 @@ def has_active_field(klass):
             return True
 
 
+def get_ignore_empty_fields(klass):
+    fields = []
+    for field in klass._meta.fields:
+        if is_interesting_field(field) and (field.blank or field.null):
+            fields.append(field)
+    return fields
+
+
 def get_type_fields(klass, the_type):
     check_funcs = {
         'html': is_html_field,
@@ -187,28 +195,25 @@ def is_model_covered(klass):
     return False
 
 
-def get_suggested_linklist(klass):
+def get_suggested_linklist_config(klass):
     meta = klass._meta
     html_fields = get_type_fields(klass, 'html')
     url_fields = get_type_fields(klass, 'url')
     image_fields = get_type_fields(klass, 'image')
     active_field = has_active_field(klass)
-    context = {
+    ignore_empty_fields = get_ignore_empty_fields(klass)
+    return {
         'meta': meta,
         'html_fields': html_fields,
         'url_fields': url_fields,
         'image_fields': image_fields,
         'active_field': active_field,
+        'ignore_empty_fields': ignore_empty_fields,
     }
-    # Remove blank lines
-    html = []
-    for line in render_to_string('linkcheck/suggested_linklist.html', context).splitlines():
-        if line.strip():
-            html.append(line)
-    return '<pre>{}</pre>'.format('\n'.join(html))
 
 
 def get_coverage_data():
+    
     """
     Check which models are covered by linkcheck
     This view assumes the key for link
@@ -226,9 +231,10 @@ def get_coverage_data():
                         should_append = True
                         break
             if should_append:
-                all_model_list.append((
-                    '%s.%s' % (model._meta.app_label, model._meta.object_name),
-                    is_model_covered(model),
-                    get_suggested_linklist(model),
-                ))
+                all_model_list.append({
+                    'name': '%s.%s' % (model._meta.app_label, model._meta.object_name),
+                    'is_covered': is_model_covered(model),
+                    'suggested_config': get_suggested_linklist_config(model),
+                })
+    
     return all_model_list

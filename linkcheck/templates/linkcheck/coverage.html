@@ -1,23 +1,24 @@
 {% extends "linkcheck/base_linkcheck.html" %}
-{% block extrahead %}
-{% endblock %}
+{% load  linkcheck_coverage_tags %}
+
+{% block extrahead %}{% endblock %}
 
 {% block innercontent %}
     <table>
         <tr>
             <th>Model</th>
             <th>Covered</th>
-            <th>Extra</th>
+            <th>Suggested config</th>
         </tr>
-        {% for m in all_model_list %}
+        {% for model in coverage_data %}
             <tr>
-                <td>{{ m.0 }}</td>
-                <td style="font-weight: bold;color:{% if m.1 %}green{% else %}red{% endif %};">
-                    {{ m.1 }}
+                <td>{{ model.name }}</td>
+                <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
+                    {{ model.is_covered }}
                 </td>
-                <td style="font-weight: bold;color:{% if m.1 %}green{% else %}red{% endif %};">
-                    {% if not m.1 %}
-                    {{ m.2|safe }}
+                <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
+                    {% if not model.is_covered %}
+                        {{ model.suggested_config|render_config }}
                     {% endif %}
                 </td>
             </tr>

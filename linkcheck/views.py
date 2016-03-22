@@ -31,10 +31,19 @@ except ImportError:
 
 @staff_member_required
 def coverage(request):
-    all_model_list = get_coverage_data()
-    return render(request, 'linkcheck/coverage.html', {
-        'all_model_list': all_model_list,
-    })
+
+    coverage_data = get_coverage_data()
+
+    if request.GET.get('config', False):
+        # Just render the suggested linklist code
+        template = 'linkcheck/suggested_configs.html'
+        context = {'coverage_data': [x['suggested_config'] for x in coverage_data]}
+    else:
+        # Render a nice report
+        template = 'linkcheck/coverage.html'
+        context = {'coverage_data': coverage_data}
+
+    return render(request, template, context)
 
 
 @staff_member_required
@@ -134,9 +143,9 @@ def report(request):
             'object_list': objects
         })
 
-    #pass any querystring data back to the form minus page
+    # Pass any querystring data back to the form minus page
     rqst = request.GET.copy()
-    if ('page' in rqst):
+    if 'page' in rqst:
         del rqst['page']
 
     return render(request, 'linkcheck/report.html', {
