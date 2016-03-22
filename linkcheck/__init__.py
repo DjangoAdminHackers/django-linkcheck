@@ -149,10 +149,7 @@ class Linklist(object):
     def urls(self, obj):
         
         urls = []
-        for field_name in self.html_fields:
-            for text, url in parse_urls(obj, field_name):
-                print obj, obj.pk, field_name, ':', url, ':'
-        
+
         # Look for HREFS in HTML fields
         for field_name in self.html_fields:
             urls += [(field_name, text, url) for text, url in parse_urls(obj, field_name)]
