@@ -68,9 +68,12 @@ class LinkCheckHandler(ClientHandler):
 
 def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
 
-    recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
+    urls = Url.objects.filter(still_exists=True)
     
-    urls = Url.objects.filter(still_exists=True).exclude(last_checked__gt=recheck_datetime)
+    # An optimization for when check_internal is False
+    if not check_internal:
+        recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
+        urls = urls.exclude(last_checked__gt=recheck_datetime)
 
     # If limit is specified set the limit
     if limit and limit > -1:
