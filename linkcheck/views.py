@@ -9,7 +9,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -132,10 +132,14 @@ def report(request):
             try:
                 admin_url = object.get_admin_url()
             except AttributeError:
-                admin_url = '%s%s/%s/%s/' % (reverse('admin:index'), content_type.app_label, content_type.model, ok)
+                try:
+                    admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
+                except NoReverseMatch:
+                    admin_url = None
+            
             objects.append({
                 'object': object,
-                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(), # convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
+                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
                 'admin_url': admin_url,
             })
         content_types_list.append({

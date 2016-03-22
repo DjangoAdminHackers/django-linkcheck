@@ -157,7 +157,7 @@
                     <div class="object">
                         <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
                         <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">view {{content_type.content_type.name}}</a>&nbsp;&nbsp;
-                        <a href='{{object.admin_url}}' style="text-decoration: underline;">edit {{content_type.content_type.name}}</a>
+                        {% if object.admin_url %}<a href='{{ object.admin_url }}' style="text-decoration: underline;">edit {{content_type.content_type.name}}</a>{% endif %}
                         <table class="links">
                             <th style='width: 40%;'>Destination</th>
                             <th style='width: 20%;'>Linked Text</th>
