@@ -6,12 +6,14 @@ except ImportError:
 
 
 class Lister(HTMLParser):
+    
     def reset(self):
         HTMLParser.reset(self)
         self.urls = []
 
 
 class URLLister(Lister):
+    
     def __init__(self):
         self.in_a = False
         self.text = ''
@@ -41,6 +43,7 @@ class URLLister(Lister):
 
 
 class ImageLister(Lister):
+    
     def handle_starttag(self, tag, attrs):
         if tag == 'img':
             src = [v for k, v in attrs if k=='src']
@@ -148,6 +151,9 @@ class Linklist(object):
 
         # Look for HREFS in HTML fields
         for field_name in self.html_fields:
+            print "-"*80
+            print parse_urls(obj, field_name)
+            print "-"*80
             urls += [(field_name, text, url) for text, url in parse_urls(obj, field_name)]
 
         # Now add in the URL fields
