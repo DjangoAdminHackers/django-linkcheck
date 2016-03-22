@@ -21,13 +21,13 @@ class Command(BaseCommand):
     help = 'Check and record internal and external link status'
 
     def handle(self, *args, **options):
-        external_interval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
+        externalinterval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
         limit = options['limit'] or MAX_CHECKS_PER_RUN
 
-        self.stdout.write("Checking all links that haven't been tested for %s minutes." % external_interval)
+        self.stdout.write("Checking all links that haven't been tested for %s minutes." % externalinterval)
         if limit != -1:
             self.stdout.write("Will run maximum of %s checks this run." % limit)
 
         internal_checked = check_links(limit=limit, check_external=False)
-        external_checked = check_links(external_recheck_interval=external_interval, limit=limit, check_internal=False)
+        external_checked = check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
         return "%s internal URLs and %s external URLs have been checked." % (internal_checked, external_checked)
