@@ -27,15 +27,16 @@ class URLLister(Lister):
                 self.in_a = True
                 self.url = href[0]
         elif tag == 'img' and self.in_a:
-            src = [v for k, v in attrs if k=='src']
+            src = [v for k, v in attrs if k == 'src']
             if src:
                 self.text += ' [image:%s] ' % src[0]
 
     def handle_endtag(self, tag):
         if tag == 'a' and self.in_a:
             self.urls.append((self.text[:256], self.url))
-        self.text = ''
-        self.url = ''
+            self.in_a = False
+            self.text = ''
+            self.url = ''
 
     def handle_data(self, data):
         if self.in_a:
@@ -148,7 +149,10 @@ class Linklist(object):
     def urls(self, obj):
         
         urls = []
-
+        for field_name in self.html_fields:
+            for text, url in parse_urls(obj, field_name):
+                print obj, obj.pk, field_name, ':', url, ':'
+        
         # Look for HREFS in HTML fields
         for field_name in self.html_fields:
             urls += [(field_name, text, url) for text, url in parse_urls(obj, field_name)]
