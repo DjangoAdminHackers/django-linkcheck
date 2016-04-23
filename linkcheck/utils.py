@@ -67,6 +67,9 @@ class LinkCheckHandler(ClientHandler):
 
 
 def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, check_external=True):
+    """
+    Return the number of links effectively checked.
+    """
 
     urls = Url.objects.filter(still_exists=True)
     
@@ -79,9 +82,12 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     if limit and limit > -1:
         urls = urls[:limit]
 
+    check_count = 0
     for u in urls:
-        u.check_url(check_internal=check_internal, check_external=check_external)
-    return len(urls)
+        status = u.check_url(check_internal=check_internal, check_external=check_external)
+        check_count += 1 if status is not None else 0
+
+    return check_count
 
 
 def update_urls(urls, content_type, object_id):

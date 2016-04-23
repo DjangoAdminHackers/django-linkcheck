@@ -142,6 +142,12 @@ class Url(models.Model):
         return EXTERNAL_REGEX.match(self.url)
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
+        """
+        Return:
+         * True if the link was checked and found valid
+         * False if the link was checked and found invalid
+         * None if the link was not checked
+        """
 
         self.status = False
 
@@ -174,6 +180,9 @@ class Url(models.Model):
 
         elif check_external and external:
             self._check_external(tested_url, external_recheck_interval)
+
+        else:
+            return None
 
         return self.status
 
