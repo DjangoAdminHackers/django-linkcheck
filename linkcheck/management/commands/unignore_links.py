@@ -8,6 +8,6 @@ class Command(BaseCommand):
     help = "Goes through all models registered with Linkcheck and records any links found"
     
     def execute(self, *args, **options):
-        print "Unignoring all links"
+        print("Unignoring all links")
         unignore()
 
