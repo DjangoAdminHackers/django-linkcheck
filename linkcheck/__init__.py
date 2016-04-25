@@ -1,8 +1,13 @@
+import threading
+
 from django.conf import settings
 try:
     from django.utils.html_parser import HTMLParser
 except ImportError:
     from HTMLParser import HTMLParser
+
+# A global lock, showing whether linkcheck is busy
+update_lock = threading.Lock()
 
 
 class Lister(HTMLParser):
