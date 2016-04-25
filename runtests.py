@@ -15,7 +15,7 @@ if not settings.configured:
             'django.contrib.sessions', 'django.contrib.contenttypes',
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
-        'ROOT_URLCONF': "linkcheck.tests.test_urls",
+        'ROOT_URLCONF': "linkcheck.tests.urls",
         'SITE_DOMAIN': "localhost",
     }
     if django.get_version() >= '1.7':

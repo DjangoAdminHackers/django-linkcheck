@@ -67,7 +67,7 @@ def mock_urlopen(url, data=None, timeout=timeout):
 
 
 class InternalCheckTestCase(TestCase):
-    urls = 'linkcheck.tests.test_urls'
+    urls = 'linkcheck.tests.urls'
 
     def setUp(self):
         #replace urllib2.urlopen with mock method
