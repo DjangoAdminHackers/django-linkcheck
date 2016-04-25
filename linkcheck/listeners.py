@@ -4,6 +4,7 @@ import time
 from threading import Thread
 
 from django.conf import settings
+from django.contrib import messages
 from django.db.models import signals as model_signals
 
 try:
@@ -20,16 +21,6 @@ from . import update_lock
 from linkcheck.models import all_linklists, Url, Link
 
 listeners = []
-
-
-def add_message_compatible(request, msg, level=None):
-    try:
-        from django.contrib import messages
-        level = level or messages.INFO
-        messages.add_message(request, level, msg)
-    except ImportError:
-        # For Django < 1.4
-        request.user.message_set.create(message=msg)
 
 
 # 1. register listeners for the objects that contain Links
@@ -189,7 +180,7 @@ def handle_upload(sender, path=None, **kwargs):
     if count:
         url_qs.update(status=True, message='Working document link')
         msg = "Please note. Uploading %s has corrected %s broken link%s. See the Link Manager for more details" % (url, count, count>1 and 's' or '')
-        add_message_compatible(request=sender, msg=msg)
+        messages.info(sender, msg)
 
 
 def handle_rename(sender, path=None, **kwargs):
@@ -211,7 +202,7 @@ def handle_rename(sender, path=None, **kwargs):
     if old_count:
         old_url_qs.update(status=False, message='Missing Document')
         msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, old_count>1 and 's' or '')
-        add_message_compatible(request=sender, msg=msg)
+        messages.info(sender, msg)
         
     # The new directory may fix some invalid links, so we also check for that
     if isdir(kwargs['new_filename']):
@@ -227,7 +218,7 @@ def handle_rename(sender, path=None, **kwargs):
             new_url_qs.update(status=True, message='Working document link')
     if new_count:
         msg = "Please note. Renaming %s has corrected %s broken link%s. See the Link Manager for more details" % (new_url, new_count, new_count>1 and 's' or '')
-        add_message_compatible(request=sender, msg=msg)
+        messages.info(sender, msg)
 
 
 def handle_delete(sender, path=None, **kwargs):
@@ -238,7 +229,7 @@ def handle_delete(sender, path=None, **kwargs):
     if count:
         url_qs.update(status=False, message='Missing Document')
         msg = "Warning. Deleting %s has caused %s link%s to break. Please use the Link Manager to fix them" % (url, count, count>1 and 's' or '')
-        add_message_compatible(request=sender, msg=msg)
+        messages.info(sender, msg)
 
 
 if FILEBROWSER_PRESENT:
