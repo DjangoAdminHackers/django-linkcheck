@@ -6,16 +6,16 @@ python:
 env:
   - DJANGO=django==1.6.11
   - DJANGO=django==1.7.11
-  - DJANGO=django==1.8.8
-  - DJANGO=django==1.9.1
+  - DJANGO=django==1.8.12
+  - DJANGO=django==1.9.5
 matrix:
   exclude:
     - python: 2.6
       env: DJANGO=django==1.7.11
     - python: 2.6
-      env: DJANGO=django==1.8.8
+      env: DJANGO=django==1.8.12
     - python: 2.6
-      env: DJANGO=django==1.9.1
+      env: DJANGO=django==1.9.5
     # Python 3.4, LiveServerTestCase and SQLite fail randomly with transaction
     # errors on Django < 1.8.
     - python: 3.4
