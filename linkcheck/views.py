@@ -16,7 +16,6 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
-from linkcheck.listeners import still_updating
 from linkcheck.models import Link
 from linkcheck.utils import get_coverage_data
 
@@ -165,6 +164,7 @@ def report(request):
 
 
 def get_status_message():
+    from linkcheck.listeners import still_updating
     if still_updating:
         return "Still checking. Please refresh this page in a short while. "
     else:
