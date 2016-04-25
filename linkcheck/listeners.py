@@ -16,12 +16,10 @@ except ImportError:
     FILEBROWSER_PRESENT = False
     
 
+from . import update_lock
 from linkcheck.models import all_linklists, Url, Link
 
 listeners = []
-
-# A global variable, showing whether linkcheck is busy
-still_updating = False
 
 
 def add_message_compatible(request, msg, level=None):
@@ -56,8 +54,7 @@ for linklist_name, linklist_cls in all_linklists.items():
             # A candidate for the future post_commit signal.
             if wait:
                 time.sleep(0.1)
-            try:
-                still_updating = True
+            with update_lock:
                 content_type = linklist_cls.content_type()
                 new_links = []
                 old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
@@ -89,9 +86,6 @@ for linklist_name, linklist_cls in all_linklists.items():
                     
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
-                
-            finally:
-                still_updating = False
 
         # Don't run in a separate thread if we are running tests
         if len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
