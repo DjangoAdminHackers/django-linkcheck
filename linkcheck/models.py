@@ -29,7 +29,7 @@ from django.utils.six.moves.urllib.request import HTTPRedirectHandler, Request, 
 try:
     from django.utils.timezone import now
 except ImportError:
-    now = datetime.now 
+    now = datetime.now
 
 try:
     from reversion.revisions import revision_context_manager
@@ -158,10 +158,10 @@ class Url(models.Model):
 
         tested_url = self.url  # May receive transformation before being checked
 
-        if SITE_DOMAINS: #if the setting is present
+        if SITE_DOMAINS:  # If the setting is present
             internal_exceptions = SITE_DOMAINS
 
-        else: # try using SITE_DOMAIN
+        else:  # try using SITE_DOMAIN
             root_domain = settings.SITE_DOMAIN
             if root_domain.startswith('www.'):
                 root_domain = root_domain[4:]
@@ -259,7 +259,7 @@ class Url(models.Model):
                         self.message = 'Broken internal hash anchor'
                         self.status = False
 
-            elif (response.status_code == 302 or response.status_code == 301):
+            elif response.status_code == 302 or response.status_code == 301:
                 self.status = None
                 self.message = 'This link redirects: code %d (not automatically checked)' % (response.status_code, )
             else:
@@ -268,7 +268,7 @@ class Url(models.Model):
         else:
             self.message = 'Invalid URL'
 
-        self.last_checked  = now()
+        self.last_checked = now()
         self.save()
 
     def _check_external(self, tested_url, external_recheck_interval):
