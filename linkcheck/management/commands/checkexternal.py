@@ -29,9 +29,9 @@ class Command(BaseCommand):
         else:
             limit = MAX_CHECKS_PER_RUN
 
-        print "Checking all external links that haven't been tested for %s minutes." % externalinterval
+        print("Checking all external links that haven't been tested for %s minutes." % externalinterval)
         if limit!=-1:
-            print "Will run maximum of %s checks this run." % limit
+            print("Will run maximum of %s checks this run." % limit)
 
         return check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
 

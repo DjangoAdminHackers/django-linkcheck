@@ -23,8 +23,8 @@ class Command(BaseCommand):
         else:
             limit = MAX_CHECKS_PER_RUN
 
-        print "Checking all internal links."
+        print("Checking all internal links.")
         if limit != -1:
-            print "Will run maximum of %s checks this run." % limit
+            print("Will run maximum of %s checks this run." % limit)
 
         return check_links(limit=limit, check_external=False)
