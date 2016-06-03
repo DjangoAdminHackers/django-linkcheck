@@ -18,7 +18,7 @@ if not settings.configured:
         'ROOT_URLCONF': "linkcheck.tests.urls",
         'SITE_DOMAIN': "localhost",
     }
-    if django.get_version() >= '1.7':
+    if django.VERSION >= (1, 7):
         test_settings['MIDDLEWARE_CLASSES'] = [
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.common.CommonMiddleware',
@@ -40,6 +40,6 @@ def runtests(*test_args):
 
 
 if __name__ == '__main__':
-    if django.get_version() >= '1.7':
+    if django.VERSION >= (1, 7):
         django.setup()
     runtests(*sys.argv[1:])
