@@ -336,5 +336,5 @@ class ReportViewTestCase(TestCase):
 
     def test_report_view(self):
         self.client.login(username='admin', password='password')
-        response = self.client.get(reverse('linkcheck.views.report'))
+        response = self.client.get(reverse('linkcheck_report'))
         self.assertContains(response, "<h1>Link Checker</h1>")
