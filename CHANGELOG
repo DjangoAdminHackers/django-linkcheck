@@ -1,3 +1,11 @@
+1.3
+
+* Django 1.9 compatibility added.
+* When checking internal links, redirects are not followed any longer.
+* Added support for the django-admin-tools dashboard, if present.
+* Fixed a bug where internal links were skipped based on the external interval
+  setting.
+
 1.2
 
 * Added migration folders (missing in the 1.1 package). Also added support for
