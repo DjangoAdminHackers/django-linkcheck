@@ -1,5 +1,3 @@
-from optparse import make_option
-
 from django.core.management.base import BaseCommand, CommandError
 
 from linkcheck.linkcheck_settings import EXTERNAL_RECHECK_INTERVAL, MAX_CHECKS_PER_RUN
@@ -8,17 +6,15 @@ from linkcheck.utils import check_links
 
 class Command(BaseCommand):
     
-    option_list = BaseCommand.option_list + (
-        make_option('--externalinterval', '-e', type='int',
-            help='Specifies the length of time in minutes until external links are rechecked. '
-                 'Defaults to linkcheck_config setting'
-        ),
-        make_option('--limit', '-l', type='int',
-            help='Specifies the maximum number (int) of links to be checked. '
-                 'Defaults to linkcheck_config setting.  Value less than 1 will check all'
-        ),
-    )
     help = 'Check and record internal and external link status'
+
+    def add_arguments(self, parser):
+        parser.add_argument('-e', '--externalinterval', type=int,
+            help='Specifies the length of time in minutes until external links are rechecked. '
+                 'Defaults to linkcheck_config setting')
+        parser.add_argument('-l', '--limit', type=int,
+            help='Specifies the maximum number (int) of links to be checked. '
+                 'Defaults to linkcheck_config setting.  Value less than 1 will check all')
 
     def handle(self, *args, **options):
         externalinterval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
