@@ -168,7 +168,7 @@
                             {% for link in object.link_list %}
                                 <tr id="link{{ link.id }}">
                                     <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
-                                    <td>{% if link.text = "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
+                                    <td>{% if link.text == "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
                                     <td>{{link.field}}</td>
                                     <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
                                     <td class="actioncell">
