@@ -17,15 +17,18 @@ if not settings.configured:
         ],
         'ROOT_URLCONF': "linkcheck.tests.urls",
         'SITE_DOMAIN': "localhost",
-    }
-    if django.VERSION >= (1, 7):
-        test_settings['MIDDLEWARE_CLASSES'] = [
+        'MIDDLEWARE_CLASSES': [
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-        ]
+        ],
+        'TEMPLATES': [{
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'APP_DIRS': True,
+        }],
+    }
     settings.configure(**test_settings)
 
 
@@ -40,6 +43,5 @@ def runtests(*test_args):
 
 
 if __name__ == '__main__':
-    if django.VERSION >= (1, 7):
-        django.setup()
+    django.setup()
     runtests(*sys.argv[1:])
