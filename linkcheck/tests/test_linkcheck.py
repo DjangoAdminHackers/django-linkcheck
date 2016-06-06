@@ -59,8 +59,8 @@ def mock_urlopen(url, data=None, **kwargs):
     raise HTTPError(url, code, msg, None, None)
 
 
+@override_settings(ROOT_URLCONF='linkcheck.tests.urls')
 class InternalCheckTestCase(TestCase):
-    urls = 'linkcheck.tests.urls'
 
     def setUp(self):
         #replace urllib2.urlopen with mock method
