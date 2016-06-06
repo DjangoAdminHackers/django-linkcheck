@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from datetime import datetime, timedelta
 import os
 import re
-import socket
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -44,13 +43,7 @@ class addinfourl():
 # Mock Method so test can run independently
 #
 
-# Fix for Python<2.6
-try:
-    timeout = socket._GLOBAL_DEFAULT_TIMEOUT
-except AttributeError:
-    timeout = 1000
-
-def mock_urlopen(url, data=None, timeout=timeout):
+def mock_urlopen(url, data=None, **kwargs):
     msg_dict = {'301': "Moved Permanently", '404': 'Not Found', '200': 'OK'}
 
     code = '404'
