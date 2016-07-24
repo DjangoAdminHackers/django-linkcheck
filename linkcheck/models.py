@@ -443,5 +443,5 @@ for key, linklist in all_linklists.items():
 
 
 # Register listeners
-
-from . import listeners
+if 'linkcheck' in settings.INSTALLED_APPS:
+    from . import listeners
