@@ -129,7 +129,7 @@ def report(request):
             except ObjectDoesNotExist:
                 pass
             try:
-                admin_url = object.get_admin_url()
+                admin_url = object.get_admin_url()  # TODO allow method name to be configurable
             except AttributeError:
                 try:
                     admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
