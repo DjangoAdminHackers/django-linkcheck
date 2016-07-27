@@ -167,8 +167,11 @@ class Url(models.Model):
                 root_domain = root_domain[4:]
             elif root_domain.startswith('test.'):
                 root_domain = root_domain[5:]
-            internal_exceptions = ['http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain]
-
+            internal_exceptions = [
+                'http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain,
+                'https://' + root_domain, 'https://www.' + root_domain, 'https://test.' + root_domain,
+            ]
+            
         for ex in internal_exceptions:
             if ex and tested_url.startswith(ex):
                 tested_url = tested_url.replace(ex, '', 1)
