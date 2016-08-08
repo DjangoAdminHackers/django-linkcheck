@@ -25,5 +25,6 @@ class Command(BaseCommand):
         if limit != -1:
             self.stdout.write("Will run maximum of %s checks this run." % limit)
 
-        return check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
+        check_count = check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
+        return "%s external URLs have been checked." % (check_count)
 
