@@ -240,7 +240,7 @@ class Url(models.Model):
             settings.PREPEND_WWW = False
             c = Client()
             c.handler = LinkCheckHandler()
-            response = c.get(tested_url)
+            response = c.get(tested_url, follow=True)
             if USE_REVERSION:
                 # using test client will clear the RevisionContextManager stack.
                 revision_context_manager.start()
