@@ -1,11 +1,17 @@
-import socket
-import re
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from datetime import datetime, timedelta
 import os
+import re
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import LiveServerTestCase, TestCase
+from django.test.utils import override_settings
+from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
 
@@ -15,8 +21,8 @@ from .sampleapp.models import Author, Book
 
 
 #MOCK addinfurl
-class addinfoUrl():
-    """class to add info() and getUrl(url=) methods to an open file."""
+class addinfourl():
+    """class to add info() and geturl(url=) methods to an open file."""
 
     def __init__(self, url, code, msg):
         self.headers = None
@@ -30,20 +36,14 @@ class addinfoUrl():
     def getcode(self):
         return self.code
 
-    def getUrl(self):
+    def geturl(self):
         return self.url
 
 #
 # Mock Method so test can run independently
 #
 
-# Fix for Python<2.6
-try:
-    timeout = socket._GLOBAL_DEFAULT_TIMEOUT
-except AttributeError:
-    timeout = 1000
-
-def mock_urlopen(url, data=None, timeout=timeout):
+def mock_urlopen(url, data=None, **kwargs):
     msg_dict = {'301': "Moved Permanently", '404': 'Not Found', '200': 'OK'}
 
     code = '404'
@@ -54,13 +54,13 @@ def mock_urlopen(url, data=None, timeout=timeout):
         code = m.group(0)
         msg  = msg_dict.get(code, 'Something Happened')
         if code == "200":
-            return addinfoUrl(url, code, msg)
+            return addinfourl(url, code, msg)
 
     raise HTTPError(url, code, msg, None, None)
 
 
+@override_settings(ROOT_URLCONF='linkcheck.tests.urls')
 class InternalCheckTestCase(TestCase):
-    urls = 'linkcheck.tests.test_urls'
 
     def setUp(self):
         #replace urllib2.urlopen with mock method
@@ -69,53 +69,52 @@ class InternalCheckTestCase(TestCase):
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, None)
-        self.assertEquals(uv.message, 'Email link (not automatically checked)')
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'Email link (not automatically checked)')
 
     def test_internal_check_blank(self):
         uv = Url(url="", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Empty link')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Empty link')
 
     def test_internal_check_anchor(self):
         uv = Url(url="#some_anchor", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, None)
-        self.assertEquals(uv.message, 'Link to within the same page (not automatically checked)')
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
-#    TODO: This now fails, because with follow=True, redirects are automatically followed
-#    def test_internal_check_view_302(self):
-#        uv = Url(url="/admin/linkcheck", still_exists=True)
-#        uv.check_url()
-#        self.assertEquals(uv.status, None)
-#        self.assertEquals(uv.message, 'This link redirects: code 302 (not automatically checked)')
-
-    def test_internal_check_admin_found(self):
-        uv = Url(url="/admin/", still_exists=True)
+    def test_internal_check_view_301(self):
+        uv = Url(url="/admin/linkcheck", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working internal link')
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'This link redirects: code 301 (not automatically checked)')
+
+    def test_internal_check_found(self):
+        uv = Url(url="/public/", still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Broken internal link')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Broken internal link')
 
     def test_internal_check_invalid_url(self):
         uv = Url(url="invalid/url", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Invalid URL')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Invalid URL')
 
     def test_same_page_anchor(self):
         # TODO Make this test
         pass
         #uv = Url(url="#anchor", still_exists=True)
         #uv.check_url()
-        #self.assertEquals(uv.status, None)
-        #self.assertEquals(uv.message, "")
+        #self.assertEqual(uv.status, None)
+        #self.assertEqual(uv.message, "")
 
 
 class InternalMediaCheckTestCase(TestCase):
@@ -129,40 +128,113 @@ class InternalMediaCheckTestCase(TestCase):
     def test_internal_check_media_missing(self):
         uv = Url(url="/media/not_found", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, 'Missing Document')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Missing Document')
 
     def test_internal_check_media_found(self):
         uv = Url(url="/media/found", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working file link')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
 
     def test_internal_check_media_utf8(self):
         uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, 'Working file link')
-
-
-class ExternalCheckTestCase(TestCase):
-    def test_external_check_200(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=200", still_exists=True)
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
+        # Also when the url is not encoded
+        uv = Url(url="/media/rückmeldung", still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, True)
-        self.assertEquals(uv.message, '200 OK')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working file link')
+
+
+@override_settings(SITE_DOMAIN='example.com')
+class ExternalCheckTestCase(LiveServerTestCase):
+    def test_external_check_200(self):
+        uv = Url(url="%s/http/200/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.redirect_to, '')
+
+    def test_external_check_200_utf8(self):
+        uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        # Also when the url is not encoded
+        uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_301(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=301", still_exists=True)
+        uv = Url(url="%s/http/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message.lower(), '301 moved permanently')
+
+    def test_external_check_301_followed(self):
+        uv = Url(url="%s/http/redirect/301/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '301 OK')
+        self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
+
+    def test_external_check_302_followed(self):
+        """
+        For temporary redirects, we do not report any redirection in `redirect_to`.
+        """
+        uv = Url(url="%s/http/redirect/302/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_404(self):
-        uv = Url(url="http://qa-dev.w3.org/link-testsuite/http.php?code=404", still_exists=True)
+        uv = Url(url="%s/whatever/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEquals(uv.status, False)
-        self.assertEquals(uv.message, '404 Not Found')
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message.lower(), '404 not found')
+
+
+class ChecklinksTestCase(TestCase):
+    def setUp(self):
+        request.urlopen = mock_urlopen
+
+    def test_checklinks_command(self):
+        Book.objects.create(title='My Title', description="""
+            Here's a link: <a href="http://www.example.org">Example</a>,
+            and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
+
+        out = StringIO()
+        call_command('checklinks', stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 10080 minutes.\n"
+            "0 internal URLs and 0 external URLs have been checked.\n"
+        )
+
+        yesterday = datetime.now() - timedelta(days=1)
+        Url.objects.all().update(last_checked=yesterday)
+        out = StringIO()
+        call_command('checklinks', externalinterval=20, stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 20 minutes.\n"
+            "0 internal URLs and 2 external URLs have been checked.\n"
+        )
+
+        Url.objects.all().update(last_checked=yesterday)
+        out = StringIO()
+        call_command('checklinks', externalinterval=20, limit=1, stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Checking all links that haven't been tested for 20 minutes.\n"
+            "Will run maximum of 1 checks this run.\n"
+            "0 internal URLs and 1 external URLs have been checked.\n"
+        )
 
 
 class FindingLinksTestCase(TestCase):
@@ -193,6 +265,54 @@ class FindingLinksTestCase(TestCase):
         # This time, the empty 'website' is extracted
         self.assertEqual(Url.objects.all().count(), 2)
 
+    def test_findlinks_command(self):
+        from linkcheck.models import all_linklists
+        all_linklists['Authors'].url_fields = []
+        Author.objects.create(name="John Smith", website="http://www.example.org/smith")
+        all_linklists['Authors'].url_fields = ['website']
+
+        out = StringIO()
+        call_command('findlinks', stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Finding all new links...\n"
+            "1 new Url object(s), 1 new Link object(s), 0 Url object(s) deleted\n"
+        )
+
+
+class ObjectsUpdateTestCase(TestCase):
+    def test_update_object(self):
+        """
+        Test that updating a broken URL in an object also updates the
+        corresponding Link, and don't leak the old URL.
+        """
+        bad_url = "/broken/internal/link"
+        good_url = "/public/"
+        author = Author.objects.create(name="John Smith", website=bad_url)
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=False).count(),
+            1
+        )
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=True).count(),
+            0
+        )
+        self.assertEqual(Url.objects.all().count(), 1)
+        self.assertEqual(Url.objects.all()[0].url, bad_url)
+        # Fix the link
+        author.website = good_url
+        author.save()
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=False).count(),
+            0
+        )
+        self.assertEqual(
+            Link.objects.filter(ignore=False, url__status=True).count(),
+            1
+        )
+        self.assertEqual(Url.objects.all().count(), 1)
+        self.assertEqual(Url.objects.all()[0].url, good_url)
+
 
 class ReportViewTestCase(TestCase):
     def setUp(self):
@@ -209,5 +329,5 @@ class ReportViewTestCase(TestCase):
 
     def test_report_view(self):
         self.client.login(username='admin', password='password')
-        response = self.client.get(reverse('linkcheck.views.report'))
+        response = self.client.get(reverse('linkcheck_report'))
         self.assertContains(response, "<h1>Link Checker</h1>")

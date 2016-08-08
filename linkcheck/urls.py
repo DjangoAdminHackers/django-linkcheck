@@ -1,9 +1,8 @@
-try:
-    from django.conf.urls.defaults import *
-except:
-    from django.conf.urls import *
+from django.conf.urls import url
 
-urlpatterns = patterns('linkcheck.views',
-   (r'^coverage/$', 'coverage'),
-   (r'^.*$', 'report'),
-)
+from . import views
+
+urlpatterns = [
+   url(r'^coverage/$', views.coverage, name='linkcheck_coverage'),
+   url(r'^.*$', views.report, name='linkcheck_report'),
+]

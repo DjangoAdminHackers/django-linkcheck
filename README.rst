@@ -22,7 +22,7 @@ automatically when objects are saved. This is handled by signals.
 Minimal requirements
 --------------------
 
-django-linkchecks requires Python 2.6 and Django 1.6. It is Python 3 compatible.
+django-linkchecks requires Python 2.7 and Django 1.8. It is Python 3 compatible.
 
 Basic usage
 -----------
@@ -82,6 +82,28 @@ customize the extracted links:
 
     ``image_fields``: a list of ``ImageField`` field names whose content will be
     considered as links. Empty ``ImageField`` content is always ignored.
+
+Management commands
+-------------------
+
+findlinks
+~~~~~~~~~
+
+This command goes through all registered fields and records the URLs it finds.
+This command does not validate anything. Typically run just after installing
+and configuring django-linkcheck.
+
+checklinks
+~~~~~~~~~~
+
+For each recorded URL, check and report the validity of the URL. All internal
+links are checked, but only external links that have not been checked during
+the last ``LINKCHECK_EXTERNAL_RECHECK_INTERVAL`` minutes are checked. This
+interval can be adapted per-invocation by using the ``--externalinterval``
+(``-e``) command option (in minutes).
+
+You can also limit the maximum number of links to be checked by passing a number
+to the ``--limit`` (``--l``) command option.
 
 Settings
 --------

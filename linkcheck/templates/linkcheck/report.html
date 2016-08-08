@@ -2,6 +2,24 @@
 {% block extrahead %}
 {{ block.super }}
 <script type="text/javascript">
+    function showProgressDots(numberOfDots) {
+        var progress = document.getElementById('progressDots');
+        if (!progress) return;
+        switch(numberOfDots) {
+            case 1:
+                progress.innerHTML = '.&nbsp;&nbsp;';
+                timerHandle = setTimeout('showProgressDots(2)',200);
+                break;
+            case 2:
+                progress.innerHTML = '..&nbsp;';
+                timerHandle = setTimeout('showProgressDots(3)',200);
+                break;
+            case 3:
+                progress.innerHTML = '...';
+                timerHandle = setTimeout('showProgressDots(1)',200);
+                break;
+        }
+    }
 
     $(document).ready(function() {
 
@@ -39,6 +57,8 @@
         });
 
         $(".recheck").submit(function(){
+            $(this).closest('tr').find('td.link_message').html('Checking<span id="progressDots"></span>');
+            showProgressDots(1);
             $.ajax({
                 url: this.action,
                 dataType: 'json',
@@ -124,7 +144,7 @@
         <strong>Show:</strong>&nbsp;&nbsp;
         {% ifequal filter 'show_valid' %}Good links{% else %}<a href="?filters=show_valid">Good links</a>{% endifequal %}&nbsp;&nbsp;
         {% ifequal filter 'show_invalid' %}Broken links{% else %}<a href="?filters=show_invalid">Broken links</a>{% endifequal %}&nbsp;&nbsp;
-        {% ifequal filter 'show_unchecked' %}{% else %}<a href="?filters=show_unchecked">Untested links</a>{% endifequal %}&nbsp;&nbsp;
+        {% ifequal filter 'show_unchecked' %}Untested links{% else %}<a href="?filters=show_unchecked">Untested links</a>{% endifequal %}&nbsp;&nbsp;
         {% ifequal filter 'ignored' %}Ignored links{% else %}<a href="?filters=ignored">Ignored links</a>{% endifequal %}
             (<span id="ignored_count">{{ ignored_count }}</span>)
         <br />
@@ -137,7 +157,7 @@
                     <div class="object">
                         <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
                         <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">view {{content_type.content_type.name}}</a>&nbsp;&nbsp;
-                        <a href='{{object.admin_url}}' style="text-decoration: underline;">edit {{content_type.content_type.name}}</a>
+                        {% if object.admin_url %}<a href='{{ object.admin_url }}' style="text-decoration: underline;">edit {{content_type.content_type.name}}</a>{% endif %}
                         <table class="links">
                             <th style='width: 40%;'>Destination</th>
                             <th style='width: 20%;'>Linked Text</th>
@@ -148,7 +168,7 @@
                             {% for link in object.link_list %}
                                 <tr id="link{{ link.id }}">
                                     <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
-                                    <td>{% if link.text = "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
+                                    <td>{% if link.text == "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
                                     <td>{{link.field}}</td>
                                     <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
                                     <td class="actioncell">
@@ -168,6 +188,9 @@
                                         {% endif %}
                                     </td>
                                 </tr>
+                                {% if link.url.redirect_to %}
+                                    <tr><td colspan="6">Redirects to: <a href="{{ link.url.redirect_to }}" target="_blank">{{ link.url.redirect_to }}</a></td></tr>
+                                {% endif %}
                             {% endfor %}
                         </table>
                     </div>

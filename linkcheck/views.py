@@ -7,14 +7,14 @@ from django.conf import settings
 from django.contrib.admin.templatetags.admin_static import static
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse
-from django.db import models
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
+from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
 from linkcheck.models import Link
 from linkcheck.utils import get_coverage_data
@@ -27,14 +27,22 @@ except ImportError:
     # However - admin_media_prefix was removed in Django 1.5
     admin_static = settings.STATIC_URL
 
+
 @staff_member_required
 def coverage(request):
-    all_model_list = get_coverage_data()
-    return render_to_response('linkcheck/coverage.html',{
-            'all_model_list': all_model_list, 
-        },
-        RequestContext(request),
-    )
+
+    coverage_data = get_coverage_data()
+
+    if request.GET.get('config', False):
+        # Just render the suggested linklist code
+        template = 'linkcheck/suggested_configs.html'
+        context = {'coverage_data': [x['suggested_config'] for x in coverage_data]}
+    else:
+        # Render a nice report
+        template = 'linkcheck/coverage.html'
+        context = {'coverage_data': coverage_data}
+
+    return render(request, template, context)
 
 
 @staff_member_required
@@ -65,7 +73,7 @@ def report(request):
                 return HttpResponse(json_data, content_type='application/javascript')
             
         recheck_link_id = request.GET.get('recheck', None)
-        if recheck_link_id != None:
+        if recheck_link_id is not None:
             link = Link.objects.get(id=recheck_link_id)
             url = link.url 
             url.check_url(external_recheck_interval=0)
@@ -102,8 +110,9 @@ def report(request):
     # offset = (page - 1) * RESULTS_PER_PAGE
     links = paginated_links.page(page)
 
-    # This code groups links into nested lists by content type and object id   
-    # It's a bit nasty but we can't use groupby unless be get values() instead of a queryset because of the 'Object is not subscriptable' error
+    # This code groups links into nested lists by content type and object id
+    # It's a bit nasty but we can't use groupby unless be get values()
+    # instead of a queryset because of the 'Object is not subscriptable' error
     
     t = sorted(links.object_list.values(), key=outerkeyfunc)
     for tk, tg in groupby(t, outerkeyfunc):
@@ -114,16 +123,22 @@ def report(request):
             content_type = ContentType.objects.get(pk=tk)
             og = list(og)
             try:
-                object = content_type.model_class().objects.get(pk=ok)
-            except content_type.model_class().DoesNotExist:
                 object = None
+                if content_type.model_class():
+                    object = content_type.model_class().objects.get(pk=ok)
+            except ObjectDoesNotExist:
+                pass
             try:
-                admin_url = object.get_admin_url()
+                admin_url = object.get_admin_url()  # TODO allow method name to be configurable
             except AttributeError:
-                admin_url = '%s%s/%s/%s/' % (reverse('admin:index'), content_type.app_label, content_type.model, ok)
+                try:
+                    admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
+                except NoReverseMatch:
+                    admin_url = None
+            
             objects.append({
                 'object': object,
-                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(), # convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
+                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
                 'admin_url': admin_url,
             })
         content_types_list.append({
@@ -131,15 +146,13 @@ def report(request):
             'object_list': objects
         })
 
-    #pass any querystring data back to the form minus page
+    # Pass any querystring data back to the form minus page
     rqst = request.GET.copy()
-    if ('page' in rqst):
+    if 'page' in rqst:
         del rqst['page']
 
-
-    return render_to_response(
-        'linkcheck/report.html',
-            {'content_types_list': content_types_list,
+    return render(request, 'linkcheck/report.html', {
+            'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
             'media':  forms.Media(js=[static('admin/js/jquery.min.js')]),
@@ -147,5 +160,22 @@ def report(request):
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
         },
-        RequestContext(request),
     )
+
+
+def get_status_message():
+    if update_lock.locked():
+        return "Still checking. Please refresh this page in a short while. "
+    else:
+        broken_links = Link.objects.filter(ignore=False, url__status=False).count()
+        if broken_links:
+            return (
+                "<span style='color: red;'>We've found {} broken link{}.</span><br>"
+                "<a href='{}'>View/fix broken links</a>".format(
+                    broken_links,
+                    "s" if broken_links > 1 else "",
+                    reverse('linkcheck_report'),
+                )
+            )
+        else:
+            return ''

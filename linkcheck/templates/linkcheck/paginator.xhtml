@@ -1,15 +1,15 @@
 <div style="text-align: center">
     <span class="step-links">
-        {% ifnotequal pages.number 1 %}
-            <a href="?{{qry_data}}&page=1">< First</a>
+        {% if pages.number > 1 %}
+            <a href="?{{qry_data}}&page=1">&lt; First</a>
         {% else %}
-            < First
-        {% endifnotequal %}
+            &lt; First
+        {% endif %}
 
         {% if pages.has_previous %}
-            <a href="?{{qry_data}}&page={{ pages.previous_page_number }}"><< Previous</a>
+            <a href="?{{qry_data}}&page={{ pages.previous_page_number }}">&lt;&lt; Previous</a>
         {% else %}
-            << Previous
+            &lt;&lt; Previous
         {% endif %}
 
         <span class="current">
@@ -17,15 +17,15 @@
         </span>
 
         {% if pages.has_next %}
-            <a href="?{{qry_data}}&page={{ pages.next_page_number }}">Next >></a>
+            <a href="?{{qry_data}}&page={{ pages.next_page_number }}">Next &gt;&gt;</a>
         {% else %}
-            Next >>
+            Next &gt;&gt;
         {% endif %}
 
-        {% ifnotequal pages.number pages.paginator.num_pages %}
-            <a href="?{{qry_data}}&page={{ pages.paginator.num_pages }}">Last ></a>
+        {% if pages.number != pages.paginator.num_pages %}
+            <a href="?{{qry_data}}&page={{ pages.paginator.num_pages }}">Last &gt;</a>
         {% else %}
-            Last >
-        {% endifnotequal %}
+            Last &gt;
+        {% endif %}
     </span>
 </div>
