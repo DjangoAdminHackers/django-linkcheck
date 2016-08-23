@@ -14,7 +14,7 @@ class Command(BaseCommand):
                  'Defaults to linkcheck_config setting.  Value less than 1 will check all')
 
     def handle(self, *args, **options):
-        limit = options['limit'] or MAX_CHECKS_PER_RUN
+        limit = options.get('limit', None) or MAX_CHECKS_PER_RUN
 
         self.stdout.write("Checking all internal links.")
         if limit != -1:

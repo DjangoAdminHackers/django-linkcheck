@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         externalinterval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
-        limit = options['limit'] or MAX_CHECKS_PER_RUN
+        limit = options.get('limit', None) or MAX_CHECKS_PER_RUN
 
         self.stdout.write("Checking all external links that haven't been tested for %s minutes." % externalinterval)
         if limit != -1:
