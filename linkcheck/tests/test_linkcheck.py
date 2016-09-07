@@ -16,6 +16,7 @@ from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
 
 from linkcheck.models import Link, Url
+from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book
 
@@ -331,3 +332,18 @@ class ReportViewTestCase(TestCase):
         self.client.login(username='admin', password='password')
         response = self.client.get(reverse('linkcheck_report'))
         self.assertContains(response, "<h1>Link Checker</h1>")
+
+
+class GetJqueryMinJsTestCase(TestCase):
+
+    def test_old_version(self):
+        self.assertEqual('admin/js/jquery.min.js',
+                         get_jquery_min_js('1.8'))
+
+    def test_newer_version(self):
+        self.assertEqual('admin/js/vendor/jquery/jquery.min.js',
+                         get_jquery_min_js('1.9.9'))
+
+    def test_newest_version(self):
+        self.assertEqual('admin/js/vendor/jquery/jquery.min.js',
+                         get_jquery_min_js('1.10.1'))

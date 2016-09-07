@@ -2,6 +2,7 @@ import json
 from itertools import groupby
 from operator import itemgetter
 
+import django
 from django import forms
 from django.conf import settings
 from django.contrib.admin.templatetags.admin_static import static
@@ -48,12 +49,12 @@ def coverage(request):
 @staff_member_required
 @csrf_exempt
 def report(request):
-    
+
     outerkeyfunc = itemgetter('content_type_id')
     content_types_list = []
 
     if request.method == 'POST':
-        
+
         ignore_link_id = request.GET.get('ignore', None)
         if ignore_link_id != None:
             link = Link.objects.get(id=ignore_link_id)
@@ -62,7 +63,7 @@ def report(request):
             if request.is_ajax():
                 json_data = json.dumps({'link': ignore_link_id})
                 return HttpResponse(json_data, content_type='application/javascript')
-        
+
         unignore_link_id = request.GET.get('unignore', None)
         if unignore_link_id != None:
             link = Link.objects.get(id=unignore_link_id)
@@ -71,11 +72,11 @@ def report(request):
             if request.is_ajax():
                 json_data = json.dumps({'link': unignore_link_id})
                 return HttpResponse(json_data, content_type='application/javascript')
-            
+
         recheck_link_id = request.GET.get('recheck', None)
         if recheck_link_id is not None:
             link = Link.objects.get(id=recheck_link_id)
-            url = link.url 
+            url = link.url
             url.check_url(external_recheck_interval=0)
             links = [x[0] for x in url.links.values_list('id')]
             if request.is_ajax():
@@ -100,7 +101,7 @@ def report(request):
     else:
         qset = Link.objects.filter(ignore=False, url__status__exact=False)
         report_type = 'Broken Links'
-    
+
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
 
     try:
@@ -113,7 +114,7 @@ def report(request):
     # This code groups links into nested lists by content type and object id
     # It's a bit nasty but we can't use groupby unless be get values()
     # instead of a queryset because of the 'Object is not subscriptable' error
-    
+
     t = sorted(links.object_list.values(), key=outerkeyfunc)
     for tk, tg in groupby(t, outerkeyfunc):
         innerkeyfunc = itemgetter('object_id')
@@ -135,7 +136,7 @@ def report(request):
                     admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
                 except NoReverseMatch:
                     admin_url = None
-            
+
             objects.append({
                 'object': object,
                 'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
@@ -155,12 +156,28 @@ def report(request):
             'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
-            'media':  forms.Media(js=[static('admin/js/vendor/jquery/jquery.min.js')]),
+            'media':  forms.Media(js=[static(get_jquery_min_js())]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
         },
     )
+
+
+def get_jquery_min_js(version_string=None):
+    """
+    Return the location of jquery.min.js.  It's in different places in
+    different versions of Django.
+    """
+    version_string = version_string or django.get_version()
+
+    django_major, django_minor = map(int, version_string.split("."))[:2]
+
+    jquery_min_js = ('admin/js/vendor/jquery/jquery.min.js'
+                     if django_major >= 1 and django_minor >= 9 else
+                     'admin/js/jquery.min.js')
+
+    return jquery_min_js
 
 
 def get_status_message():
