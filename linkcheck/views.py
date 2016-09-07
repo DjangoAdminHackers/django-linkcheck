@@ -155,7 +155,7 @@ def report(request):
             'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
-            'media':  forms.Media(js=[static('admin/js/jquery.min.js')]),
+            'media':  forms.Media(js=[static('admin/js/vendor/jquery/jquery.min.js')]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
