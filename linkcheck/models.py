@@ -373,11 +373,11 @@ class Link(models.Model):
     Such as a HTML or Rich Text field.
     Multiple Links can reference a single Url
     """
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     field = models.CharField(max_length=128)
-    url = models.ForeignKey(Url, related_name="links")
+    url = models.ForeignKey(Url, related_name="links", on_delete=models.CASCADE)
     text = models.CharField(max_length=256, default='')
     ignore = models.BooleanField(default=False)
 
