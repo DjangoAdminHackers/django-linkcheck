@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('field', models.CharField(max_length=128)),
                 ('text', models.CharField(default='', max_length=256)),
                 ('ignore', models.BooleanField(default=False)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -36,6 +36,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='link',
             name='url',
-            field=models.ForeignKey(related_name='links', to='linkcheck.Url'),
+            field=models.ForeignKey(related_name='links', to='linkcheck.Url', on_delete=models.CASCADE),
         ),
     ]
