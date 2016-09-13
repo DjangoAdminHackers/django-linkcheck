@@ -38,7 +38,7 @@ Basic usage
   #) can be the target of a link - i.e. is addressed by a url - in this case
      make sure it has an instance method named 'get_absolute_url'
 
-#. ``./manage.py migrate`` (or ``./manage.py syncdb`` on Django 1.6).
+#. Run ``./manage.py migrate``.
 
 #. Add to your root url config::
 
