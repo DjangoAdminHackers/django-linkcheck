@@ -5,7 +5,7 @@ from linkcheck.utils import check_links
 
 
 class Command(BaseCommand):
-    
+
     help = 'Check and record internal and external link status'
 
     def add_arguments(self, parser):

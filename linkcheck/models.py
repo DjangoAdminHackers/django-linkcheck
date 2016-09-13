@@ -91,7 +91,6 @@ def html_decode(s):
 
 @python_2_unicode_compatible
 class Url(models.Model):
-    
     """
     Represents a distinct URL found somewhere in the models registered with linkcheck
     A single Url can have multiple Links associated with it.
@@ -171,7 +170,7 @@ class Url(models.Model):
                 'http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain,
                 'https://' + root_domain, 'https://www.' + root_domain, 'https://test.' + root_domain,
             ]
-            
+
         for ex in internal_exceptions:
             if ex and tested_url.startswith(ex):
                 tested_url = tested_url.replace(ex, '', 1)

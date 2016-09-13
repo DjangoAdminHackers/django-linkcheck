@@ -11,14 +11,14 @@ update_lock = threading.Lock()
 
 
 class Lister(HTMLParser):
-    
+
     def reset(self):
         HTMLParser.reset(self)
         self.urls = []
 
 
 class URLLister(Lister):
-    
+
     def __init__(self):
         self.in_a = False
         self.text = ''
@@ -49,7 +49,7 @@ class URLLister(Lister):
 
 
 class ImageLister(Lister):
-    
+
     def handle_starttag(self, tag, attrs):
         if tag == 'img':
             src = [v for k, v in attrs if k=='src']
@@ -109,14 +109,14 @@ class Linklist(object):
     url_fields = []
     ignore_empty = []
     image_fields = []
-    
+
     # You can override object_filter and object_exclude in a linklist class.
     # Just provide a dictionary to be used as a Django lookup filter.
     # Only objects that pass the filter will be queried for links.
     # This doesn't affect whether an object is regarded as a valid link target. Only as a link source.
     # Example usage in your linklists.py:
     # object_filter = {'active': True} - Would only check active objects for links
-    
+
     object_filter = None
     object_exclude = None
 
@@ -139,7 +139,7 @@ class Linklist(object):
                 url = ''
         except AttributeError:
             url = val  # Assume the field returns the url directly
-        
+
         return url or ''  # Coerce None to ''
 
     def get_urls_from_field_list(self, obj, field_list):
@@ -152,7 +152,7 @@ class Linklist(object):
         return urls
 
     def urls(self, obj):
-        
+
         urls = []
 
         # Look for HREFS in HTML fields
@@ -161,55 +161,55 @@ class Linklist(object):
 
         # Now add in the URL fields
         urls += self.get_urls_from_field_list(obj, self.url_fields)
-        
+
         return urls
-        
+
     def images(self, obj):
-        
+
         urls = []
-        
+
         # Look for IMGs in HTML fields
         for field_name in self.html_fields:
             urls += [(field_name, text, url) for text, url in parse_images(obj, field_name)]
-        
+
         # hostname_length = settings.MEDIA_URL[:-1].rfind('/')
         # url[hostname_length:]
-        
+
         # Now add in the image fields
         urls += self.get_urls_from_field_list(obj, self.image_fields)
-        
+
         return urls
 
     @classmethod
     def objects(cls):
-        
+
         objects = cls.model.objects.all()
-        
+
         if cls.object_filter:
             objects = objects.filter(**cls.object_filter).distinct()
         if cls.object_exclude:
             objects = objects.exclude(**cls.object_exclude).distinct()
         return objects
-    
+
     def get_linklist(self, extra_filter=None):
-        
-        extra_filter = extra_filter or {} 
-        
+
+        extra_filter = extra_filter or {}
+
         linklist = []
         objects = self.objects()
-        
+
         if extra_filter:
             objects = objects.filter(**extra_filter)
-            
+
         for obj in objects:
             linklist.append({
                 'object': obj,
                 'urls': self.urls(obj),
                 'images': self.images(obj),
             })
-        
+
         return linklist
-    
+
     @classmethod
     def content_type(cls):
         from django.contrib.contenttypes.models import ContentType

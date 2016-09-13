@@ -48,12 +48,12 @@ def coverage(request):
 @staff_member_required
 @csrf_exempt
 def report(request):
-    
+
     outerkeyfunc = itemgetter('content_type_id')
     content_types_list = []
 
     if request.method == 'POST':
-        
+
         ignore_link_id = request.GET.get('ignore', None)
         if ignore_link_id != None:
             link = Link.objects.get(id=ignore_link_id)
@@ -62,7 +62,7 @@ def report(request):
             if request.is_ajax():
                 json_data = json.dumps({'link': ignore_link_id})
                 return HttpResponse(json_data, content_type='application/javascript')
-        
+
         unignore_link_id = request.GET.get('unignore', None)
         if unignore_link_id != None:
             link = Link.objects.get(id=unignore_link_id)
@@ -71,11 +71,11 @@ def report(request):
             if request.is_ajax():
                 json_data = json.dumps({'link': unignore_link_id})
                 return HttpResponse(json_data, content_type='application/javascript')
-            
+
         recheck_link_id = request.GET.get('recheck', None)
         if recheck_link_id is not None:
             link = Link.objects.get(id=recheck_link_id)
-            url = link.url 
+            url = link.url
             url.check_url(external_recheck_interval=0)
             links = [x[0] for x in url.links.values_list('id')]
             if request.is_ajax():
@@ -100,7 +100,7 @@ def report(request):
     else:
         qset = Link.objects.filter(ignore=False, url__status__exact=False)
         report_type = 'Broken Links'
-    
+
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
 
     try:
@@ -113,7 +113,7 @@ def report(request):
     # This code groups links into nested lists by content type and object id
     # It's a bit nasty but we can't use groupby unless be get values()
     # instead of a queryset because of the 'Object is not subscriptable' error
-    
+
     t = sorted(links.object_list.values(), key=outerkeyfunc)
     for tk, tg in groupby(t, outerkeyfunc):
         innerkeyfunc = itemgetter('object_id')
@@ -135,7 +135,7 @@ def report(request):
                     admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
                 except NoReverseMatch:
                     admin_url = None
-            
+
             objects.append({
                 'object': object,
                 'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?

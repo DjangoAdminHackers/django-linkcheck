@@ -15,7 +15,7 @@ try:
     FILEBROWSER_PRESENT = True
 except ImportError:
     FILEBROWSER_PRESENT = False
-    
+
 
 from . import update_lock
 from linkcheck.models import all_linklists, Url, Link
@@ -26,19 +26,18 @@ listeners = []
 # 1. register listeners for the objects that contain Links
 
 for linklist_name, linklist_cls in all_linklists.items():
-    
+
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
-        
         """
         When an object is saved:
             new Link/Urls are created, checked
-            
+
         When an object is modified:
             new link/urls are created, checked
             existing link/urls are checked
             Removed links are deleted
         """
-        
+
         def do_check_instance_links(sender, instance, linklist_cls=linklist_cls, wait=False):
             # On some installations, this wait time might be enough for the
             # thread transaction to account for the object change (GH #41).
@@ -58,7 +57,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 else:
                     linklist = linklists[0]
                     links = linklist['urls']+linklist['images']
-                    
+
                 for link in links:
                     # url structure = (field, link text, url)
                     url = link[2]
@@ -74,7 +73,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                         setattr(u, '_internal_hash', internal_hash)
                         setattr(u, '_instance', instance)
                     u.check_url()
-                    
+
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
 
@@ -100,9 +99,9 @@ for linklist_name, linklist_cls in all_linklists.items():
 
 
 # 2. register listeners for the objects that are targets of Links, only when get_absolute_url() is defined for the model
-    
+
     if getattr(linklist_cls.model, 'get_absolute_url', None):
-        
+
         def instance_pre_save(sender, instance, ModelCls=linklist_cls.model, **kwargs):
             if instance.pk:  # Ignore unsaved instances
                 current_url = instance.get_absolute_url()
@@ -119,11 +118,11 @@ for linklist_name, linklist_cls in all_linklists.items():
                     if new_urls:
                         # Mark these urls' status as False, so that post_save will check them
                         new_urls.update(status=False, message='Should be checked now!')
-    
+
         listeners.append(instance_pre_save)
         model_signals.pre_save.connect(listeners[-1], sender=linklist_cls.model)
-    
-    
+
+
         def instance_post_save(sender, instance, ModelCls=linklist_cls.model, linklist=linklist_cls, **kwargs):
             def do_instance_post_save(sender, instance, ModelCls=ModelCls, linklist=linklist_cls, **kwargs):
                 current_url = instance.get_absolute_url()
@@ -131,14 +130,14 @@ for linklist_name, linklist_cls in all_linklists.items():
                 # We assume returning None from get_absolute_url means that this instance doesn't have a URL
                 # Not sure if we should do the same for '' as this could refer to '/'
                 if current_url!=None and current_url != previous_url:
-        
+
                     active = linklist.objects().filter(pk=instance.pk).count()
-        
+
                     if kwargs['created'] or (not active):
                         new_urls = Url.objects.filter(url__startswith=current_url)
                     else:
                         new_urls = Url.objects.filter(status=False).filter(url__startswith=current_url)
-        
+
                     if new_urls:
                         for url in new_urls:
                             url.check_url()
@@ -147,11 +146,11 @@ for linklist_name, linklist_cls in all_linklists.items():
             else:
                 t = Thread(target=do_instance_post_save, args=(sender, instance, ModelCls,), kwargs=kwargs)
                 t.start()
-    
+
         listeners.append(instance_post_save)
         model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
-    
-    
+
+
         def instance_pre_delete(sender, instance, ModelCls=linklist_cls.model,  **kwargs):
             instance.linkcheck_deleting = True
             deleted_url = instance.get_absolute_url()
@@ -190,7 +189,7 @@ def handle_rename(sender, path=None, **kwargs):
             return False
         else:
             return True
-    
+
     old_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
     new_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['new_filename'])
     # Renaming a file will cause it's urls to become invalid
@@ -203,7 +202,7 @@ def handle_rename(sender, path=None, **kwargs):
         old_url_qs.update(status=False, message='Missing Document')
         msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, old_count>1 and 's' or '')
         messages.info(sender, msg)
-        
+
     # The new directory may fix some invalid links, so we also check for that
     if isdir(kwargs['new_filename']):
         new_count = 0

@@ -6,7 +6,7 @@ django-linkcheck
     :target: https://travis-ci.org/DjangoAdminHackers/django-linkcheck
 
 A fairly flexible app that will analyze and report on links in any model that
-you register with it. 
+you register with it.
 
 .. image:: https://github.com/DjangoAdminHackers/django-linkcheck/raw/master/linkcheck.jpg
 
@@ -14,7 +14,7 @@ Links can be bare (urls or image and file fields) or
 embedded in HTML (linkcheck handles the parsing). It's fairly easy to override
 methods of the Linkcheck object should you need to do anything more
 complicated (like generate URLs from slug fields etc).
- 
+
 You should run its management command via cron or similar to check external
 links regularly to see if their status changes. All links are checked
 automatically when objects are saved. This is handled by signals.
@@ -162,7 +162,7 @@ SITE_DOMAIN and LINKCHECK_SITE_DOMAINS
 
 Linkcheck tests external and internal using differently. Internal links use the Django test client whereas external links are tested using urllib2.
 
-Testing internal links this as if they were external can cause errors in some circumstances so Linkcheck needs to know which external urls are to be treated as internal. 
+Testing internal links this as if they were external can cause errors in some circumstances so Linkcheck needs to know which external urls are to be treated as internal.
 
 Linkcheck looks for either of the settings above. It only uses SITE_DOMAIN if LINKCHECK_SITE_DOMAINS isn't present
 

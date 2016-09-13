@@ -10,7 +10,7 @@ from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_
 
 
 class LinkCheckHandler(ClientHandler):
-    
+
     # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
@@ -72,7 +72,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     """
 
     urls = Url.objects.filter(still_exists=True)
-    
+
     # An optimization for when check_internal is False
     if not check_internal:
         recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
@@ -91,23 +91,23 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
 
 def update_urls(urls, content_type, object_id):
-    
+
     # Structure of urls param is [(field, link text, url), ... ]
-    
+
     new_urls = new_links = 0
-    
+
     for field, link_text, url in urls:
-        
+
         if url is not None and url.startswith('#'):
             instance = content_type.get_object_for_this_type(id=object_id)
             url = instance.get_absolute_url() + url
-            
+
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
-            
+
         url, url_created = Url.objects.get_or_create(url=url)
-        
+
         link, link_created = Link.objects.get_or_create(
             url=url,
             field=field,
@@ -115,27 +115,27 @@ def update_urls(urls, content_type, object_id):
             content_type=content_type,
             object_id=object_id,
         )
-        
+
         url.still_exists = True
         url.save()
         new_urls += url_created
         new_links += link_created
-        
+
     return new_urls, new_links
 
 
 def find_all_links(all_linklists):
-    
+
     all_links_dict = {}
     urls_created = links_created = 0
-    
+
     Url.objects.all().update(still_exists=False)
-    
+
     for linklist_name, linklist_cls in all_linklists.items():
-        
+
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
-        
+
         for linklist in linklists:
             object_id = linklist['object'].id
             urls = linklist['urls'] + linklist['images']
@@ -144,11 +144,11 @@ def find_all_links(all_linklists):
                 urls_created += new_urls
                 links_created += new_links
         all_links_dict[linklist_name] = linklists
-    
+
     deleted = Url.objects.filter(still_exists=False).count()
-    
+
     Url.objects.filter(still_exists=False).delete()
-    
+
     return {
         'urls_deleted': deleted,
         'urls_created': urls_created,
@@ -213,7 +213,7 @@ def get_type_fields(klass, the_type):
             fields.append(field)
     return fields
 
-    
+
 def is_model_covered(klass):
     for linklist in all_linklists.items():
         if linklist[1].model == klass:
@@ -239,7 +239,6 @@ def get_suggested_linklist_config(klass):
 
 
 def get_coverage_data():
-    
     """
     Check which models are covered by linkcheck
     This view assumes the key for link
@@ -262,5 +261,5 @@ def get_coverage_data():
                     'is_covered': is_model_covered(model),
                     'suggested_config': get_suggested_linklist_config(model),
                 })
-    
+
     return all_model_list

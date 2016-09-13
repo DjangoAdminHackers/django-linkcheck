@@ -34,7 +34,7 @@
 * notifications.py is now based on django-admin-blocks.
 * Linklist classes now support an ignore_empty list to ignore empty URLField values.
 
-1.0 
+1.0
 
 Changes:
 

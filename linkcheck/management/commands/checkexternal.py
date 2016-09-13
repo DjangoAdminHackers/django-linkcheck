@@ -6,7 +6,7 @@ from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
 
 
 class Command(BaseCommand):
-    
+
     help = 'Check and record external link status'
 
     def add_arguments(self, parser):
