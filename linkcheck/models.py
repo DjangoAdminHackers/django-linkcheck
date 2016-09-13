@@ -128,7 +128,7 @@ class Url(models.Model):
     def colour(self):
         if not self.last_checked:
             return 'blue'
-        elif self.status==True:
+        elif self.status is True:
             return 'green'
         else:
             return 'red'

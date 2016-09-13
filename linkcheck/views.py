@@ -55,7 +55,7 @@ def report(request):
     if request.method == 'POST':
 
         ignore_link_id = request.GET.get('ignore', None)
-        if ignore_link_id != None:
+        if ignore_link_id is not None:
             link = Link.objects.get(id=ignore_link_id)
             link.ignore = True
             link.save()
@@ -64,7 +64,7 @@ def report(request):
                 return HttpResponse(json_data, content_type='application/javascript')
 
         unignore_link_id = request.GET.get('unignore', None)
-        if unignore_link_id != None:
+        if unignore_link_id is not None:
             link = Link.objects.get(id=unignore_link_id)
             link.ignore = False
             link.save()

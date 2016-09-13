@@ -129,7 +129,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                 previous_url = getattr(instance, '__previous_url', None)
                 # We assume returning None from get_absolute_url means that this instance doesn't have a URL
                 # Not sure if we should do the same for '' as this could refer to '/'
-                if current_url!=None and current_url != previous_url:
+                if current_url is not None and current_url != previous_url:
 
                     active = linklist.objects().filter(pk=instance.pk).count()
 
