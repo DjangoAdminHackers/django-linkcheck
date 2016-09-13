@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 import re
 
+import django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
@@ -336,14 +337,10 @@ class ReportViewTestCase(TestCase):
 
 class GetJqueryMinJsTestCase(TestCase):
 
-    def test_old_version(self):
-        self.assertEqual('admin/js/jquery.min.js',
-                         get_jquery_min_js('1.8'))
-
-    def test_newer_version(self):
-        self.assertEqual('admin/js/vendor/jquery/jquery.min.js',
-                         get_jquery_min_js('1.9.9'))
-
-    def test_newest_version(self):
-        self.assertEqual('admin/js/vendor/jquery/jquery.min.js',
-                         get_jquery_min_js('1.10.1'))
+    def test(self):
+        if django.VERSION < (10, 0):
+            self.assertEqual('admin/js/jquery.min.js',
+                             get_jquery_min_js())
+        else:
+            self.assertEqual('admin/js/vendor/jquery/jquery.min.js',
+                             get_jquery_min_js())

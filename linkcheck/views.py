@@ -164,18 +164,13 @@ def report(request):
     )
 
 
-def get_jquery_min_js(version_string=None):
+def get_jquery_min_js():
     """
     Return the location of jquery.min.js.  It's in different places in
     different versions of Django.
     """
-    version_string = version_string or django.get_version()
-
-    django_major, django_minor = map(int, version_string.split("."))[:2]
-
-    jquery_min_js = ('admin/js/vendor/jquery/jquery.min.js'
-                     if django_major >= 1 and django_minor >= 9 else
-                     'admin/js/jquery.min.js')
+    jquery_min_js = ('admin/js/jquery.min.js' if django.VERSION < (1, 10)
+                     else 'admin/js/vendor/jquery/jquery.min.js')
 
     return jquery_min_js
 
