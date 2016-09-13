@@ -1,6 +1,5 @@
 import threading
 
-from django.conf import settings
 try:
     from django.utils.html_parser import HTMLParser
 except ImportError:

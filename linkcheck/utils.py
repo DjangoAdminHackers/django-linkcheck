@@ -1,6 +1,5 @@
 from django.db import models
 from django.test.client import ClientHandler
-from django.template.loader import render_to_string
 
 from datetime import datetime
 from datetime import timedelta
