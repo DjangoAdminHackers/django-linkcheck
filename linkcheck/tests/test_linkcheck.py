@@ -338,7 +338,7 @@ class ReportViewTestCase(TestCase):
 class GetJqueryMinJsTestCase(TestCase):
 
     def test(self):
-        if django.VERSION < (10, 0):
+        if django.VERSION < (1, 10):
             self.assertEqual('admin/js/jquery.min.js',
                              get_jquery_min_js())
         else:
