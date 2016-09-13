@@ -2,6 +2,7 @@ import json
 from itertools import groupby
 from operator import itemgetter
 
+import django
 from django import forms
 from django.conf import settings
 from django.contrib.admin.templatetags.admin_static import static
@@ -155,12 +156,23 @@ def report(request):
             'content_types_list': content_types_list,
             'pages': links,
             'filter': link_filter,
-            'media':  forms.Media(js=[static('admin/js/jquery.min.js')]),
+            'media':  forms.Media(js=[static(get_jquery_min_js())]),
             'qry_data': rqst.urlencode(),
             'report_type': report_type,
             'ignored_count': Link.objects.filter(ignore=True).count(),
         },
     )
+
+
+def get_jquery_min_js():
+    """
+    Return the location of jquery.min.js.  It's in different places in
+    different versions of Django.
+    """
+    jquery_min_js = ('admin/js/jquery.min.js' if django.VERSION < (1, 10)
+                     else 'admin/js/vendor/jquery/jquery.min.js')
+
+    return jquery_min_js
 
 
 def get_status_message():
