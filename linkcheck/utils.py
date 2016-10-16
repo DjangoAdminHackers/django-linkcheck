@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
 
@@ -243,9 +244,8 @@ def get_coverage_data():
     This view assumes the key for link
     """
     all_model_list = []
-    for app in models.get_apps():
-        model_list = models.get_models(app)
-        for model in model_list:
+    for app in apps.get_app_configs():
+        for model in app.get_models():
             should_append = False
             if getattr(model, 'get_absolute_url', None):
                 should_append = True

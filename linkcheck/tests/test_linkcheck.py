@@ -316,7 +316,7 @@ class ObjectsUpdateTestCase(TestCase):
         self.assertEqual(Url.objects.all()[0].url, good_url)
 
 
-class ReportViewTestCase(TestCase):
+class ViewTestCase(TestCase):
     def setUp(self):
         User.objects.create_superuser('admin', 'admin@example.org', 'password')
 
@@ -333,6 +333,17 @@ class ReportViewTestCase(TestCase):
         self.client.login(username='admin', password='password')
         response = self.client.get(reverse('linkcheck_report'))
         self.assertContains(response, "<h1>Link Checker</h1>")
+
+    def test_coverage_view(self):
+        self.client.login(username='admin', password='password')
+        response = self.client.get(reverse('linkcheck_coverage'))
+        self.assertContains(
+            response,
+            '<tr><td>sampleapp.Book</td>'
+            '<td style="font-weight: bold;color:green;">True</td>'
+            '<td style="font-weight: bold;color:green;"></td></tr>',
+            html=True,
+        )
 
 
 class GetJqueryMinJsTestCase(TestCase):
