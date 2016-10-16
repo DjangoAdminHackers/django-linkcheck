@@ -6,6 +6,7 @@ import os
 import re
 
 import django
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
@@ -255,7 +256,7 @@ class FindingLinksTestCase(TestCase):
         """
         Test that URLField empty content is excluded depending on ignore_empty list.
         """
-        from linkcheck.models import all_linklists
+        all_linklists = apps.get_app_config('linkcheck').all_linklists
         all_linklists['Authors'].ignore_empty = ['website']
         try:
             Author.objects.create(name="William Shakespeare")
@@ -268,7 +269,7 @@ class FindingLinksTestCase(TestCase):
         self.assertEqual(Url.objects.all().count(), 2)
 
     def test_findlinks_command(self):
-        from linkcheck.models import all_linklists
+        all_linklists = apps.get_app_config('linkcheck').all_linklists
         all_linklists['Authors'].url_fields = []
         Author.objects.create(name="John Smith", website="http://www.example.org/smith")
         all_linklists['Authors'].url_fields = ['website']

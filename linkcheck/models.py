@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import re
-import imp
 import os.path
 
 from datetime import datetime
@@ -15,14 +14,9 @@ except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import signals as model_signals
 from django.test.client import Client
 from django.utils.encoding import iri_to_uri, python_2_unicode_compatible
 from django.utils.http import urlunquote
-try:
-    from importlib import import_module
-except ImportError:
-    from django.utils.importlib import import_module
 from django.utils.six.moves import http_client
 from django.utils.six.moves.urllib.error import HTTPError, URLError
 from django.utils.six.moves.urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -38,7 +32,6 @@ except ImportError:
     USE_REVERSION = False
 
 from .linkcheck_settings import (
-    DISABLE_LISTENERS,
     MAX_URL_LENGTH,
     MEDIA_PREFIX,
     SITE_DOMAINS,
@@ -403,48 +396,3 @@ def link_post_delete(sender, instance, **kwargs):
             url.delete()
     except Url.DoesNotExist:
         pass
-model_signals.post_delete.connect(link_post_delete, sender=Link)
-
-
-# Autodiscovery of linkLists
-
-
-class AlreadyRegistered(Exception):
-    pass
-
-
-all_linklists = {}
-
-for app in settings.INSTALLED_APPS:
-    try:
-        app_path = import_module(app).__path__
-    except AttributeError:
-        continue
-    try:
-        imp.find_module('linklists', app_path)
-    except ImportError:
-        continue
-    the_module = import_module("%s.linklists" % app)
-    try:
-        for k in the_module.linklists.keys():
-            if k in all_linklists.keys():
-                raise AlreadyRegistered('The key %s is already registered in all_linklists' % k)
-
-        for l in the_module.linklists.values():
-            for l2 in all_linklists.values():
-                if l.model == l2.model:
-                    raise AlreadyRegistered('The LinkList %s is already registered in all_linklists' % l)
-        all_linklists.update(the_module.linklists)
-    except AttributeError:
-        pass
-
-# Add a reference to the linklist in the model. This change is for internal hash link,
-# But might also be useful elsewhere in the future
-
-for key, linklist in all_linklists.items():
-    setattr(linklist.model, '_linklist', linklist)
-
-
-# Register listeners
-if 'linkcheck' in settings.INSTALLED_APPS and not DISABLE_LISTENERS:
-    from . import listeners

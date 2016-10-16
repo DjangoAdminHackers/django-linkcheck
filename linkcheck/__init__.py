@@ -8,6 +8,8 @@ except ImportError:
 # A global lock, showing whether linkcheck is busy
 update_lock = threading.Lock()
 
+default_app_config = 'linkcheck.apps.LinkcheckConfig'
+
 
 class Lister(HTMLParser):
 
