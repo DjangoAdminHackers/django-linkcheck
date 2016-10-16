@@ -124,14 +124,17 @@ def update_urls(urls, content_type, object_id):
     return new_urls, new_links
 
 
-def find_all_links(all_linklists):
+def find_all_links(linklists=None):
+
+    if linklists is None:
+        linklists = all_linklists
 
     all_links_dict = {}
     urls_created = links_created = 0
 
     Url.objects.all().update(still_exists=False)
 
-    for linklist_name, linklist_cls in all_linklists.items():
+    for linklist_name, linklist_cls in linklists.items():
 
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
