@@ -38,6 +38,7 @@ except ImportError:
     USE_REVERSION = False
 
 from .linkcheck_settings import (
+    DISABLE_LISTENERS,
     MAX_URL_LENGTH,
     MEDIA_PREFIX,
     SITE_DOMAINS,
@@ -445,5 +446,5 @@ for key, linklist in all_linklists.items():
 
 
 # Register listeners
-if 'linkcheck' in settings.INSTALLED_APPS:
+if 'linkcheck' in settings.INSTALLED_APPS and not DISABLE_LISTENERS:
     from . import listeners
