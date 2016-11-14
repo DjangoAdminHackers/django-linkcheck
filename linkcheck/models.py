@@ -380,6 +380,7 @@ class Link(models.Model):
     url = models.ForeignKey(Url, related_name="links", on_delete=models.CASCADE)
     text = models.CharField(max_length=256, default='')
     ignore = models.BooleanField(default=False)
+    alert_mail = models.EmailField(null=True)
 
     @property
     def display_url(self):

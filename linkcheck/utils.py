@@ -4,6 +4,7 @@ from django.test.client import ClientHandler
 
 from datetime import datetime
 from datetime import timedelta
+import functools
 
 from .models import all_linklists, Link, Url
 from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_CLASSES, URL_FIELD_CLASSES
@@ -90,7 +91,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     return check_count
 
 
-def update_urls(urls, content_type, object_id):
+def update_urls(urls, content_type, object_id, alert_mail=None):
 
     # Structure of urls param is [(field, link text, url), ... ]
 
@@ -262,3 +263,12 @@ def get_coverage_data():
                 })
 
     return all_model_list
+
+sentinel = object()
+def rgetattr(obj, attr, default=sentinel):
+    if default is sentinel:
+        _getattr = getattr
+    else:
+        def _getattr(obj, name):
+            return getattr(obj, name, default)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
