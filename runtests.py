@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import os
 
 from os.path import dirname, abspath
 
@@ -8,7 +9,10 @@ from django.conf import settings
 
 if not settings.configured:
     test_settings = {
-        'DATABASES': {'default': {'ENGINE': 'django.db.backends.sqlite3'}},
+        'DATABASES': {'default': {'ENGINE': 'django.db.backends.sqlite3',
+                                  'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+                                  'TEST_NAME': os.path.join(os.path.dirname(__file__), 'test.db'),}
+                      },
         'STATIC_URL': '/static/',
         'INSTALLED_APPS': [
             'django.contrib.admin', 'django.contrib.auth',
