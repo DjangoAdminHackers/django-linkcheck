@@ -1,5 +1,6 @@
 import django
-from django.apps import apps
+if django.get_version() >= '1.7':
+    from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
 
@@ -245,7 +246,7 @@ def get_coverage_data():
 
 
     model_list = list()
-    if django.__version__ < '1.7':
+    if django.get_version() < '1.7':
         for app in models.get_apps():
             model_list.extend(models.get_models(app))
     else:
