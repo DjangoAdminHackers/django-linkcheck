@@ -113,6 +113,7 @@ def update_urls(urls, content_type, object_id, alert_mail=None):
             url=url,
             field=field,
             text=link_text,
+            alert_mail=alert_mail,
             content_type=content_type,
             object_id=object_id,
         )
@@ -140,7 +141,7 @@ def find_all_links(all_linklists):
             object_id = linklist['object'].id
             urls = linklist['urls'] + linklist['images']
             if urls:
-                new_urls, new_links = update_urls(urls, content_type, object_id)
+                new_urls, new_links = update_urls(urls, content_type, object_id, alert_mail=linklist['alert_mail'])
                 urls_created += new_urls
                 links_created += new_links
         all_links_dict[linklist_name] = linklists

@@ -1,0 +1,12 @@
+{% load i18n %}
+
+{% block content %}
+Broken links where found:
+
+    {% for link in links %}
+    Object: {{ link.content_object }}
+    Url: {{ link.url }}
+
+    {% endfor %}
+
+{% endblock %}

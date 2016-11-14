@@ -361,3 +361,19 @@ class GetJqueryMinJsTestCase(TestCase):
             self.assertEqual(
                 'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
             )
+
+
+class ManagementCommandTestCase(TestCase):
+
+    def setUp(self):
+        Author.objects.create(name="Author Name", website="author.org", mail="info@author.org")
+
+    def test_send_mail_report(self):
+        from django.core.management import call_command
+        from django.core import mail
+        from linkcheck.management.commands.sendreports import EMAIL_SUBJECT
+        call_command("findlinks")
+        call_command("sendreports")
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, EMAIL_SUBJECT)
