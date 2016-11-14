@@ -13,3 +13,5 @@ class Author(models.Model):
     # This model has purposefully no get_absolute_url
     name = models.CharField(max_length=50)
     website = models.URLField(blank=True)
+    mail = models.EmailField()
+

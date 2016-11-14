@@ -14,6 +14,8 @@ class AuthorLinklist(Linklist):
     model = Author
     object_filter = {}
     url_fields = ['website']
+    alert_mail_field = 'mail'
+
 
 
 linklists = {

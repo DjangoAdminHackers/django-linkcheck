@@ -251,6 +251,13 @@ class FindingLinksTestCase(TestCase):
             ["<Url: http://www.example.org>", "<Url: http://www.example.org/logo.png>"]
         )
 
+    def test_find_alert_email(self):
+        self.assertEqual(Url.objects.all().count(), 0)
+        Author.objects.create(name="Author name", website="https://author.org", mail="info@author.org")
+        self.assertEqual(Url.objects.all().count(), 1)
+        url = Url.objects.first()
+        link = url.links.first()
+        self.assertEqual(url.links.first().alert_mail, 'info@author.org')
     def test_empty_url_field(self):
         """
         Test that URLField empty content is excluded depending on ignore_empty list.
