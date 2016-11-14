@@ -183,8 +183,11 @@ class Linklist(object):
         from utils import rgetattr
         if hasattr(self, 'alert_mail_field'):
             field_name = self.alert_mail_field
-            mail = rgetattr(obj, field_name) or ''
-            return mail
+            try:
+                return rgetattr(obj, field_name) or ''
+            except AttributeError:
+                return None
+
 
     @classmethod
     def objects(cls):
