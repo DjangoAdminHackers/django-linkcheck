@@ -366,7 +366,11 @@ class GetJqueryMinJsTestCase(TestCase):
 class ManagementCommandTestCase(TestCase):
 
     def setUp(self):
-        Author.objects.create(name="Author Name", website="author.org", mail="info@author.org")
+        a1 = Author.objects.create(name="Author 1", website="http://author1.xyz", mail="mail1@example.org")
+        Book.objects.create(author=a1, title="Book 1", description="Read book online: http://someadress.xyz")
+        Book.objects.create(author=a1, title="Book 2", description="Read book online: http://anotheradress.xyz")
+
+        Author.objects.create(name="Author 2", website="http://author2.xyz", mail="mail2@example.org")
 
     def test_send_mail_report(self):
         from django.core.management import call_command
@@ -375,5 +379,5 @@ class ManagementCommandTestCase(TestCase):
         call_command("findlinks")
         call_command("sendreports")
 
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2) # 2 Mails to Author1 and Author2
         self.assertEqual(mail.outbox[0].subject, EMAIL_SUBJECT)
