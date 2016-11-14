@@ -33,7 +33,7 @@ if not settings.configured:
             'APP_DIRS': True,
         }],
         'EMAIL_BACKEND': 'django.core.mail.backends.filebased.EmailBackend',
-        'EMAIL_FILE_PATH': 'tmp/email-messages/',
+        'EMAIL_FILE_PATH': 'tmp/',
         'DEFAULT_FROM_EMAIL': 'example@example.org'
     }
     settings.configure(**test_settings)

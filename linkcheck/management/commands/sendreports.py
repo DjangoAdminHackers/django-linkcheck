@@ -17,18 +17,24 @@ class Command(BaseCommand):
     help = "Goes through all broken links an notifies the owner"
 
     def handle(self, *args, **options):
-        links = Link.objects.filter(url__status=False)
+        links = Link.objects.filter(url__status=False,
+                                    url__status__isnull=False,
+                                    ignore=False,
+                                    )
         self.stdout.write("Found %s broken links." % links.count())
 
         if DEFAULT_ALERT_EMAIL:
             self.stdout.write("Sending report to %s with all broken links..." % DEFAULT_ALERT_EMAIL)
             self.send_report(links, to_email=DEFAULT_ALERT_EMAIL)
 
+        links = links.filter(alert_mail__isnull=False)
         self.stdout.write("Sending reports...")
         for link in links:
             links_with_same_mail = links.filter(alert_mail=link.alert_mail)
-            self.send_report(links=links_with_same_mail)
-            links = links.exclude(alert_mail=link.alert_mail)
+            if links_with_same_mail.count() is 0:
+                continue
+            self.send_report(links=links_with_same_mail, to_email=link.alert_mail)
+            links = links.exclude(alert_mail=link.alert_mail).distinct()
 
         return "Finished."
 
