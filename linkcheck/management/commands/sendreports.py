@@ -45,7 +45,9 @@ class Command(BaseCommand):
         html = render_to_string('linkcheck/mail_report.html', {
             'links': links
         })
-        text = striptags(html)
+        text = render_to_string('linkcheck/mail_report.txt', {
+            'links': links
+        })
 
         msg = EmailMultiAlternatives(EMAIL_SUBJECT, text, settings.DEFAULT_FROM_EMAIL, [to_email])
         msg.attach_alternative(html, "text/html")
