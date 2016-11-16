@@ -343,7 +343,7 @@ class Url(models.Model):
 
         except HTTPError as e:
             if hasattr(e, 'code') and hasattr(e, 'msg'):
-                self.message = u' '.join([str(e.code), e.msg])
+                self.message = u' '.join([str(e.code), e.msg.decode('utf-8')])
             else:
                 self.message = "Unknown Error"
 
