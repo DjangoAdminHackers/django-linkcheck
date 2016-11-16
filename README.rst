@@ -83,6 +83,9 @@ customize the extracted links:
     ``image_fields``: a list of ``ImageField`` field names whose content will be
     considered as links. Empty ``ImageField`` content is always ignored.
 
+    ``alert_mail_field``: a field name containing a email address. The ``sendreports``
+    management command will notify this address about broken links.
+
 Management commands
 -------------------
 
@@ -103,7 +106,13 @@ interval can be adapted per-invocation by using the ``--externalinterval``
 (``-e``) command option (in minutes).
 
 You can also limit the maximum number of links to be checked by passing a number
-to the ``--limit`` (``--l``) command option.
+to the ``--limit`` (``--l``) command option.`
+
+sendreports
+~~~~~~~~~~~
+
+Sends an email report containing all broken links to `DEFAULT_ALERT_EMAIL`.
+If `alert_mail_field` is defined in the Linklist class, this address will be notified additionally.
 
 Settings
 --------
@@ -155,6 +164,13 @@ LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
 Default: 10
 
 The timeout in seconds for each connection attempts. Sometimes it is useful to limit check time per connection in order to hold at bay the total check time.
+
+LINKCHECK_DEFAULT_ALERT_MAIL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default: None
+
+The `sendreports` management command will send reports about broken links to this address.
 
 
 SITE_DOMAIN and LINKCHECK_SITE_DOMAINS
