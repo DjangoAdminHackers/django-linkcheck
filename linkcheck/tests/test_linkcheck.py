@@ -10,6 +10,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
+from django.core.management import call_command
+from django.core import mail
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.utils.six import StringIO
@@ -18,8 +20,10 @@ from django.utils.six.moves.urllib.error import HTTPError
 
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
+from linkcheck import linkcheck_settings
 
 from .sampleapp.models import Author, Book
+
 
 
 #MOCK addinfurl
@@ -365,21 +369,16 @@ class GetJqueryMinJsTestCase(TestCase):
 @override_settings(SITE_DOMAIN='example.com')
 class ManagementCommandTestCase(LiveServerTestCase):
 
-    def setUp(self):
+    def test_send_mail_report(self):
+        from linkcheck.management.commands.sendreports import EMAIL_SUBJECT
+        linkcheck_settings.EXTERNAL_RECHECK_INTERVAL = 0
+
         a1 = Author.objects.create(name="Author 1", website="%s/whatever/2" % self.live_server_url, mail="mail1@example.org")
         Book.objects.create(author=a1, title="Book 1", description="Read book online: %s/whatever/2" % self.live_server_url)
         Book.objects.create(author=a1, title="Book 2", description="Read book online: %s/whatever/3" % self.live_server_url)
-
         Author.objects.create(name="Author 2", website="%s/whatever/4" % self.live_server_url, mail="mail2@example.org")
 
 
-
-    def test_send_mail_report(self):
-        from django.core.management import call_command
-        from django.core import mail
-        from linkcheck.management.commands.sendreports import EMAIL_SUBJECT
-        from linkcheck import linkcheck_settings
-        linkcheck_settings.EXTERNAL_RECHECK_INTERVAL = 0
         call_command("findlinks")
         call_command("checklinks", "-e 0")
         call_command("sendreports")
@@ -388,4 +387,19 @@ class ManagementCommandTestCase(LiveServerTestCase):
         self.assertEqual(mail.outbox[0].subject, EMAIL_SUBJECT)
 
         self.assertEqual(Link.objects.first().alert_mails_count, 1)
+
+    def test_alert_mail_max(self):
+        Author.objects.create(name="Author 2", website="%s/whatever/4" % self.live_server_url, mail="mail2@example.org")
+        Link.objects.update(alert_mails_count=linkcheck_settings.MAX_ALERT_MAILS)
+
+        out = StringIO()
+        call_command("findlinks")
+        call_command("checklinks", "-e 0")
+        call_command("sendreports", stdout=out)
+
+        self.assertEqual(
+            out.getvalue().split('\n')[2],
+            "Finished. Sent 0 reports."
+        )
+
 
