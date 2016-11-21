@@ -199,6 +199,8 @@ class Url(models.Model):
         else:
             return Url.STATUS_NOT_TESTED
 
+        if self.status is not Url.STATUS_ERROR:
+            self.links.update(alert_mails_count=0)
         return self.status
 
     def _check_internal(self, tested_url):
@@ -393,6 +395,8 @@ class Link(models.Model):
     text = models.CharField(max_length=256, default='')
     ignore = models.BooleanField(default=False)
     alert_mail = models.EmailField(null=True)
+
+    alert_mails_count = models.PositiveIntegerField(default=0)
 
     @property
     def display_url(self):
