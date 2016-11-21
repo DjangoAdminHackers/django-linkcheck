@@ -366,19 +366,12 @@ class GetJqueryMinJsTestCase(TestCase):
 class ManagementCommandTestCase(LiveServerTestCase):
 
     def setUp(self):
-        a = Author.objects.all()
-        b = Book.objects.all()
-        u = Url.objects.all()
-
-        a1 = Author.objects.create(name="Author 1", website="http://lakshdlkashdlakshdoihrefoiioh.de", mail="mail1@example.org")
+        a1 = Author.objects.create(name="Author 1", website="%s/whatever/2" % self.live_server_url, mail="mail1@example.org")
         Book.objects.create(author=a1, title="Book 1", description="Read book online: %s/whatever/2" % self.live_server_url)
         Book.objects.create(author=a1, title="Book 2", description="Read book online: %s/whatever/3" % self.live_server_url)
 
         Author.objects.create(name="Author 2", website="%s/whatever/4" % self.live_server_url, mail="mail2@example.org")
 
-        a = Author.objects.all()
-        b = Book.objects.all()
-        u = Url.objects.all()
 
 
     def test_send_mail_report(self):
@@ -393,3 +386,6 @@ class ManagementCommandTestCase(LiveServerTestCase):
 
         self.assertEqual(len(mail.outbox), 2) # 2 Mails to Author1 and Author2
         self.assertEqual(mail.outbox[0].subject, EMAIL_SUBJECT)
+
+        self.assertEqual(Link.objects.first().alert_mails_count, 1)
+
