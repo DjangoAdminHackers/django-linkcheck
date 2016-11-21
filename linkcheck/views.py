@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
-from linkcheck.models import Link
+from linkcheck.models import Link, Url
 from linkcheck.utils import get_coverage_data
 
 
@@ -82,7 +82,7 @@ def report(request):
     link_filter = request.GET.get('filters', 'show_invalid')
 
     if link_filter == 'show_valid':
-        qset = Link.objects.filter(ignore=False, url__status__exact=True)
+        qset = Link.objects.filter(ignore=False, url__status__exact=Url.STATUS_OK)
         report_type = 'Good Links'
     elif link_filter == 'show_unchecked':
         qset = Link.objects.filter(ignore=False, url__last_checked__exact=None)
@@ -91,7 +91,7 @@ def report(request):
         qset = Link.objects.filter(ignore=True)
         report_type = 'Ignored Links'
     else:
-        qset = Link.objects.filter(ignore=False, url__status__exact=False)
+        qset = Link.objects.filter(ignore=False, url__status__exact=Url.STATUS_ERROR)
         report_type = 'Broken Links'
 
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
@@ -170,7 +170,7 @@ def get_status_message():
     if update_lock.locked():
         return "Still checking. Please refresh this page in a short while. "
     else:
-        broken_links = Link.objects.filter(ignore=False, url__status=False).count()
+        broken_links = Link.objects.filter(ignore=False, url__status=Url.STATUS_ERROR).count()
         if broken_links:
             return (
                 "<span style='color: red;'>We've found {} broken link{}.</span><br>"

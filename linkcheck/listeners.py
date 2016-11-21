@@ -208,7 +208,7 @@ def handle_rename(sender, path=None, **kwargs):
         new_count = 0
         new_url_qs = Url.objects.filter(url__startswith=new_url).filter(status=False)
         for url in new_url_qs:
-            if url.check_url():
+            if url.check_url() is Url.STATUS_OK:
                 new_count += 1
     else:
         new_url_qs = Url.objects.filter(url=new_url).filter(status=False)

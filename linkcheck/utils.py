@@ -74,6 +74,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     """
 
     urls = Url.objects.filter(still_exists=True)
+    urls_values = list(urls) #del
 
     # An optimization for when check_internal is False
     if not check_internal:
@@ -87,7 +88,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     check_count = 0
     for u in urls:
         status = u.check_url(check_internal=check_internal, check_external=check_external)
-        check_count += 1 if status is not None else 0
+        check_count += 1 if status is not Url.STATUS_NOT_TESTED else 0
 
     return check_count
 
@@ -106,7 +107,7 @@ def update_urls(urls, content_type, object_id, alert_mail=None):
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
-
+        u = Url.objects.all()
         url, url_created = Url.objects.get_or_create(url=url)
 
         link, link_created = Link.objects.get_or_create(

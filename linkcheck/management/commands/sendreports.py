@@ -17,8 +17,7 @@ class Command(BaseCommand):
     help = "Goes through all broken links an notifies the owner"
 
     def handle(self, *args, **options):
-        links = Link.objects.filter(url__status=False,
-                                    url__status__isnull=False,
+        links = Link.objects.filter(url__status=Url.STATUS_ERROR,
                                     ignore=False,
                                     )
         self.stdout.write("Found %s broken links." % links.count())

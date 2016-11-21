@@ -71,43 +71,43 @@ class InternalCheckTestCase(TestCase):
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.status, Url.STATUS_NOT_TESTED)
         self.assertEqual(uv.message, 'Email link (not automatically checked)')
 
     def test_internal_check_blank(self):
         uv = Url(url="", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message, 'Empty link')
 
     def test_internal_check_anchor(self):
         uv = Url(url="#some_anchor", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.status, Url.STATUS_NOT_TESTED)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
     def test_internal_check_view_301(self):
         uv = Url(url="/admin/linkcheck", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.status, Url.STATUS_NOT_TESTED)
         self.assertEqual(uv.message, 'This link redirects: code 301 (not automatically checked)')
 
     def test_internal_check_found(self):
         uv = Url(url="/public/", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message, 'Broken internal link')
 
     def test_internal_check_invalid_url(self):
         uv = Url(url="invalid/url", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message, 'Invalid URL')
 
     def test_same_page_anchor(self):
@@ -130,24 +130,24 @@ class InternalMediaCheckTestCase(TestCase):
     def test_internal_check_media_missing(self):
         uv = Url(url="/media/not_found", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message, 'Missing Document')
 
     def test_internal_check_media_found(self):
         uv = Url(url="/media/found", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, 'Working file link')
 
     def test_internal_check_media_utf8(self):
         uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, 'Working file link')
         # Also when the url is not encoded
         uv = Url(url="/media/rückmeldung", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, 'Working file link')
 
 
@@ -156,31 +156,31 @@ class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
         uv = Url(url="%s/http/200/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_200_utf8(self):
         uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, '200 OK')
         # Also when the url is not encoded
         uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_301(self):
         uv = Url(url="%s/http/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message.lower(), '301 moved permanently')
 
     def test_external_check_301_followed(self):
         uv = Url(url="%s/http/redirect/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, '301 OK')
         self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
@@ -190,14 +190,14 @@ class ExternalCheckTestCase(LiveServerTestCase):
         """
         uv = Url(url="%s/http/redirect/302/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.status, Url.STATUS_OK)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_404(self):
         uv = Url(url="%s/whatever/" % self.live_server_url, still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.status, Url.STATUS_ERROR)
         self.assertEqual(uv.message.lower(), '404 not found')
 
 
@@ -299,11 +299,11 @@ class ObjectsUpdateTestCase(TestCase):
         good_url = "/public/"
         author = Author.objects.create(name="John Smith", website=bad_url)
         self.assertEqual(
-            Link.objects.filter(ignore=False, url__status=False).count(),
+            Link.objects.filter(ignore=False, url__status=Url.STATUS_ERROR).count(),
             1
         )
         self.assertEqual(
-            Link.objects.filter(ignore=False, url__status=True).count(),
+            Link.objects.filter(ignore=False, url__status=Url.STATUS_OK).count(),
             0
         )
         self.assertEqual(Url.objects.all().count(), 1)
@@ -312,11 +312,11 @@ class ObjectsUpdateTestCase(TestCase):
         author.website = good_url
         author.save()
         self.assertEqual(
-            Link.objects.filter(ignore=False, url__status=False).count(),
+            Link.objects.filter(ignore=False, url__status=Url.STATUS_ERROR).count(),
             0
         )
         self.assertEqual(
-            Link.objects.filter(ignore=False, url__status=True).count(),
+            Link.objects.filter(ignore=False, url__status=Url.STATUS_OK).count(),
             1
         )
         self.assertEqual(Url.objects.all().count(), 1)
@@ -362,21 +362,33 @@ class GetJqueryMinJsTestCase(TestCase):
                 'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
             )
 
-
-class ManagementCommandTestCase(TestCase):
+@override_settings(SITE_DOMAIN='example.com')
+class ManagementCommandTestCase(LiveServerTestCase):
 
     def setUp(self):
-        a1 = Author.objects.create(name="Author 1", website="http://author1.xyz", mail="mail1@example.org")
-        Book.objects.create(author=a1, title="Book 1", description="Read book online: http://someadress.xyz")
-        Book.objects.create(author=a1, title="Book 2", description="Read book online: http://anotheradress.xyz")
+        a = Author.objects.all()
+        b = Book.objects.all()
+        u = Url.objects.all()
 
-        Author.objects.create(name="Author 2", website="http://author2.xyz", mail="mail2@example.org")
+        a1 = Author.objects.create(name="Author 1", website="http://lakshdlkashdlakshdoihrefoiioh.de", mail="mail1@example.org")
+        Book.objects.create(author=a1, title="Book 1", description="Read book online: %s/whatever/2" % self.live_server_url)
+        Book.objects.create(author=a1, title="Book 2", description="Read book online: %s/whatever/3" % self.live_server_url)
+
+        Author.objects.create(name="Author 2", website="%s/whatever/4" % self.live_server_url, mail="mail2@example.org")
+
+        a = Author.objects.all()
+        b = Book.objects.all()
+        u = Url.objects.all()
+
 
     def test_send_mail_report(self):
         from django.core.management import call_command
         from django.core import mail
         from linkcheck.management.commands.sendreports import EMAIL_SUBJECT
+        from linkcheck import linkcheck_settings
+        linkcheck_settings.EXTERNAL_RECHECK_INTERVAL = 0
         call_command("findlinks")
+        call_command("checklinks", "-e 0")
         call_command("sendreports")
 
         self.assertEqual(len(mail.outbox), 2) # 2 Mails to Author1 and Author2

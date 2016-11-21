@@ -19,6 +19,7 @@ from django.db.models import signals as model_signals
 from django.test.client import Client
 from django.utils.encoding import iri_to_uri, python_2_unicode_compatible
 from django.utils.http import urlunquote
+from django.utils.translation import ugettext_lazy as _
 try:
     from importlib import import_module
 except ImportError:
@@ -98,10 +99,21 @@ class Url(models.Model):
     """
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)  # See http://www.boutell.com/newfaq/misc/urllength.html
     last_checked = models.DateTimeField(blank=True, null=True)
-    status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField(default=False)
     redirect_to = models.CharField(max_length=MAX_URL_LENGTH, default='')
+
+    STATUS_OK = 'ok'
+    STATUS_ERROR = 'error'
+    STATUS_NOT_TESTED = 'untested'
+    STATUS_CHOICES = (
+        (STATUS_OK, _('None')),
+        (STATUS_ERROR, _('Error')),
+        (STATUS_NOT_TESTED, _('Not tested'))
+    )
+    status = models.CharField(max_length=20,
+                              choices=STATUS_CHOICES,
+                              default=STATUS_NOT_TESTED)
 
     @property
     def type(self):
@@ -127,9 +139,9 @@ class Url(models.Model):
 
     @property
     def colour(self):
-        if not self.last_checked:
+        if self.status is self.STATUS_NOT_TESTED:
             return 'blue'
-        elif self.status is True:
+        elif self.status is self.STATUS_OK:
             return 'green'
         else:
             return 'red'
@@ -149,7 +161,7 @@ class Url(models.Model):
          * None if the link was not checked
         """
 
-        self.status = False
+        self.status = self.STATUS_ERROR
 
         # Remove current domain from URLs as the test client chokes when trying to test them during a page save
         # They shouldn't generally exist but occasionally slip through
@@ -185,7 +197,7 @@ class Url(models.Model):
             self._check_external(tested_url, external_recheck_interval)
 
         else:
-            return None
+            return Url.STATUS_NOT_TESTED
 
         return self.status
 
@@ -197,11 +209,11 @@ class Url(models.Model):
             self.message = 'Empty link'
 
         elif tested_url.startswith('mailto:'):
-            self.status = None
+            self.status = self.STATUS_NOT_TESTED
             self.message = 'Email link (not automatically checked)'
 
         elif tested_url.startswith('#'):
-            self.status = None
+            self.status = self.STATUS_NOT_TESTED
             self.message = 'Link to within the same page (not automatically checked)'
 
         elif tested_url.startswith(MEDIA_PREFIX):
@@ -210,7 +222,7 @@ class Url(models.Model):
             decoded_path = html_decode(path)
             if os.path.exists(path) or os.path.exists(decoded_path):
                 self.message = 'Working file link'
-                self.status = True
+                self.status = self.STATUS_OK
             else:
                 self.message = 'Missing Document'
 
@@ -222,7 +234,7 @@ class Url(models.Model):
             instance = self._instance
             if hash == '#': # special case, point to #
                 self.message = 'Working internal hash anchor'
-                self.status = True
+                self.status = self.STATUS_OK
             else:
                 hash = hash[1:] #'#something' => 'something'
                 html_content = ''
@@ -231,7 +243,7 @@ class Url(models.Model):
                 names = parse_anchors(html_content)
                 if hash in names:
                     self.message = 'Working internal hash anchor'
-                    self.status = True
+                    self.status = self.STATUS_OK
                 else:
                     self.message = 'Broken internal hash anchor'
 
@@ -247,7 +259,7 @@ class Url(models.Model):
 
             if response.status_code == 200:
                 self.message = 'Working internal link'
-                self.status = True
+                self.status = self.STATUS_OK
                 # see if the internal link points an anchor
                 if tested_url[-1] == '#': # special case, point to #
                     self.message = 'Working internal hash anchor'
@@ -257,13 +269,13 @@ class Url(models.Model):
                     names = parse_anchors(response.content)
                     if anchor in names:
                         self.message = 'Working internal hash anchor'
-                        self.status = True
+                        self.status = self.STATUS_OK
                     else:
                         self.message = 'Broken internal hash anchor'
-                        self.status = False
+                        self.status = self.STATUS_ERROR
 
             elif response.status_code == 302 or response.status_code == 301:
-                self.status = None
+                self.status = self.STATUS_NOT_TESTED
                 self.message = 'This link redirects: code %d (not automatically checked)' % (response.status_code, )
             else:
                 self.message = 'Broken internal link'
@@ -317,7 +329,7 @@ class Url(models.Model):
                     )
 
             self.message = ' '.join([str(response.code), response.msg])
-            self.status = True
+            self.status = self.STATUS_OK
 
             if tested_url.count('#'):
 
@@ -327,16 +339,16 @@ class Url(models.Model):
                     names = parse_anchors(response.read())
                     if anchor in names:
                         self.message = 'Working external hash anchor'
-                        self.status = True
+                        self.status = self.STATUS_OK
                     else:
                         self.message = 'Broken external hash anchor'
-                        self.status = False
+                        self.status = self.STATUS_ERROR
 
                 except:
                     # The external web page is mal-formatted #or maybe other parse errors like encoding
                     # I reckon a broken anchor on an otherwise good URL should count as a pass
                     self.message = "Page OK but anchor can't be checked"
-                    self.status = True
+                    self.status = self.STATUS_OK
 
         except http_client.BadStatusLine:
                 self.message = "Bad Status Line"
