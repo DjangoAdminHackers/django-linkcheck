@@ -1,0 +1,21 @@
+{% load i18n %}
+
+{% block content %}
+    Broken links where found:
+    <table>
+        <tr>
+            <th>Object</th>
+            <th>Url</th>
+        </tr>
+
+        {% for link in links %}
+            <tr>
+                <td>{{ link.content_object }}</td>
+                <td>{{ link.url }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+
+{% endblock %}

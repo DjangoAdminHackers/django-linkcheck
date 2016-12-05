@@ -179,6 +179,16 @@ class Linklist(object):
 
         return urls
 
+    def alert_mail(self, obj):
+        from .utils import rgetattr
+        if hasattr(self, 'alert_mail_field'):
+            field_name = self.alert_mail_field
+            try:
+                return rgetattr(obj, field_name) or ''
+            except AttributeError:
+                return None
+
+
     @classmethod
     def objects(cls):
 
@@ -205,6 +215,7 @@ class Linklist(object):
                 'object': obj,
                 'urls': self.urls(obj),
                 'images': self.images(obj),
+                'alert_mail': self.alert_mail(obj),
             })
 
         return linklist

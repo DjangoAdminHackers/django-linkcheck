@@ -171,12 +171,12 @@
                                     <td>{{link.field}}</td>
                                     <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
                                     <td class="actioncell">
-                                        {% if not link.url.status %}
+                                        {% if link.url.status == 'error' %}
                                             <form class="recheck" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}recheck={{ link.id }}"><input type="submit" value="Recheck" /></form>
                                         {% endif %}
                                     </td>
                                     <td class="actioncell">
-                                        {% if not link.url.status %}
+                                        {% if link.url.status == 'error' %}
                                             {% if link.url.external %}
                                                 {% if not link.ignore %}
                                                     <form class="ignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}ignore={{ link.id }}"><input type="submit" value="Ignore" /></form>

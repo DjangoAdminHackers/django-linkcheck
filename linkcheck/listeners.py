@@ -66,7 +66,7 @@ for linklist_name, linklist_cls in all_linklists.items():
                         internal_hash = url
                         url = instance.get_absolute_url() + url
                     u, created = Url.objects.get_or_create(url=url)
-                    l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
+                    l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], alert_mail=linklist['alert_mail'], content_type=content_type, object_id=instance.pk)
                     new_links.append(l.id)
                     u.still_exists = True
                     if internal_hash:
@@ -208,7 +208,7 @@ def handle_rename(sender, path=None, **kwargs):
         new_count = 0
         new_url_qs = Url.objects.filter(url__startswith=new_url).filter(status=False)
         for url in new_url_qs:
-            if url.check_url():
+            if url.check_url() is Url.STATUS_OK:
                 new_count += 1
     else:
         new_url_qs = Url.objects.filter(url=new_url).filter(status=False)

@@ -1,20 +1,22 @@
-from django.apps import apps
+import django
+if django.get_version() >= '1.7':
+    from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
 
 from datetime import datetime
 from datetime import timedelta
+import functools
 
 from .models import all_linklists, Link, Url
 from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_CLASSES, URL_FIELD_CLASSES
 
 
 class LinkCheckHandler(ClientHandler):
-
     # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
-        self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
+        self.ignore_keywords = ['reversion.middleware', 'MaintenanceModeMiddleware']
         super(LinkCheckHandler, self).load_middleware()
         new_request_middleware = []
 
@@ -72,6 +74,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     """
 
     urls = Url.objects.filter(still_exists=True)
+    urls_values = list(urls) #del
 
     # An optimization for when check_internal is False
     if not check_internal:
@@ -85,13 +88,12 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     check_count = 0
     for u in urls:
         status = u.check_url(check_internal=check_internal, check_external=check_external)
-        check_count += 1 if status is not None else 0
+        check_count += 1 if status is not Url.STATUS_NOT_TESTED else 0
 
     return check_count
 
 
-def update_urls(urls, content_type, object_id):
-
+def update_urls(urls, content_type, object_id, alert_mail=None):
     # Structure of urls param is [(field, link text, url), ... ]
 
     new_urls = new_links = 0
@@ -105,13 +107,14 @@ def update_urls(urls, content_type, object_id):
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
             continue
-
+        u = Url.objects.all()
         url, url_created = Url.objects.get_or_create(url=url)
 
         link, link_created = Link.objects.get_or_create(
             url=url,
             field=field,
             text=link_text,
+            alert_mail=alert_mail,
             content_type=content_type,
             object_id=object_id,
         )
@@ -125,7 +128,6 @@ def update_urls(urls, content_type, object_id):
 
 
 def find_all_links(all_linklists):
-
     all_links_dict = {}
     urls_created = links_created = 0
 
@@ -140,7 +142,7 @@ def find_all_links(all_linklists):
             object_id = linklist['object'].id
             urls = linklist['urls'] + linklist['images']
             if urls:
-                new_urls, new_links = update_urls(urls, content_type, object_id)
+                new_urls, new_links = update_urls(urls, content_type, object_id, alert_mail=linklist['alert_mail'])
                 urls_created += new_urls
                 links_created += new_links
         all_links_dict[linklist_name] = linklists
@@ -243,22 +245,44 @@ def get_coverage_data():
     Check which models are covered by linkcheck
     This view assumes the key for link
     """
+
+
+    model_list = list()
+    if django.get_version() < '1.7':
+        for app in models.get_apps():
+            model_list.extend(models.get_models(app))
+    else:
+        for app in apps.get_app_configs():
+            model_list.extend(app.get_models())
+
     all_model_list = []
-    for app in apps.get_app_configs():
-        for model in app.get_models():
-            should_append = False
-            if getattr(model, 'get_absolute_url', None):
-                should_append = True
-            else:
-                for field in model._meta.fields:
-                    if is_interesting_field(field):
-                        should_append = True
-                        break
-            if should_append:
-                all_model_list.append({
-                    'name': '%s.%s' % (model._meta.app_label, model._meta.object_name),
-                    'is_covered': is_model_covered(model),
-                    'suggested_config': get_suggested_linklist_config(model),
-                })
+    for model in model_list:
+        should_append = False
+        if getattr(model, 'get_absolute_url', None):
+            should_append = True
+        else:
+            for field in model._meta.fields:
+                if is_interesting_field(field):
+                    should_append = True
+                    break
+        if should_append:
+            all_model_list.append({
+                'name': '%s.%s' % (model._meta.app_label, model._meta.object_name),
+                'is_covered': is_model_covered(model),
+                'suggested_config': get_suggested_linklist_config(model),
+            })
+
 
     return all_model_list
+
+
+sentinel = object()
+
+
+def rgetattr(obj, attr, default=sentinel):
+    if default is sentinel:
+        _getattr = getattr
+    else:
+        def _getattr(obj, name):
+            return getattr(obj, name, default)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
