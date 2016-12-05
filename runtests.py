@@ -34,7 +34,10 @@ if not settings.configured:
         }],
         'EMAIL_BACKEND': 'django.core.mail.backends.filebased.EmailBackend',
         'EMAIL_FILE_PATH': 'tmp/',
-        'DEFAULT_FROM_EMAIL': 'example@example.org'
+        'DEFAULT_FROM_EMAIL': 'example@example.org',
+        'MIGRATION_MODULES': {
+            'linkcheck': 'linkcheck.south_migrations'
+        }
     }
     settings.configure(**test_settings)
 
