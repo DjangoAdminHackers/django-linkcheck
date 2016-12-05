@@ -13,9 +13,10 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('url', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
             ('last_checked', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('status', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
             ('message', self.gf('django.db.models.fields.CharField')(max_length=1024, null=True, blank=True)),
             ('still_exists', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('redirect_to', self.gf('django.db.models.fields.CharField')(default=u'', max_length=255)),
+            ('status', self.gf('django.db.models.fields.CharField')(default=u'untested', max_length=20)),
         ))
         db.send_create_signal(u'linkcheck', ['Url'])
 
@@ -28,6 +29,8 @@ class Migration(SchemaMigration):
             ('url', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'links', to=orm['linkcheck.Url'])),
             ('text', self.gf('django.db.models.fields.CharField')(default=u'', max_length=256)),
             ('ignore', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('alert_mail', self.gf('django.db.models.fields.EmailField')(max_length=75, null=True)),
+            ('alert_mails_count', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
         ))
         db.send_create_signal(u'linkcheck', ['Link'])
 
@@ -50,6 +53,8 @@ class Migration(SchemaMigration):
         },
         u'linkcheck.link': {
             'Meta': {'object_name': 'Link'},
+            'alert_mail': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True'}),
+            'alert_mails_count': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
             'field': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -63,7 +68,8 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_checked': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'message': ('django.db.models.fields.CharField', [], {'max_length': '1024', 'null': 'True', 'blank': 'True'}),
-            'status': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
+            'redirect_to': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '255'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "u'untested'", 'max_length': '20'}),
             'still_exists': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'url': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         }
