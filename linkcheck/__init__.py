@@ -180,7 +180,7 @@ class Linklist(object):
         return urls
 
     def alert_mail(self, obj):
-        from utils import rgetattr
+        from .utils import rgetattr
         if hasattr(self, 'alert_mail_field'):
             field_name = self.alert_mail_field
             try:
