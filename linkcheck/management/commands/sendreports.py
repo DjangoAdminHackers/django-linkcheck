@@ -37,9 +37,10 @@ class Command(BaseCommand):
             if links_with_same_mail.filter(alert_mails_count__lt=MAX_ALERT_MAILS).count() is 0:
                 continue
             self.send_report(links=links_with_same_mail, to_email=link.alert_mail)
+            links.update(alert_mails_count=F('alert_mails_count') + 1)
             links = links.exclude(alert_mail=link.alert_mail).distinct()
 
-            reports_sent+=1
+            reports_sent += 1
 
         return "Finished. Sent %s reports." % str(reports_sent)
 
@@ -58,4 +59,4 @@ class Command(BaseCommand):
         msg.attach_alternative(html, "text/html")
         msg.send()
 
-        links.update(alert_mails_count=F('alert_mails_count')+1)
+
