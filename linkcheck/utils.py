@@ -5,7 +5,7 @@ from django.test.client import ClientHandler
 from datetime import datetime
 from datetime import timedelta
 
-from .models import all_linklists, Link, Url
+from .models import Link, Url
 from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_CLASSES, URL_FIELD_CLASSES
 
 
@@ -124,14 +124,17 @@ def update_urls(urls, content_type, object_id):
     return new_urls, new_links
 
 
-def find_all_links(all_linklists):
+def find_all_links(linklists=None):
+
+    if linklists is None:
+        linklists = apps.get_app_config('linkcheck').all_linklists
 
     all_links_dict = {}
     urls_created = links_created = 0
 
     Url.objects.all().update(still_exists=False)
 
-    for linklist_name, linklist_cls in all_linklists.items():
+    for linklist_name, linklist_cls in linklists.items():
 
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
@@ -215,7 +218,8 @@ def get_type_fields(klass, the_type):
 
 
 def is_model_covered(klass):
-    for linklist in all_linklists.items():
+    app = apps.get_app_config('linkcheck')
+    for linklist in app.all_linklists.items():
         if linklist[1].model == klass:
             return True
     return False

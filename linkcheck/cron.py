@@ -13,7 +13,6 @@ from django_cron import HOUR, DAY, WEEK, MONTH
 
 from linkcheck.utils import check_links
 from linkcheck.utils import find_all_links
-from linkcheck.models import all_linklists
 
 from linkcheck.linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
 from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
@@ -24,7 +23,7 @@ class RunLinkCheckFind(Job):
         run_every = WEEK
 
         def job(self):
-            find_all_links(all_linklists)
+            find_all_links()
 
 cronScheduler.register(RunLinkCheckFind)
 

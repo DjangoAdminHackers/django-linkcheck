@@ -3,6 +3,7 @@ import sys
 import time
 from threading import Thread
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import signals as model_signals
@@ -18,14 +19,14 @@ except ImportError:
 
 
 from . import update_lock
-from linkcheck.models import all_linklists, Url, Link
+from linkcheck.models import Url, Link
 
 listeners = []
 
 
 # 1. register listeners for the objects that contain Links
 
-for linklist_name, linklist_cls in all_linklists.items():
+for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
 
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
         """
