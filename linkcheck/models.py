@@ -115,6 +115,7 @@ class Url(models.Model):
                               choices=STATUS_CHOICES,
                               default=STATUS_NOT_TESTED)
 
+
     @property
     def type(self):
         if EXTERNAL_REGEX.match(self.url):
@@ -379,6 +380,10 @@ class Url(models.Model):
         self.last_checked = now()
         self.save()
 
+    def save(self, *args, **kwargs):
+        super(Url, self).save(*args, **kwargs)
+        if self.status == self.STATUS_OK:
+            self.links.update(alert_mails_count=0)
 
 class Link(models.Model):
     """
