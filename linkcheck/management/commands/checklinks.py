@@ -17,8 +17,8 @@ class Command(BaseCommand):
                  'Defaults to linkcheck_config setting.  Value less than 1 will check all')
 
     def handle(self, *args, **options):
-        externalinterval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
-        limit = options['limit'] or MAX_CHECKS_PER_RUN
+        externalinterval = options.get('externalinterval', None) or EXTERNAL_RECHECK_INTERVAL
+        limit = options.get('limit', None) or MAX_CHECKS_PER_RUN
 
         self.stdout.write("Checking all links that haven't been tested for %s minutes." % externalinterval)
         if limit != -1:
