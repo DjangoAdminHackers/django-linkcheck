@@ -17,7 +17,7 @@ if not settings.configured:
         ],
         'ROOT_URLCONF': "linkcheck.tests.urls",
         'SITE_DOMAIN': "localhost",
-        'MIDDLEWARE_CLASSES': [
+        'MIDDLEWARE': [
             'django.contrib.sessions.middleware.SessionMiddleware',
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
@@ -29,6 +29,8 @@ if not settings.configured:
             'APP_DIRS': True,
         }],
     }
+    # Django < 1.10 compatibility
+    test_settings['MIDDLEWARE_CLASSES'] = test_settings['MIDDLEWARE']
     settings.configure(**test_settings)
 
 
