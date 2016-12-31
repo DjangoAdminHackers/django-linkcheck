@@ -29,14 +29,15 @@ Basic usage
 
 #. Install app to somewhere on your Python path (e.g. ``pip install
    django-linkcheck``).
+   
+#. Add ``'linkcheck'`` to your ``settings.INSTALLED_APPS``.
 
-#. Add something along the lines of ``examples/linklists.py`` to every app that
-   either:
+#. Add a file named ``linklists.py`` to every app (see an example in ``examples/linklists.py``) that either:
 
-  #) has models that contain content (e.g. url/image fields, chunks of markup
-     or anything that gets transformed into a IMG or HREF when displayed
-  #) can be the target of a link - i.e. is addressed by a url - in this case
-     make sure it has an instance method named 'get_absolute_url'
+   #) has models that contain content (e.g. url/image fields, chunks of markup
+      or anything that gets transformed into a IMG or HREF when displayed
+   #) can be the target of a link - i.e. is addressed by a url - in this case
+      make sure it has an instance method named 'get_absolute_url'
 
 #. Run ``./manage.py migrate``.
 
