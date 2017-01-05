@@ -2,6 +2,7 @@ import os.path
 import sys
 import time
 from threading import Thread
+import Queue
 
 from django.apps import apps
 from django.conf import settings
@@ -20,6 +21,31 @@ except ImportError:
 
 from . import update_lock
 from linkcheck.models import Url, Link
+
+tasks_queue = Queue.Queue()
+worker_queue = Queue.Queue()
+
+
+def linkcheck_worker():
+    while not tasks_queue.empty():
+        try:
+            task = tasks_queue.get_nowait()
+        except Queue.Empty:
+            break
+        task['target'](*task['args'], **task['kwargs'])
+        time.sleep(0.1)
+
+
+def start_worker():
+    if not worker_queue.empty():
+        # we have a worker processing it already.
+        return
+    else:
+        # starting a worker.
+        t = Thread(target=linkcheck_worker)
+        t.start()
+        worker_queue.put(t)
+
 
 listeners = []
 
@@ -82,8 +108,8 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
         if len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py'):
             do_check_instance_links(sender, instance, linklist_cls)
         else:
-            t = Thread(target=do_check_instance_links, args=(sender, instance, linklist_cls, True))
-            t.start()
+            tasks_queue.put({'target': do_check_instance_links, 'args': (sender, instance, linklist_cls, True), 'kwargs': {}})
+            start_worker()
 
     listeners.append(check_instance_links)
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
@@ -145,8 +171,8 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
             if len(sys.argv)>1 and sys.argv[1] == 'test' or sys.argv[0] == 'runtests.py':
                 do_instance_post_save(sender, instance, ModelCls, **kwargs)
             else:
-                t = Thread(target=do_instance_post_save, args=(sender, instance, ModelCls,), kwargs=kwargs)
-                t.start()
+                tasks_queue.put({'target': do_instance_post_save, 'args': (sender, instance, ModelCls,), 'kwargs': kwargs})
+                start_worker()
 
         listeners.append(instance_post_save)
         model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
