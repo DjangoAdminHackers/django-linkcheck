@@ -5,7 +5,7 @@ from threading import Thread
 try:
     import Queue
 except ImportError:
-    from queue import Queue
+    import queue as Queue
 
 from django.apps import apps
 from django.conf import settings
