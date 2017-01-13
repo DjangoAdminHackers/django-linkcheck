@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name='django-linkcheck',
-    version='1.3',
+    version='1.4',
     description="A Django app that will analyze and report on links in any "
                 "model that you register with it.",
     long_description=read('README.rst'),
