@@ -19,7 +19,6 @@ setup(
         'linkcheck.management',
         'linkcheck.management.commands',
         'linkcheck.migrations',
-        'linkcheck.south_migrations',
         'linkcheck.tests',
         'linkcheck.tests.sampleapp',
     ],
