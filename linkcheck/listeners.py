@@ -2,7 +2,10 @@ import os.path
 import sys
 import time
 from threading import Thread
-import Queue
+try:
+    import Queue
+except ImportError:
+    from queue import Queue
 
 from django.apps import apps
 from django.conf import settings
