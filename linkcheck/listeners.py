@@ -141,11 +141,11 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
                 if previous_url == current_url:
                     return
                 else:
-                    old_urls = Url.objects.filter(url__startswith=previous_url)
-                    if old_urls:
+                    if previous_url:
+                        old_urls = Url.objects.filter(url__startswith=previous_url)
                         old_urls.update(status=False, message='Broken internal link')
-                    new_urls = Url.objects.filter(url__startswith=current_url)
-                    if new_urls:
+                    if current_url:
+                        new_urls = Url.objects.filter(url__startswith=current_url)
                         # Mark these urls' status as False, so that post_save will check them
                         new_urls.update(status=False, message='Should be checked now!')
 
