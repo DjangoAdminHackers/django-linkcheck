@@ -1,10 +1,14 @@
+import logging
 import os.path
 import sys
+import threading
 import time
 from threading import Thread
+
 try:
     import Queue
 except ImportError:
+    # Python 3
     import queue as Queue
 
 from django.apps import apps
@@ -21,33 +25,38 @@ try:
 except ImportError:
     FILEBROWSER_PRESENT = False
 
-
 from . import update_lock
 from linkcheck.models import Url, Link
 
-tasks_queue = Queue.Queue()
-worker_queue = Queue.Queue()
+
+logger = logging.getLogger(__name__)
+
+tasks_queue = Queue.LifoQueue()
+worker_running = False
 
 
 def linkcheck_worker():
-    while not tasks_queue.empty():
-        try:
-            task = tasks_queue.get_nowait()
-        except Queue.Empty:
-            break
+    logger.debug("Running worker: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
+    global worker_running
+    while tasks_queue.not_empty:
+        task = tasks_queue.get()
         task['target'](*task['args'], **task['kwargs'])
-        time.sleep(0.1)
+        tasks_queue.task_done()
+        logger.debug("Consuming: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
+    logger.debug("Empty: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
+    worker_running = False
 
 
 def start_worker():
-    if not worker_queue.empty():
-        # we have a worker processing it already.
-        return
-    else:
-        # starting a worker.
+    global worker_running
+    if worker_running is False:
+        worker_running = True
+        logger.debug("Starting worker: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
         t = Thread(target=linkcheck_worker)
+        t.daemon = True
         t.start()
-        worker_queue.put(t)
+    else:
+        logger.debug("Already running. {} threads".format(threading.active_count()))
 
 
 listeners = []
@@ -58,6 +67,7 @@ listeners = []
 for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
 
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
+        logger.debug("{} threads".format(threading.active_count()))
         """
         When an object is saved:
             new Link/Urls are created, checked
@@ -72,6 +82,9 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
             # On some installations, this wait time might be enough for the
             # thread transaction to account for the object change (GH #41).
             # A candidate for the future post_commit signal.
+
+            global worker_running
+
             if wait:
                 time.sleep(0.1)
             with update_lock:
@@ -106,13 +119,16 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
 
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
+            logger.debug("Done: {}#{}".format(type(instance), instance.pk))
 
         # Don't run in a separate thread if we are running tests
         if len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py'):
             do_check_instance_links(sender, instance, linklist_cls)
         else:
+            logger.debug("Put: {} tasks {}, threads for {}#{}".format(tasks_queue.qsize(), threading.active_count(), type(instance), instance.pk))
             tasks_queue.put({'target': do_check_instance_links, 'args': (sender, instance, linklist_cls, True), 'kwargs': {}})
             start_worker()
+
 
     listeners.append(check_instance_links)
     model_signals.post_save.connect(listeners[-1], sender=linklist_cls.model)
