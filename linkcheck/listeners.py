@@ -1,7 +1,5 @@
-import logging
 import os.path
 import sys
-import threading
 import time
 from threading import Thread
 
@@ -29,21 +27,16 @@ from . import update_lock
 from linkcheck.models import Url, Link
 
 
-logger = logging.getLogger(__name__)
-
 tasks_queue = Queue.LifoQueue()
 worker_running = False
 
 
 def linkcheck_worker():
-    logger.debug("Running worker: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
     global worker_running
     while tasks_queue.not_empty:
         task = tasks_queue.get()
         task['target'](*task['args'], **task['kwargs'])
         tasks_queue.task_done()
-        logger.debug("Consuming: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
-    logger.debug("Empty: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
     worker_running = False
 
 
@@ -51,12 +44,9 @@ def start_worker():
     global worker_running
     if worker_running is False:
         worker_running = True
-        logger.debug("Starting worker: {} tasks. {} threads".format(tasks_queue.qsize(), threading.active_count()))
         t = Thread(target=linkcheck_worker)
         t.daemon = True
         t.start()
-    else:
-        logger.debug("Already running. {} threads".format(threading.active_count()))
 
 
 listeners = []
@@ -67,7 +57,6 @@ listeners = []
 for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
 
     def check_instance_links(sender, instance, linklist_cls=linklist_cls, **kwargs):
-        logger.debug("{} threads".format(threading.active_count()))
         """
         When an object is saved:
             new Link/Urls are created, checked
@@ -119,13 +108,11 @@ for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklist
 
                 gone_links = old_links.exclude(id__in=new_links)
                 gone_links.delete()
-            logger.debug("Done: {}#{}".format(type(instance), instance.pk))
 
         # Don't run in a separate thread if we are running tests
         if len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py'):
             do_check_instance_links(sender, instance, linklist_cls)
         else:
-            logger.debug("Put: {} tasks {}, threads for {}#{}".format(tasks_queue.qsize(), threading.active_count(), type(instance), instance.pk))
             tasks_queue.put({'target': do_check_instance_links, 'args': (sender, instance, linklist_cls, True), 'kwargs': {}})
             start_worker()
 
