@@ -102,6 +102,8 @@ class Url(models.Model):
             return 'external'
         if self.url.startswith('mailto'):
             return 'mailto'
+        if self.url.startswith('tel'):
+            return 'phone'
         elif str(self.url)=='':
             return 'empty'
         elif self.url.startswith('#'):
@@ -192,6 +194,10 @@ class Url(models.Model):
         elif tested_url.startswith('mailto:'):
             self.status = None
             self.message = 'Email link (not automatically checked)'
+
+        elif tested_url.startswith('tel:'):
+            self.status = None
+            self.message = 'Phone number (not automatically checked)'
 
         elif tested_url.startswith('#'):
             self.status = None
