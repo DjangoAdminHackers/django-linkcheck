@@ -22,7 +22,6 @@ if not settings.configured:
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
-            'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         ],
         'TEMPLATES': [{
             'BACKEND': 'django.template.backends.django.DjangoTemplates',

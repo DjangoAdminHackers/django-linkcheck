@@ -10,10 +10,14 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+
+try:
+    from django.urls import reverse, NoReverseMatch
+except ImportError:  # Django < 1.10
+    from django.core.urlresolvers import reverse, NoReverseMatch
 
 from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
