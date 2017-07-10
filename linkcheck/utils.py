@@ -78,14 +78,12 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
         recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
         urls = urls.exclude(last_checked__gt=recheck_datetime)
 
-    # If limit is specified set the limit
-    if limit and limit > -1:
-        urls = urls[:limit]
-
     check_count = 0
     for u in urls:
         status = u.check_url(check_internal=check_internal, check_external=check_external)
         check_count += 1 if status is not None else 0
+        if limit > -1 and check_count >= limit:
+            break
 
     return check_count
 

@@ -212,7 +212,8 @@ class ChecklinksTestCase(TestCase):
 
     def test_checklinks_command(self):
         Book.objects.create(title='My Title', description="""
-            Here's a link: <a href="http://www.example.org">Example</a>,
+            Here's an external link: <a href="http://www.example.org">External</a>,
+            an internal link: <a href="/public/">Internal</a>,
             and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
 
         out = StringIO()
@@ -220,7 +221,7 @@ class ChecklinksTestCase(TestCase):
         self.assertEqual(
             out.getvalue(),
             "Checking all links that haven't been tested for 10080 minutes.\n"
-            "0 internal URLs and 0 external URLs have been checked.\n"
+            "1 internal URLs and 0 external URLs have been checked.\n"
         )
 
         yesterday = datetime.now() - timedelta(days=1)
@@ -230,7 +231,7 @@ class ChecklinksTestCase(TestCase):
         self.assertEqual(
             out.getvalue(),
             "Checking all links that haven't been tested for 20 minutes.\n"
-            "0 internal URLs and 2 external URLs have been checked.\n"
+            "1 internal URLs and 2 external URLs have been checked.\n"
         )
 
         Url.objects.all().update(last_checked=yesterday)
@@ -240,7 +241,7 @@ class ChecklinksTestCase(TestCase):
             out.getvalue(),
             "Checking all links that haven't been tested for 20 minutes.\n"
             "Will run maximum of 1 checks this run.\n"
-            "0 internal URLs and 1 external URLs have been checked.\n"
+            "1 internal URLs and 1 external URLs have been checked.\n"
         )
 
 
