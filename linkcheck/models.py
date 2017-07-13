@@ -33,6 +33,7 @@ except ImportError:
 
 from .linkcheck_settings import (
     MAX_URL_LENGTH,
+    MAX_REDIRECT_URL_LENGTH,
     MEDIA_PREFIX,
     SITE_DOMAINS,
     EXTERNAL_REGEX_STRING,
@@ -95,7 +96,7 @@ class Url(models.Model):
     status = models.NullBooleanField()
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField(default=False)
-    redirect_to = models.CharField(max_length=MAX_URL_LENGTH, default='')
+    redirect_to = models.CharField(max_length=MAX_REDIRECT_URL_LENGTH, default='')
 
     @property
     def type(self):
