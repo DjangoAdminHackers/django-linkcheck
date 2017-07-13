@@ -10,12 +10,16 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
+
+try:
+    from django.urls import reverse
+except ImportError:  # Django < 1.10
+    from django.core.urlresolvers import reverse
 
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
@@ -208,7 +212,8 @@ class ChecklinksTestCase(TestCase):
 
     def test_checklinks_command(self):
         Book.objects.create(title='My Title', description="""
-            Here's a link: <a href="http://www.example.org">Example</a>,
+            Here's an external link: <a href="http://www.example.org">External</a>,
+            an internal link: <a href="/public/">Internal</a>,
             and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
 
         out = StringIO()
@@ -216,7 +221,7 @@ class ChecklinksTestCase(TestCase):
         self.assertEqual(
             out.getvalue(),
             "Checking all links that haven't been tested for 10080 minutes.\n"
-            "0 internal URLs and 0 external URLs have been checked.\n"
+            "1 internal URLs and 0 external URLs have been checked.\n"
         )
 
         yesterday = datetime.now() - timedelta(days=1)
@@ -226,7 +231,7 @@ class ChecklinksTestCase(TestCase):
         self.assertEqual(
             out.getvalue(),
             "Checking all links that haven't been tested for 20 minutes.\n"
-            "0 internal URLs and 2 external URLs have been checked.\n"
+            "1 internal URLs and 2 external URLs have been checked.\n"
         )
 
         Url.objects.all().update(last_checked=yesterday)
@@ -236,7 +241,7 @@ class ChecklinksTestCase(TestCase):
             out.getvalue(),
             "Checking all links that haven't been tested for 20 minutes.\n"
             "Will run maximum of 1 checks this run.\n"
-            "0 internal URLs and 1 external URLs have been checked.\n"
+            "1 internal URLs and 1 external URLs have been checked.\n"
         )
 
 
