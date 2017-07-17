@@ -33,7 +33,6 @@ except ImportError:
 
 from .linkcheck_settings import (
     MAX_URL_LENGTH,
-    MAX_REDIRECT_URL_LENGTH,
     MEDIA_PREFIX,
     SITE_DOMAINS,
     EXTERNAL_REGEX_STRING,
