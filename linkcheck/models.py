@@ -358,9 +358,7 @@ class Url(models.Model):
             self.message = 'Other Error: %s' % e
         else:
             if response.getcode() == 301 and response.geturl() != url:
-                redirect_url = response.geturl()
-                redirect_url = redirect_url[:MAX_REDIRECT_URL_LENGTH]
-                self.redirect_to = redirect_url
+                self.redirect_to = response.geturl()
             elif self.redirect_to:
                 self.redirect_to = ''
 
