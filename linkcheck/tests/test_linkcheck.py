@@ -91,11 +91,15 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
-    def test_internal_check_view_301(self):
+    def test_internal_check_view_redirect(self):
         uv = Url(url="/admin/linkcheck", still_exists=True)
         uv.check_url()
-        self.assertEqual(uv.status, None)
-        self.assertEqual(uv.message, 'This link redirects: code 301 (not automatically checked)')
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'This link redirects: code 301 (Working redirect)')
+        uv = Url(url="/http/brokenredirect/", still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'This link redirects: code 302 (Broken redirect)')
 
     def test_internal_check_found(self):
         uv = Url(url="/public/", still_exists=True)

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.conf.urls import include, url
 from django.contrib import admin
 from django import http
+from django.views.generic import RedirectView
 
 from linkcheck.tests.sampleapp import views
 
@@ -16,4 +17,5 @@ urlpatterns = [
     url(r'^http/(?P<code>\d+)/$', views.http_response),
     url(r'^http/(?P<code>\d+)/rückmeldung/$', views.http_response),
     url(r'^http/redirect/(?P<code>\d+)/$', views.http_redirect),
+    url(r'^http/brokenredirect/$', RedirectView.as_view(url='/non-existent/')),
 ]
