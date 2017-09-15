@@ -38,7 +38,6 @@ from .linkcheck_settings import (
     EXTERNAL_REGEX_STRING,
     EXTERNAL_RECHECK_INTERVAL,
     LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
-    FOLLOW_REDIRECT,
 )
 
 logger = logging.getLogger('linkcheck')
@@ -240,7 +239,7 @@ class Url(models.Model):
             settings.PREPEND_WWW = False
             c = Client()
             c.handler = LinkCheckHandler()
-            response = c.get(tested_url, follow=FOLLOW_REDIRECT)
+            response = c.get(tested_url)
             if USE_REVERSION:
                 # using test client will clear the RevisionContextManager stack.
                 revision_context_manager.start()
