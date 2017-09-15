@@ -99,7 +99,8 @@ class InternalCheckTestCase(TestCase):
         uv = Url(url="/http/brokenredirect/", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, 'This link redirects: code 302 (Broken redirect)')
+        redirect_code = 301 if django.VERSION < (1, 9) else 302
+        self.assertEqual(uv.message, 'This link redirects: code %d (Broken redirect)' % redirect_code)
 
     def test_internal_check_found(self):
         uv = Url(url="/public/", still_exists=True)
