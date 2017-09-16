@@ -1,8 +1,14 @@
-1.5 (to be released)
+1.5 (2017-09-16)
 
+* Added support for `tel:` links.
+* For redirecting links, linkcheck now reports the status of the redirect
+  target (#78).
 * Dropped South migrations.
+* 'Url.redirect_to' was migrated to a TextField to not limit its length (#75).
+* Fixed handling of the '--limit' argument of the 'checklinks' command (#73).
+* Fixed the task queue of links to check (#69).
 
-1.4
+1.4 (2017-01-13)
 
 * Dropped support for Django 1.6 and Django 1.7, the minimal Python version is
   now Python 2.7. Django 1.10 is also supported.
@@ -15,7 +21,7 @@
 * A task queue is now used to process link checking, so as to prevent exhaustion
   of available threads during massive updates.
 
-1.3
+1.3 (2016-06-05)
 
 * Django 1.9 compatibility added.
 * When checking internal links, redirects are not followed any longer.
@@ -29,7 +35,7 @@
 * Fix - correctly handle tags that are inside tags.
 * Fix - don't run pre_save if it's a new instance.
 
-1.2
+1.2 (2015-11-13)
 
 * Added migration folders (missing in the 1.1 package). Also added support for
   South migrations (compatibility).
@@ -37,7 +43,7 @@
   is stored in Url.redirect_to and displayed in the link report.
 * Better support for URLs containing non-ASCII characters.
 
-1.1
+1.1 (2015-06-03)
 
 * Minimal software requirements are now Python 2.6 / Django 1.6 (and South 1.0 if
   you still use Django 1.6).
