@@ -4,7 +4,7 @@ from admin_tools.dashboard.modules import LinkList
 class PermCheckingLinkList(LinkList):
 
     def __init__(self, title=None, **kwargs):
-        self.required_perms = kwargs.pop('linkcheck.can_change_link', [])
+        self.required_perms = kwargs.pop('required_perms', [])
         super(PermCheckingLinkList, self).__init__(title, **kwargs)
 
     def init_with_context(self, context):
