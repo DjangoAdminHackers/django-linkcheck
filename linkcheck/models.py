@@ -38,7 +38,6 @@ from .linkcheck_settings import (
     EXTERNAL_REGEX_STRING,
     EXTERNAL_RECHECK_INTERVAL,
     LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
-    FOLLOW_REDIRECT,
 )
 
 logger = logging.getLogger('linkcheck')
@@ -240,7 +239,7 @@ class Url(models.Model):
             settings.PREPEND_WWW = False
             c = Client()
             c.handler = LinkCheckHandler()
-            response = c.get(tested_url, follow=FOLLOW_REDIRECT)
+            response = c.get(tested_url)
             if USE_REVERSION:
                 # using test client will clear the RevisionContextManager stack.
                 revision_context_manager.start()
@@ -263,8 +262,15 @@ class Url(models.Model):
                         self.status = False
 
             elif response.status_code == 302 or response.status_code == 301:
-                self.status = None
-                self.message = 'This link redirects: code %d (not automatically checked)' % (response.status_code, )
+                redir_response = c.get(tested_url, follow=True)
+                if redir_response.status_code == 200:
+                    redir_state = 'Working redirect'
+                    self.status = True
+                else:
+                    redir_state = 'Broken redirect'
+                    self.status = False
+                self.message = 'This link redirects: code %d (%s)' % (
+                    response.status_code, redir_state)
             else:
                 self.message = 'Broken internal link'
             settings.PREPEND_WWW = old_prepend_setting

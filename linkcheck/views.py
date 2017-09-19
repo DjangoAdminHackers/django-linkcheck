@@ -85,17 +85,18 @@ def report(request):
 
     link_filter = request.GET.get('filters', 'show_invalid')
 
+    qset = Link.objects.order_by('-url__last_checked')
     if link_filter == 'show_valid':
-        qset = Link.objects.filter(ignore=False, url__status__exact=True)
+        qset = qset.filter(ignore=False, url__status__exact=True)
         report_type = 'Good Links'
     elif link_filter == 'show_unchecked':
-        qset = Link.objects.filter(ignore=False, url__last_checked__exact=None)
+        qset = qset.filter(ignore=False, url__last_checked__exact=None)
         report_type = 'Untested Links'
     elif link_filter == 'ignored':
-        qset = Link.objects.filter(ignore=True)
+        qset = qset.filter(ignore=True)
         report_type = 'Ignored Links'
     else:
-        qset = Link.objects.filter(ignore=False, url__status__exact=False)
+        qset = qset.filter(ignore=False, url__status__exact=False)
         report_type = 'Broken Links'
 
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
