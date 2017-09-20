@@ -1,4 +1,4 @@
-from .dashboard_extra_modules import PermCheckingLinkList
+from admin_tools.dashboard import modules
 from linkcheck.views import get_status_message
 
 try:
@@ -7,7 +7,7 @@ except ImportError:  # Django < 1.10
     from django.core.urlresolvers import reverse
 
 
-linkcheck_dashboard_module = PermCheckingLinkList(
+linkcheck_dashboard_module = modules.LinkList(
     title="Linkchecker",
     pre_content=get_status_message,
     children=(
@@ -15,6 +15,5 @@ linkcheck_dashboard_module = PermCheckingLinkList(
         {'title': 'Broken links', 'url': reverse('linkcheck_report')},
         {'title': 'Untested links', 'url': reverse('linkcheck_report') + '?filters=show_unchecked'},
         {'title': 'Ignored links', 'url': reverse('linkcheck_report') + '?filters=ignored'},
-    ),
-    required_perms=['linkcheck.can_change_link'],
+    )
 )
