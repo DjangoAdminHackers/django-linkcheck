@@ -20,10 +20,7 @@ from django.utils.http import urlunquote
 from django.utils.six.moves import http_client
 from django.utils.six.moves.urllib.error import HTTPError, URLError
 from django.utils.six.moves.urllib.request import HTTPRedirectHandler, Request, build_opener
-try:
-    from django.utils.timezone import now
-except ImportError:
-    now = datetime.now
+from django.utils.timezone import now
 
 try:
     from reversion.revisions import revision_context_manager
