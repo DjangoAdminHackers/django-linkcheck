@@ -237,10 +237,6 @@ class Url(models.Model):
             c = Client()
             c.handler = LinkCheckHandler()
             response = c.get(tested_url)
-            if USE_REVERSION:
-                # using test client will clear the RevisionContextManager stack.
-                revision_context_manager.start()
-
             if response.status_code == 200:
                 self.message = 'Working internal link'
                 self.status = True
@@ -273,6 +269,10 @@ class Url(models.Model):
             settings.PREPEND_WWW = old_prepend_setting
         else:
             self.message = 'Invalid URL'
+
+        if USE_REVERSION:
+            # using test client will clear the RevisionContextManager stack.
+            revision_context_manager.start()
 
         self.last_checked = now()
         self.save()
