@@ -224,12 +224,16 @@ class Url(models.Model):
                 html_content = ''
                 for field in instance._linklist.html_fields:
                     html_content += getattr(instance, field, '')
-                names = parse_anchors(html_content)
-                if hash in names:
-                    self.message = 'Working internal hash anchor'
-                    self.status = True
-                else:
-                    self.message = 'Broken internal hash anchor'
+                try:
+                    names = parse_anchors(html_content)
+                    if hash in names:
+                        self.message = 'Working internal hash anchor'
+                        self.status = True
+                    else:
+                        self.message = 'Broken internal hash anchor'
+                except UnicodeDecodeError:
+                    self.message = 'Failed to parse HTML for anchor'
+
 
         elif tested_url.startswith('/'):
             old_prepend_setting = settings.PREPEND_WWW
@@ -246,13 +250,16 @@ class Url(models.Model):
                 elif tested_url.count('#'):
                     anchor = tested_url.split('#')[1]
                     from linkcheck import parse_anchors
-                    names = parse_anchors(response.content)
-                    if anchor in names:
-                        self.message = 'Working internal hash anchor'
-                        self.status = True
-                    else:
-                        self.message = 'Broken internal hash anchor'
-                        self.status = False
+                    try:
+                        names = parse_anchors(response.content)
+                        if anchor in names:
+                            self.message = 'Working internal hash anchor'
+                            self.status = True
+                        else:
+                            self.message = 'Broken internal hash anchor'
+                            self.status = False
+                    except UnicodeDecodeError:
+                        self.message = 'Failed to parse HTML for anchor'
 
             elif response.status_code == 302 or response.status_code == 301:
                 redir_response = c.get(tested_url, follow=True)
