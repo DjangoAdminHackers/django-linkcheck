@@ -1,9 +1,12 @@
 import threading
 
 try:
-    from django.utils.html_parser import HTMLParser
+    from django.utils.html_parser import HTMLParser  # Gone in Django 2.1
 except ImportError:
-    from HTMLParser import HTMLParser
+    try:
+        from HTMLParser import HTMLParser  # Python 2
+    except ImportError:
+        from html.parser import HTMLParser  # Python 3
 
 # A global lock, showing whether linkcheck is busy
 update_lock = threading.Lock()
