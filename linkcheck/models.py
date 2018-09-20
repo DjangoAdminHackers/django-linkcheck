@@ -319,7 +319,7 @@ class Url(models.Model):
                 except URLError as e:
                     # When we get CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:579) error
                     # we try the link using requests, and ignore SSL verification error.
-                    if hasattr(e, 'reason') and 'certificate verify failed' in e.reason:
+                    if hasattr(e, 'reason') and 'certificate verify failed' in str(e.reason):
                         response = requests.head(url, verify=False, timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT)
                         response.code = response.status_code
                         response.msg = ''
