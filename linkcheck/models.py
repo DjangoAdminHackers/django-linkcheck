@@ -378,7 +378,7 @@ class Url(models.Model):
         except Exception as e:
             self.message = 'Other Error: %s' % e
         else:
-            if response.getcode and response.getcode() == 301 and response.geturl() != url:
+            if getattr(response, 'getcode') and response.getcode() == 301 and response.geturl() != url:
                 self.redirect_to = response.geturl()
             elif self.redirect_to:
                 self.redirect_to = ''
