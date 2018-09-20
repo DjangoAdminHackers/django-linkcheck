@@ -6,6 +6,7 @@ import os.path
 from datetime import datetime
 from datetime import timedelta
 import logging
+import requests
 
 from django.conf import settings
 try:
@@ -315,6 +316,16 @@ class Url(models.Model):
                         req,
                         timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT
                     )
+                except URLError as e:
+                    # When we get CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:579) error
+                    # we try the link using requests, and ignore SSL verification error.
+                    if hasattr(e, 'reason') and 'certificate verify failed' in e.reason:
+                        response = requests.head(url, verify=False, timeout=LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT)
+                        response.code = response.status_code
+                        response.msg = ''
+                    else:
+                        raise
+
                 except (ValueError, HTTPError) as error:
                     # ...except sometimes it triggers a bug in urllib2
                     if hasattr(error, 'code') and error.code == METHOD_NOT_ALLOWED:
