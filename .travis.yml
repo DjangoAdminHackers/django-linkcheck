@@ -16,6 +16,7 @@ matrix:
       env: DJANGO=django==2.0.5
 install:
   - travis_retry pip install $DJANGO
+  - travis_retry pip install requests
   - pip install -e .
 script: python runtests.py
 notifications:
