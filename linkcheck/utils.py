@@ -17,18 +17,20 @@ class LinkCheckHandler(ClientHandler):
         self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
         super(LinkCheckHandler, self).load_middleware()
         new_request_middleware = []
-
+        
         #############################_request_middleware#################################
-        for method in self._request_middleware:
-            ignored = False
-            for keyword in self.ignore_keywords:
-                if method.__str__().count(keyword):
-                    ignored = True
-                    break
-            if not ignored:
-                new_request_middleware.append(method)
-        self._request_middleware = new_request_middleware
-
+        # _request_middleware is removed in newer django.
+        if getattr(self, '_request_middleware', None):
+            for method in self._request_middleware:
+                ignored = False
+                for keyword in self.ignore_keywords:
+                    if method.__str__().count(keyword):
+                        ignored = True
+                        break
+                if not ignored:
+                    new_request_middleware.append(method)
+            self._request_middleware = new_request_middleware
+        
         #############################_view_middleware#################################
         new_view_middleware = []
         for method in self._view_middleware:
@@ -42,16 +44,31 @@ class LinkCheckHandler(ClientHandler):
         self._view_middleware = new_view_middleware
 
         #############################_response_middleware#################################
-        new_response_middleware = []
-        for method in self._response_middleware:
-            ignored = False
-            for keyword in self.ignore_keywords:
-                if method.__str__().count(keyword):
-                    ignored = True
-                    break
-            if not ignored:
-                new_response_middleware.append(method)
-        self._response_middleware = new_response_middleware
+        if getattr(self, '_response_middleware', None):
+            new_response_middleware = []
+            for method in self._response_middleware:
+                ignored = False
+                for keyword in self.ignore_keywords:
+                    if method.__str__().count(keyword):
+                        ignored = True
+                        break
+                if not ignored:
+                    new_response_middleware.append(method)
+            self._response_middleware = new_response_middleware
+
+
+        #############################_template_response_middleware#################################
+        if getattr(self, '_template_response_middleware', None):
+            new_template_response_middleware = []
+            for method in self._template_response_middleware:
+                ignored = False
+                for keyword in self.ignore_keywords:
+                    if method.__str__().count(keyword):
+                        ignored = True
+                        break
+                if not ignored:
+                    new_template_response_middleware.append(method)
+            self._template_response_middleware = new_template_response_middleware
 
         #############################_exception_middleware#################################
         new_exception_middleware = []

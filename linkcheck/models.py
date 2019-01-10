@@ -151,10 +151,11 @@ class Url(models.Model):
 
         tested_url = self.url  # May receive transformation before being checked
 
+        internal_exceptions = []
         if SITE_DOMAINS:  # If the setting is present
             internal_exceptions = SITE_DOMAINS
 
-        else:  # try using SITE_DOMAIN
+        elif getattr(settings, 'SITE_DOMAIN', None):  # try using SITE_DOMAIN
             root_domain = settings.SITE_DOMAIN
             if root_domain.startswith('www.'):
                 root_domain = root_domain[4:]
