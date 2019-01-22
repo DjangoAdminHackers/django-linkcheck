@@ -1,8 +1,8 @@
 from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
+from django.utils import timezone
 
-from datetime import datetime
 from datetime import timedelta
 
 from .models import Link, Url
@@ -92,7 +92,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
     # An optimization for when check_internal is False
     if not check_internal:
-        recheck_datetime = datetime.now() - timedelta(minutes=external_recheck_interval)
+        recheck_datetime = timezone.now() - timedelta(minutes=external_recheck_interval)
         urls = urls.exclude(last_checked__gt=recheck_datetime)
 
     check_count = 0
