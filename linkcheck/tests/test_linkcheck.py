@@ -150,6 +150,9 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.message, 'Working file link')
 
     def test_internal_check_media_utf8(self):
+        media_file = os.path.join(os.path.dirname(__file__), 'media', 'rückmeldung')
+        open(media_file, 'a').close()
+        self.addCleanup(os.remove, media_file)
         uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
