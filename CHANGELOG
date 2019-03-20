@@ -1,3 +1,9 @@
+1.6 (2019-03-20)
+
+* Use requests library when getting 'certificate verify failed' errors.
+* Fixed compatibility issues with newer versions of Django.
+* Fixed pip installation issues with encoding errors (#87).
+
 1.5 (2017-09-16)
 
 * Added support for `tel:` links.

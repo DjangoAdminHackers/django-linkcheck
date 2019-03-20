@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name='django-linkcheck',
-    version='1.5',
+    version='1.6',
     description="A Django app that will analyze and report on links in any "
                 "model that you register with it.",
     long_description=read('README.rst'),
@@ -40,6 +40,8 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Framework :: Django',
     ],
 )
