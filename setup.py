@@ -29,6 +29,7 @@ setup(
             'tests/media/*',
         ]
     },
+    install_requires=['requests'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
