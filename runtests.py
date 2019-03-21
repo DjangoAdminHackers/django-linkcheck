@@ -10,6 +10,7 @@ if not settings.configured:
     test_settings = {
         'DATABASES': {'default': {'ENGINE': 'django.db.backends.sqlite3'}},
         'STATIC_URL': '/static/',
+        'MEDIA_URL': '/media/',
         'INSTALLED_APPS': [
             'django.contrib.admin', 'django.contrib.auth',
             'django.contrib.sessions', 'django.contrib.contenttypes',
