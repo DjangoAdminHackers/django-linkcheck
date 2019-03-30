@@ -1,3 +1,7 @@
+1.7 (unreleased)
+
+* Dropped support for Django < 1.11
+
 1.6 (2019-03-20)
 
 * Use requests library when getting 'certificate verify failed' errors.
