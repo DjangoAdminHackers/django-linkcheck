@@ -35,8 +35,6 @@ if not settings.configured:
             },
         }],
     }
-    # Django < 1.10 compatibility
-    test_settings['MIDDLEWARE_CLASSES'] = test_settings['MIDDLEWARE']
     settings.configure(**test_settings)
 
 

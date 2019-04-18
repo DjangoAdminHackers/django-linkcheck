@@ -5,9 +5,6 @@ python:
   - 3.5
   - 3.6
 env:
-  - DJANGO=django==1.8.19
-  - DJANGO=django==1.9.13
-  - DJANGO=django==1.10.8
   - DJANGO=django==1.11.20
   - DJANGO=django==2.0.13
   - DJANGO=django==2.1.7

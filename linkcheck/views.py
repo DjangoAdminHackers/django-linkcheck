@@ -12,12 +12,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse, NoReverseMatch
 from django.views.decorators.csrf import csrf_exempt
-
-try:
-    from django.urls import reverse, NoReverseMatch
-except ImportError:  # Django < 1.10
-    from django.core.urlresolvers import reverse, NoReverseMatch
 
 from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
@@ -163,12 +159,10 @@ def report(request):
 
 def get_jquery_min_js():
     """
-    Return the location of jquery.min.js. It's in different places in
-    different versions of Django.
+    Return the location of jquery.min.js. It's an entry point to adapt the path
+    when it changes in Django.
     """
-    jquery_min_js = ('admin/js/jquery.min.js' if django.VERSION < (1, 10)
-                     else 'admin/js/vendor/jquery/jquery.min.js')
-    return jquery_min_js
+    return 'admin/js/vendor/jquery/jquery.min.js'
 
 
 def get_status_message():

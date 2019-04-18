@@ -22,7 +22,7 @@ automatically when objects are saved. This is handled by signals.
 Minimal requirements
 --------------------
 
-django-linkchecks requires Python 2.7 and Django 1.8. It is Python 3 compatible.
+django-linkchecks requires Python 2.7 and Django 1.11. It is Python 3 compatible.
 
 Basic usage
 -----------

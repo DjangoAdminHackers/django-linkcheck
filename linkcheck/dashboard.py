@@ -1,10 +1,7 @@
 from admin_tools.dashboard import modules
 from linkcheck.views import get_status_message
 
-try:
-    from django.urls import reverse
-except ImportError:  # Django < 1.10
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 linkcheck_dashboard_module = modules.LinkList(

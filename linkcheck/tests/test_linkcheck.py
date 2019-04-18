@@ -12,14 +12,10 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils.six import StringIO
 from django.utils.six.moves.urllib import request
 from django.utils.six.moves.urllib.error import HTTPError
-
-try:
-    from django.urls import reverse
-except ImportError:  # Django < 1.10
-    from django.core.urlresolvers import reverse
 
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
