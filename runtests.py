@@ -14,12 +14,14 @@ if not settings.configured:
         'INSTALLED_APPS': [
             'django.contrib.admin', 'django.contrib.auth',
             'django.contrib.sessions', 'django.contrib.contenttypes',
+            'django.contrib.messages',
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
         'ROOT_URLCONF': "linkcheck.tests.urls",
         'SITE_DOMAIN': "localhost",
         'MIDDLEWARE': [
             'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -30,6 +32,7 @@ if not settings.configured:
             'OPTIONS': {
                 'context_processors': [
                     'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
                     'django.template.context_processors.static',
                 ],
             },
