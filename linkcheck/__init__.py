@@ -152,9 +152,14 @@ class Linklist(object):
             url = self.extract_url_from_field(obj, field_name)
             if field_name in self.ignore_empty and not url:
                 continue
-            urls.append((field_name, '', url))
+            link_text = self.get_link_text_for_field(obj, field_name)
+            urls.append((field_name, link_text, url))
         return urls
-
+    
+    def get_link_text_for_field(self, obj, field_name):
+        # implement this in subclasses
+        return ''
+    
     def urls(self, obj):
 
         urls = []
