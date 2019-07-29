@@ -4,7 +4,7 @@ import time
 from threading import Thread
 
 try:
-    import Queue
+    import queue
 except ImportError:
     # Python 3
     import queue as Queue
@@ -27,7 +27,7 @@ from . import update_lock
 from linkcheck.models import Url, Link
 
 
-tasks_queue = Queue.LifoQueue()
+tasks_queue = queue.LifoQueue()
 worker_running = False
 tests_running = len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py')
 
@@ -185,7 +185,7 @@ def instance_pre_delete(sender, instance, **kwargs):
 
 
 # 1. register listeners for the objects that contain Links
-for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
+for linklist_name, linklist_cls in list(apps.get_app_config('linkcheck').all_linklists.items()):
     model_signals.post_save.connect(check_instance_links, sender=linklist_cls.model)
     model_signals.post_delete.connect(delete_instance_links, sender=linklist_cls.model)
 

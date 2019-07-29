@@ -149,7 +149,7 @@ def find_all_links(linklists=None):
 
     Url.objects.all().update(still_exists=False)
 
-    for linklist_name, linklist_cls in linklists.items():
+    for linklist_name, linklist_cls in list(linklists.items()):
 
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
@@ -234,7 +234,7 @@ def get_type_fields(klass, the_type):
 
 def is_model_covered(klass):
     app = apps.get_app_config('linkcheck')
-    for linklist in app.all_linklists.items():
+    for linklist in list(app.all_linklists.items()):
         if linklist[1].model == klass:
             return True
     return False

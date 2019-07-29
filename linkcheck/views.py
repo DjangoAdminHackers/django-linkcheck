@@ -108,7 +108,7 @@ def report(request):
     # It's a bit nasty but we can't use groupby unless be get values()
     # instead of a queryset because of the 'Object is not subscriptable' error
 
-    t = sorted(links.object_list.values(), key=outerkeyfunc)
+    t = sorted(list(links.object_list.values()), key=outerkeyfunc)
     for tk, tg in groupby(t, outerkeyfunc):
         innerkeyfunc = itemgetter('object_id')
         objects = []
@@ -132,7 +132,7 @@ def report(request):
 
             objects.append({
                 'object': object,
-                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
+                'link_list': list(Link.objects.in_bulk([x['id'] for x in og]).values()),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
                 'admin_url': admin_url,
             })
         content_types_list.append({

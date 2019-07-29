@@ -1,10 +1,11 @@
 import threading
+import collections
 
 try:
     from django.utils.html_parser import HTMLParser  # Gone in Django 2.1
 except ImportError:
     try:
-        from HTMLParser import HTMLParser  # Python 2
+        from html.parser import HTMLParser  # Python 2
     except ImportError:
         from html.parser import HTMLParser  # Python 3
 
@@ -129,7 +130,7 @@ class Linklist(object):
             attr = getattr(self, name)
         except AttributeError:
             return default
-        if callable(attr):
+        if isinstance(attr, collections.Callable):
             return attr(obj)
         return attr
 
