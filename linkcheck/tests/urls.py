@@ -16,6 +16,9 @@ urlpatterns = [
     url(r'^public/', views.http_response, {'code': '200'}),
     url(r'^http/(?P<code>\d+)/$', views.http_response),
     url(r'^http/(?P<code>\d+)/rückmeldung/$', views.http_response),
+    url(r'^http/getonly/(?P<code>\d+)/$', views.http_response_get_only),
     url(r'^http/redirect/(?P<code>\d+)/$', views.http_redirect),
+    url(r'^http/redirect_to_404/$', views.http_redirect_to_404),
     url(r'^http/brokenredirect/$', RedirectView.as_view(url='/non-existent/')),
+    url(r'^timeout/$', views.timeout),
 ]

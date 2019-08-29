@@ -37,6 +37,7 @@ if not settings.configured:
                 ],
             },
         }],
+        'LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT': 1,
     }
     settings.configure(**test_settings)
 
