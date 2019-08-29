@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from datetime import datetime, timedelta
+from unittest import skipIf
 import os
 import re
 
@@ -160,6 +161,8 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.message, 'Working file link')
 
 
+# See https://code.djangoproject.com/ticket/29849 (fixed in Django 2.1+)
+@skipIf(django.VERSION[:2]==(2, 0), 'LiveServerTestCase is broken on Django 2.0.x')
 @override_settings(SITE_DOMAIN='example.com')
 class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
@@ -185,29 +188,51 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '301 moved permanently')
+        self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301_followed(self):
         uv = Url(url="%s/http/redirect/301/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, '301 OK')
+        self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
     def test_external_check_302_followed(self):
-        """
-        For temporary redirects, we do not report any redirection in `redirect_to`.
-        """
         uv = Url(url="%s/http/redirect/302/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, '200 OK')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.message, '302 Found')
+        self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
     def test_external_check_404(self):
         uv = Url(url="%s/whatever/" % self.live_server_url, still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '404 not found')
+
+    def test_external_check_redirect_final_404(self):
+        uv = Url(url="%s/http/redirect_to_404/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message.lower(), '404 not found')
+
+    def test_external_check_get_only(self):
+        # An URL that allows GET but not HEAD, linkcheck should fallback on GET.
+        uv = Url(url="%s/http/getonly/405/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        # Same test with other 40x error
+        uv = Url(url="%s/http/getonly/400/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+
+    def test_external_check_timedout(self):
+        uv = Url(url="%s/timeout/" % self.live_server_url, still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'Other Error: The read operation timed out')
 
 
 class ChecklinksTestCase(TestCase):
