@@ -47,7 +47,7 @@ class BaseLinkcheckConfig(AppConfig):
 class LinkcheckConfig(BaseLinkcheckConfig):
     def ready(self):
         from .linkcheck_settings import DISABLE_LISTENERS
-        super(LinkcheckConfig, self).ready()
+        super().ready()
 
         if not DISABLE_LISTENERS:
             # This import will register listeners

@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime, timedelta
+from io import StringIO
 from unittest import skipIf
+from urllib import request
+from urllib.error import HTTPError
 import os
 import re
 
@@ -14,9 +14,6 @@ from django.core.management import call_command
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
-from django.utils.six import StringIO
-from django.utils.six.moves.urllib import request
-from django.utils.six.moves.urllib.error import HTTPError
 
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js

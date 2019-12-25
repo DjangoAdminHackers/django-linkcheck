@@ -107,7 +107,7 @@ def parse_anchors(content):
     return parser.names
 
 
-class Linklist(object):
+class Linklist:
 
     html_fields = []
     url_fields = []

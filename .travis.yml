@@ -1,10 +1,9 @@
 language: python
-dist: xenial
 python:
-  - 2.7
   - 3.4
   - 3.5
   - 3.6
+  - 3.7
 env:
   - DJANGO=django==1.11.23
   - DJANGO=django==2.0.13
@@ -13,14 +12,8 @@ env:
 matrix:
   fast_finish: true
   exclude:
-    - python: 2.7
-      env: DJANGO=django==2.0.13
-    - python: 2.7
-      env: DJANGO=django==2.1.11
     - python: 3.4
       env: DJANGO=django==2.1.11
-    - python: 2.7
-      env: DJANGO=django==2.2.4
     - python: 3.4
       env: DJANGO=django==2.2.4
 install:

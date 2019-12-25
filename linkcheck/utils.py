@@ -15,7 +15,7 @@ class LinkCheckHandler(ClientHandler):
 
     def load_middleware(self):
         self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
-        super(LinkCheckHandler, self).load_middleware()
+        super().load_middleware()
         new_request_middleware = []
         
         #############################_request_middleware#################################

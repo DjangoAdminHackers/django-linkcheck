@@ -1,6 +1,6 @@
 1.7 (unreleased)
 
-* Dropped support for Django < 1.11
+* Dropped support for Python 2 and Django < 1.11
 * Made more usage of the requests library.
 
 1.6 (2019-03-20)
