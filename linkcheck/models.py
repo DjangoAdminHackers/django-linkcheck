@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import re
 import os.path
 
@@ -8,14 +6,14 @@ import logging
 import requests
 from requests.exceptions import ReadTimeout
 from requests.models import REDIRECT_STATI
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.test.client import Client
-from django.utils.encoding import iri_to_uri, python_2_unicode_compatible
-from django.utils.http import urlunquote
+from django.utils.encoding import iri_to_uri
 from django.utils.timezone import now
 
 try:
@@ -56,7 +54,6 @@ def html_decode(s):
     return s
 
 
-@python_2_unicode_compatible
 class Url(models.Model):
     """
     Represents a distinct URL found somewhere in the models registered with linkcheck
@@ -179,7 +176,7 @@ class Url(models.Model):
 
         elif tested_url.startswith(MEDIA_PREFIX):
             # TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
-            path = settings.MEDIA_ROOT + urlunquote(tested_url)[len(MEDIA_PREFIX)-1:]
+            path = settings.MEDIA_ROOT + unquote(tested_url)[len(MEDIA_PREFIX)-1:]
             decoded_path = html_decode(path)
             if os.path.exists(path) or os.path.exists(decoded_path):
                 self.message = 'Working file link'

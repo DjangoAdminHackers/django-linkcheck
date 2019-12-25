@@ -5,13 +5,13 @@ from operator import itemgetter
 import django
 from django import forms
 from django.conf import settings
-from django.contrib.admin.templatetags.admin_static import static
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.templatetags.static import static
 from django.urls import reverse, NoReverseMatch
 from django.views.decorators.csrf import csrf_exempt
 
