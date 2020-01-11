@@ -1,4 +1,4 @@
-1.7 (unreleased)
+1.7 (2020-01-13)
 
 * Dropped support for Python 2 and Django < 1.11.
 * Added support for Django 3.0.
