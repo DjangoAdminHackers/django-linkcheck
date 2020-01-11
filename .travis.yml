@@ -5,17 +5,22 @@ python:
   - 3.6
   - 3.7
 env:
-  - DJANGO=django==1.11.23
+  - DJANGO=django==1.11.27
   - DJANGO=django==2.0.13
-  - DJANGO=django==2.1.11
-  - DJANGO=django==2.2.4
+  - DJANGO=django==2.1.15
+  - DJANGO=django==2.2.9
+  - DJANGO=django==3.0.2
 matrix:
   fast_finish: true
   exclude:
     - python: 3.4
-      env: DJANGO=django==2.1.11
+      env: DJANGO=django==2.1.15
     - python: 3.4
-      env: DJANGO=django==2.2.4
+      env: DJANGO=django==2.2.9
+    - python: 3.4
+      env: DJANGO=django==3.0.2
+    - python: 3.5
+      env: DJANGO=django==3.0.2
 install:
   - travis_retry pip install $DJANGO
   - travis_retry pip install requests
