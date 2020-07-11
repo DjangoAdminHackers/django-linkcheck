@@ -102,6 +102,8 @@ def parse_images(obj, field):
 
 def parse_anchors(content):
     parser = AnchorLister()
+    if not isinstance(content, str):
+        content = str(content)
     parser.feed(content)
     parser.close()
     return parser.names
