@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('url', models.CharField(unique=True, max_length=255)),
                 ('last_checked', models.DateTimeField(null=True, blank=True)),
-                ('status', models.NullBooleanField()),
+                ('status', models.BooleanField(null=True)),
                 ('message', models.CharField(max_length=1024, null=True, blank=True)),
                 ('still_exists', models.BooleanField(default=False)),
             ],

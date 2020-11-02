@@ -62,7 +62,7 @@ class Url(models.Model):
     """
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)  # See http://www.boutell.com/newfaq/misc/urllength.html
     last_checked = models.DateTimeField(blank=True, null=True)
-    status = models.NullBooleanField()
+    status = models.BooleanField(null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
     still_exists = models.BooleanField(default=False)
     redirect_to = models.TextField(blank=True)
