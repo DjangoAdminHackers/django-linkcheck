@@ -168,17 +168,17 @@ def instance_pre_delete(sender, instance, **kwargs):
             old_urls.update(status=False, message='Broken internal link')
 
 
-# 1. register listeners for the objects that contain Links
-for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
-    model_signals.post_save.connect(check_instance_links, sender=linklist_cls.model)
-    model_signals.post_delete.connect(delete_instance_links, sender=linklist_cls.model)
+def register_listeners():
+    # 1. register listeners for the objects that contain Links
+    for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
+        model_signals.post_save.connect(check_instance_links, sender=linklist_cls.model)
+        model_signals.post_delete.connect(delete_instance_links, sender=linklist_cls.model)
 
-    # 2. register listeners for the objects that are targets of Links,
-    # only when get_absolute_url() is defined for the model
+        # 2. register listeners for the objects that are targets of Links,
+        # only when get_absolute_url() is defined for the model
+        if getattr(linklist_cls.model, 'get_absolute_url', None):
+            model_signals.pre_save.connect(instance_pre_save, sender=linklist_cls.model)
+            model_signals.post_save.connect(instance_post_save, sender=linklist_cls.model)
+            model_signals.pre_delete.connect(instance_pre_delete, sender=linklist_cls.model)
 
-    if getattr(linklist_cls.model, 'get_absolute_url', None):
-        model_signals.pre_save.connect(instance_pre_save, sender=linklist_cls.model)
-        model_signals.post_save.connect(instance_post_save, sender=linklist_cls.model)
-        model_signals.pre_delete.connect(instance_pre_delete, sender=linklist_cls.model)
-
-filebrowser.register_listeners()
+    filebrowser.register_listeners()
