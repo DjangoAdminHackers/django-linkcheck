@@ -109,6 +109,12 @@ to the ``--limit`` (``--l``) command option.
 Settings
 --------
 
+LINKCHECK_DISABLE_LISTENERS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A setting to totally disable linkcheck, typically when running tests. See also
+the context managers below.
+
 LINKCHECK_EXTERNAL_RECHECK_INTERVAL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -192,3 +198,17 @@ Tests can be run standalone by using the runtests.py script in linkcheck root:
     $ python runtests.py
 
 If you want to run linkcheck tests in the context of your project, you should include 'linkcheck.tests.sampleapp' in your INSTALLED_APPS setting.
+
+Linkcheck gives you two context managers to enable or disable listeners in your
+own tests. For example:
+
+    def test_something_without_listeners(self):
+        with listeners.disable_listeners():
+            # Create/update here without linkcheck intervening.
+
+In the case you defined the LINKCHECK_DISABLE_LISTENERS setting, you can
+temporarily enable it by:
+
+    def test_something_with_listeners(self):
+        with listeners.enable_listeners():
+            # Create/update here and see linkcheck activated.

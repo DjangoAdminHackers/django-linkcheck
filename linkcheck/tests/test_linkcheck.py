@@ -15,6 +15,9 @@ from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
+from linkcheck.listeners import (
+    enable_listeners, disable_listeners, register_listeners, unregister_listeners,
+)
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
 
@@ -345,6 +348,37 @@ class ObjectsUpdateTestCase(TestCase):
         )
         self.assertEqual(Url.objects.all().count(), 1)
         self.assertEqual(Url.objects.all()[0].url, good_url)
+
+
+class RegisteringTests(TestCase):
+    good_url = "/public/"
+
+    def test_unregister(self):
+        self.assertEqual(Link.objects.count(), 0)
+        unregister_listeners()
+        Author.objects.create(name="John Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 0)
+        register_listeners()
+        Author.objects.create(name="Jill Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 1)
+
+    def test_disable_listeners(self):
+        self.assertEqual(Link.objects.count(), 0)
+        with disable_listeners():
+            Author.objects.create(name="John Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 0)
+        Author.objects.create(name="Jill Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 1)
+
+    def test_enable_listeners(self):
+        self.assertEqual(Link.objects.count(), 0)
+        unregister_listeners()
+        with enable_listeners():
+            Author.objects.create(name="John Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 1)
+        Author.objects.create(name="Jill Smith", website=self.good_url)
+        self.assertEqual(Link.objects.count(), 1)
+        register_listeners()
 
 
 class ViewTestCase(TestCase):

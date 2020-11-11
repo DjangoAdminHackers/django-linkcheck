@@ -1,5 +1,6 @@
 import sys
 import time
+from contextlib import contextmanager
 from queue import LifoQueue
 from threading import Thread
 
@@ -182,3 +183,37 @@ def register_listeners():
             model_signals.pre_delete.connect(instance_pre_delete, sender=linklist_cls.model)
 
     filebrowser.register_listeners()
+
+
+def unregister_listeners():
+    # 1. register listeners for the objects that contain Links
+    for linklist_name, linklist_cls in apps.get_app_config('linkcheck').all_linklists.items():
+        model_signals.post_save.disconnect(check_instance_links, sender=linklist_cls.model)
+        model_signals.post_delete.disconnect(delete_instance_links, sender=linklist_cls.model)
+
+        # 2. register listeners for the objects that are targets of Links,
+        # only when get_absolute_url() is defined for the model
+        if getattr(linklist_cls.model, 'get_absolute_url', None):
+            model_signals.pre_save.disconnect(instance_pre_save, sender=linklist_cls.model)
+            model_signals.post_save.disconnect(instance_post_save, sender=linklist_cls.model)
+            model_signals.pre_delete.disconnect(instance_pre_delete, sender=linklist_cls.model)
+
+    filebrowser.unregister_listeners()
+
+
+@contextmanager
+def enable_listeners(*args, **kwargs):
+    register_listeners()
+    try:
+        yield
+    finally:
+        unregister_listeners()
+
+
+@contextmanager
+def disable_listeners(*args, **kwargs):
+    unregister_listeners()
+    try:
+        yield
+    finally:
+        register_listeners()

@@ -88,3 +88,10 @@ def register_listeners():
         filebrowser_post_upload.connect(handle_upload)
         filebrowser_post_rename.connect(handle_rename)
         filebrowser_post_delete.connect(handle_delete)
+
+
+def unregister_listeners():
+    if FILEBROWSER_PRESENT:
+        filebrowser_post_upload.disconnect(handle_upload)
+        filebrowser_post_rename.disconnect(handle_rename)
+        filebrowser_post_delete.disconnect(handle_delete)
