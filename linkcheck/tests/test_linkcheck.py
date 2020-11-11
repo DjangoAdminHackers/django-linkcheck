@@ -93,8 +93,7 @@ class InternalCheckTestCase(TestCase):
         uv = Url(url="/http/brokenredirect/", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
-        redirect_code = 301 if django.VERSION < (1, 9) else 302
-        self.assertEqual(uv.message, 'This link redirects: code %d (Broken redirect)' % redirect_code)
+        self.assertEqual(uv.message, 'This link redirects: code 302 (Broken redirect)')
 
     def test_internal_check_found(self):
         uv = Url(url="/public/", still_exists=True)
@@ -380,9 +379,6 @@ class ViewTestCase(TestCase):
 
 class GetJqueryMinJsTestCase(TestCase):
     def test(self):
-        if django.VERSION < (1, 10):
-            self.assertEqual('admin/js/jquery.min.js', get_jquery_min_js())
-        else:
-            self.assertEqual(
-                'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
-            )
+        self.assertEqual(
+            'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
+        )
