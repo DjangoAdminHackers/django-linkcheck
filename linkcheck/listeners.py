@@ -1,13 +1,8 @@
 import os.path
 import sys
 import time
+from queue import LifoQueue
 from threading import Thread
-
-try:
-    import Queue
-except ImportError:
-    # Python 3
-    import queue as Queue
 
 from django.apps import apps
 from django.conf import settings
@@ -27,7 +22,7 @@ from . import update_lock
 from linkcheck.models import Url, Link
 
 
-tasks_queue = Queue.LifoQueue()
+tasks_queue = LifoQueue()
 worker_running = False
 tests_running = len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py')
 
