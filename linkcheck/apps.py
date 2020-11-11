@@ -47,11 +47,11 @@ class BaseLinkcheckConfig(AppConfig):
 class LinkcheckConfig(BaseLinkcheckConfig):
     def ready(self):
         from .linkcheck_settings import DISABLE_LISTENERS
+        from .listeners import register_listeners
         super().ready()
 
         if not DISABLE_LISTENERS:
-            # This import will register listeners
-            from . import listeners
+            register_listeners()
 
         from .models import Link, link_post_delete
         post_delete.connect(link_post_delete, sender=Link)
