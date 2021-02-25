@@ -13,6 +13,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.test.client import Client
+from django.test.utils import modify_settings
 from django.utils.encoding import iri_to_uri
 from django.utils.timezone import now
 
@@ -214,7 +215,8 @@ class Url(models.Model):
             settings.PREPEND_WWW = False
             c = Client()
             c.handler = LinkCheckHandler()
-            response = c.get(tested_url)
+            with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
+                response = c.get(tested_url)
             if response.status_code == 200:
                 self.message = 'Working internal link'
                 self.status = True
@@ -236,7 +238,8 @@ class Url(models.Model):
                         self.message = 'Failed to parse HTML for anchor'
 
             elif response.status_code == 302 or response.status_code == 301:
-                redir_response = c.get(tested_url, follow=True)
+                with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
+                    redir_response = c.get(tested_url, follow=True)
                 if redir_response.status_code == 200:
                     redir_state = 'Working redirect'
                     self.status = True
