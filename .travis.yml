@@ -1,6 +1,5 @@
 language: python
 python:
-  - 3.4
   - 3.5
   - 3.6
   - 3.7
@@ -15,16 +14,8 @@ env:
 matrix:
   fast_finish: true
   exclude:
-    - python: 3.4
-      env: DJANGO="Django==2.1.*"
-    - python: 3.4
-      env: DJANGO="Django==2.2.*"
-    - python: 3.4
-      env: DJANGO="Django==3.0.*"
     - python: 3.5
       env: DJANGO="Django==3.0.*"
-    - python: 3.4
-      env: DJANGO="Django==3.1.*"
     - python: 3.5
       env: DJANGO="Django==3.1.*"
 install:
