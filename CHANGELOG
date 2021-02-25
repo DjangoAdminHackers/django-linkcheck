@@ -1,9 +1,14 @@
-Unreleased
+1.8 (2021-02-25)
 
 * Added explicit `listeners.register_listeners` and
   `listeners.unregister_listeners` functions.
 * Added `listeners.enable_listeners` and `listeners.disable_listeners` context
   managers.
+* Avoid crash when looking for anchors in response content.
+* Avoid possible failures when checking internal links depending on
+  ALLOWED_HOSTS setting.
+* Confirmed compatibility with Django 3.1.
+* Dropped support for Python 3.4.
 
 1.7 (2020-01-13)
 
