@@ -1,3 +1,9 @@
+1.8.1 (2021-04-01)
+
+* The 1.8 release contained unwanted temporary stuff and was
+  therefore a broken release. Many thanks to Stefan Borer for
+  noticing that.
+
 1.8 (2021-02-25)
 
 * Added explicit `listeners.register_listeners` and
