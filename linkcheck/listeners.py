@@ -111,9 +111,9 @@ def delete_instance_links(sender, instance, **kwargs):
     old_links.delete()
 
 
-def instance_pre_save(sender, instance, **kwargs):
-    if not instance.pk:
-        # Ignore unsaved instances
+def instance_pre_save(sender, instance, raw=False, **kwargs):
+    if not instance.pk or raw:
+        # Ignore unsaved instances or raw imports
         return
     current_url = instance.get_absolute_url()
     previous_url = sender.objects.get(pk=instance.pk).get_absolute_url()
