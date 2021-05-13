@@ -416,3 +416,10 @@ class GetJqueryMinJsTestCase(TestCase):
         self.assertEqual(
             'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
         )
+
+
+class FixtureTestCase(TestCase):
+    fixtures = ['linkcheck/tests/sampleapp/fixture.json']
+
+    def test_fixture(self):
+        self.assertEqual(Book.objects.count(), 1)
