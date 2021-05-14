@@ -1,0 +1,10 @@
+[
+  {
+    "model": "sampleapp.Book",
+    "pk": 1,
+    "fields": {
+      "title": "My Title",
+      "description": "My description"
+    }
+  }
+]
