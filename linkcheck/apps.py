@@ -1,5 +1,4 @@
-import imp
-from importlib import import_module
+import importlib
 
 from django.apps import AppConfig, apps
 from django.db.models.signals import post_delete
@@ -21,11 +20,10 @@ class BaseLinkcheckConfig(AppConfig):
     def build_linklists(self):
         """Autodiscovery of linkLists"""
         for app in apps.get_app_configs():
-            try:
-                imp.find_module('linklists', [app.path])
-            except ImportError:
+            module_name = "%s.linklists" % app.name
+            if not importlib.util.find_spec(module_name):
                 continue
-            the_module = import_module("%s.linklists" % app.name)
+            the_module = importlib.import_module(module_name)
             try:
                 for k in the_module.linklists.keys():
                     if k in self.all_linklists.keys():
