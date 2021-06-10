@@ -92,7 +92,9 @@ class InternalCheckTestCase(TestCase):
         uv = Url(url="/admin/linkcheck", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, 'This link redirects: code 301 (Working redirect)')
+        self.assertIn(uv.message,
+            ['This link redirects: code %s (Working redirect)' % status for status in [301, 302]]
+        )
         uv = Url(url="/http/brokenredirect/", still_exists=True)
         uv.check_url()
         self.assertEqual(uv.status, False)
