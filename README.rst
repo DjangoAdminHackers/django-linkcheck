@@ -48,12 +48,6 @@ Basic usage
 
 #. View ``/admin/linkcheck/`` from your browser.
 
-The file ``notifications.py`` is completely optional. It works with
-django-admin-blocks_ to display a notification about broken links as
-shown in the screenshot above.
-
-.. _django-admin-blocks: https://github.com/DjangoAdminHackers/django-admin-blocks
-
 We are aware that this documentation is on the brief side of things so any
 suggestions for elaboration or clarification would be gratefully accepted.
 
