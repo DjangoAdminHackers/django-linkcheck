@@ -2,8 +2,9 @@
 django-linkcheck
 ===================
 
-.. image:: https://travis-ci.org/DjangoAdminHackers/django-linkcheck.svg?branch=master
-    :target: https://travis-ci.org/DjangoAdminHackers/django-linkcheck
+.. image:: https://github.com/DjangoAdminHackers/django-linkcheck/workflows/Test/badge.svg
+   :target: https://github.com/DjangoAdminHackers/django-linkcheck/actions
+   :alt: GitHub Actions
 
 A fairly flexible app that will analyze and report on links in any model that
 you register with it.
