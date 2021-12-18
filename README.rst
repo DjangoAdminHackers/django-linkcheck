@@ -44,7 +44,7 @@ Basic usage
 
 #. Add to your root url config::
 
-    url(r'^admin/linkcheck/', include('linkcheck.urls'))
+    path('admin/linkcheck/', include('linkcheck.urls'))
 
 #. View ``/admin/linkcheck/`` from your browser.
 
