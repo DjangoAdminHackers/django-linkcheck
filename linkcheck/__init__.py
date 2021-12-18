@@ -1,10 +1,13 @@
 import threading
 from html.parser import HTMLParser
 
+import django
+
 # A global lock, showing whether linkcheck is busy
 update_lock = threading.Lock()
 
-default_app_config = 'linkcheck.apps.LinkcheckConfig'
+if django.VERSION <= (3, 2):
+    default_app_config = 'linkcheck.apps.LinkcheckConfig'
 
 
 class Lister(HTMLParser):

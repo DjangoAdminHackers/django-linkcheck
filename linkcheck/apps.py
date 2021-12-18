@@ -43,6 +43,8 @@ class BaseLinkcheckConfig(AppConfig):
 
 
 class LinkcheckConfig(BaseLinkcheckConfig):
+    default = True
+
     def ready(self):
         from .linkcheck_settings import DISABLE_LISTENERS
         from .listeners import register_listeners
