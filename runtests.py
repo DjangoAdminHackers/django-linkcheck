@@ -34,9 +34,11 @@ if not settings.configured:
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                     'django.template.context_processors.static',
+                    'django.template.context_processors.request',
                 ],
             },
         }],
+        'DEFAULT_AUTO_FIELD': 'django.db.models.AutoField',
         'SECRET_KEY': 'arandomstring',
         'LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT': 1,
     }
