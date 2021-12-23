@@ -6,6 +6,10 @@ django-linkcheck
    :target: https://github.com/DjangoAdminHackers/django-linkcheck/actions
    :alt: GitHub Actions
 
+.. image:: https://img.shields.io/pypi/v/django-linkcheck.svg
+    :alt: PyPI version
+    :target: https://pypi.org/project/django-linkcheck/
+
 A fairly flexible app that will analyze and report on links in any model that
 you register with it.
 
