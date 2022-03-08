@@ -13,3 +13,9 @@ class Author(models.Model):
     # This model has purposefully no get_absolute_url
     name = models.CharField(max_length=50)
     website = models.URLField(blank=True)
+
+
+class Journal(models.Model):
+    title = models.CharField(max_length=50)
+    description = models.TextField()
+    version = models.PositiveIntegerField(default=0)

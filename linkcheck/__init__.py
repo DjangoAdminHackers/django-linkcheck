@@ -121,17 +121,6 @@ class Linklist:
 
     object_filter = None
     object_exclude = None
-
-    # filter_callable allows to pass a function as filter for your linklist class.
-    # It allows to apply more advanced filter operations.
-    # This function must be a class method and it should be passed the objects query set
-    # and return the filtered objects.
-    # Example usage in your linklists.py - only check latest versions:
-    # @classmethod
-    # def filter_callable(cls, objects):
-    #     latest = Model.objects.filter(id=OuterRef('id')).order_by('-version')
-    #     return objects.filter(version=Subquery(latest.values('version')[:1]))
-
     filter_callable = None
 
     def __get(self, name, obj, default=None):

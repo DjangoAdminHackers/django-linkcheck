@@ -21,7 +21,7 @@ from linkcheck.listeners import (
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
 
-from .sampleapp.models import Author, Book
+from .sampleapp.models import Author, Book, Journal
 
 
 #MOCK addinfurl
@@ -425,3 +425,24 @@ class FixtureTestCase(TestCase):
 
     def test_fixture(self):
         self.assertEqual(Book.objects.count(), 1)
+
+
+class FilterCallableTestCase(TestCase):
+    def test_filter_callable(self):
+        all_linklists = apps.get_app_config('linkcheck').all_linklists
+        all_linklists['Journals'].html_fields = []
+        Journal.objects.create(title='My Title', description="""
+            My description <a href="http://www.example.org">Example</a>""")
+        Journal.objects.create(title='My Title', version=1, description="""
+            My new description <a href="http://www.example.org">Example</a>""")
+        all_linklists['Journals'].html_fields = ['description']
+        # assert there are two versions of the same journal
+        self.assertEqual(Journal.objects.count(), 2)
+        # assert command just finds the latest version of same journals
+        out = StringIO()
+        call_command('findlinks', stdout=out)
+        self.assertEqual(
+            out.getvalue(),
+            "Finding all new links...\n"
+            "1 new Url object(s), 1 new Link object(s), 0 Url object(s) deleted\n"
+        )
