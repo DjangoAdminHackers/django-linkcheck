@@ -83,6 +83,17 @@ customize the extracted links:
     ``image_fields``: a list of ``ImageField`` field names whose content will be
     considered as links. Empty ``ImageField`` content is always ignored.
 
+    ``filter_callable``: a callable which allows to pass a function as filter
+    for your linklist class. It allows to apply more advanced filter operations.
+    This function must be a class method and it should be passed the objects query
+    set and return the filtered objects.
+    Example usage in your linklists.py - only check latest versions::
+
+        @classmethod
+        def filter_callable(cls, objects):
+            latest = Model.objects.filter(id=OuterRef('id')).order_by('-version')
+            return objects.filter(version=Subquery(latest.values('version')[:1]))
+
 Management commands
 -------------------
 

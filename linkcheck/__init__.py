@@ -121,6 +121,7 @@ class Linklist:
 
     object_filter = None
     object_exclude = None
+    filter_callable = None
 
     def __get(self, name, obj, default=None):
         try:
@@ -191,6 +192,8 @@ class Linklist:
             objects = objects.filter(**cls.object_filter).distinct()
         if cls.object_exclude:
             objects = objects.exclude(**cls.object_exclude).distinct()
+        if cls.filter_callable:
+            objects = cls.filter_callable(objects)
         return objects
 
     def get_linklist(self, extra_filter=None):
