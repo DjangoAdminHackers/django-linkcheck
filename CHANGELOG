@@ -1,3 +1,8 @@
+1.9.1 (2022-03-23)
+
+* Added `Linklist.filter_callable` optional hook to allow for more
+  flexible link list filtering (Giuliano Mele).
+
 1.9 (2021-12-23)
 
 * Added support for Django 3.2 and 4.0 and removed support for Django < 2.2.
