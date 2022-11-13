@@ -19,6 +19,7 @@ from linkcheck.listeners import (
     enable_listeners, disable_listeners, register_listeners, unregister_listeners,
 )
 from linkcheck.models import Link, Url
+from linkcheck.linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book, Journal
@@ -294,6 +295,19 @@ class FindingLinksTestCase(TestCase):
             ["http://www.example.org", "http://www.example.org/logo.png"],
             transform=lambda obj: obj.url
         )
+
+    def test_urls_exceeding_max_length(self):
+        self.assertEqual(Url.objects.all().count(), 0)
+        with self.assertLogs(logger="linkcheck", level="WARN") as cm:
+            Book.objects.create(title='My Title', description=f"""
+                Here's a link: <a href="http://www.example.org">Example</a>,
+                and here's a url exceeding the max length: <img src="http://www.example.org/{MAX_URL_LENGTH * "X"}" alt="logo">""")
+        # We skip urls which are too long because we can't store them in the database
+        self.assertIn(
+            f"WARNING:linkcheck.listeners:URL exceeding max length will be skipped: http://www.example.org/{MAX_URL_LENGTH * 'X'}",
+            cm.output
+        )
+        self.assertEqual(Url.objects.all().count(), 1)
 
     def test_empty_url_field(self):
         """
