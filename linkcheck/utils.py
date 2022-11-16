@@ -1,3 +1,4 @@
+import logging
 from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
@@ -9,6 +10,9 @@ from .models import Link, Url
 from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_CLASSES, URL_FIELD_CLASSES
 
 
+logger = logging.getLogger(__name__)
+
+
 class LinkCheckHandler(ClientHandler):
 
     # Customize the ClientHandler to allow us removing some middlewares
@@ -17,7 +21,7 @@ class LinkCheckHandler(ClientHandler):
         self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
         super().load_middleware()
         new_request_middleware = []
-        
+
         #############################_request_middleware#################################
         # _request_middleware is removed in newer django.
         if getattr(self, '_request_middleware', None):
@@ -30,7 +34,7 @@ class LinkCheckHandler(ClientHandler):
                 if not ignored:
                     new_request_middleware.append(method)
             self._request_middleware = new_request_middleware
-        
+
         #############################_view_middleware#################################
         new_view_middleware = []
         for method in self._view_middleware:
@@ -119,6 +123,7 @@ def update_urls(urls, content_type, object_id):
 
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
+            logger.warning('URL exceeding max length will be skipped: %s', url)
             continue
 
         url, url_created = Url.objects.get_or_create(url=url)

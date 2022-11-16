@@ -1,3 +1,4 @@
+import logging
 import sys
 import time
 from contextlib import contextmanager
@@ -9,7 +10,11 @@ from django.db.models import signals as model_signals
 
 from . import filebrowser
 from . import update_lock
+from .linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.models import Url, Link
+
+
+logger = logging.getLogger(__name__)
 
 
 tasks_queue = LifoQueue()
@@ -77,6 +82,12 @@ def check_instance_links(sender, instance, **kwargs):
                 if url.startswith('#'):
                     internal_hash = url
                     url = instance.get_absolute_url() + url
+
+                if len(url) > MAX_URL_LENGTH:
+                    # We cannot handle url longer than MAX_URL_LENGTH at the moment
+                    logger.warning('URL exceeding max length will be skipped: %s', url)
+                    continue
+
                 u, created = Url.objects.get_or_create(url=url)
                 l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
                 new_links.append(l.id)
