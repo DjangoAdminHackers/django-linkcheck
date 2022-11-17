@@ -4,7 +4,7 @@ import os.path
 from datetime import timedelta
 import logging
 import requests
-from requests.exceptions import ReadTimeout
+from requests.exceptions import ConnectionError, ReadTimeout
 from requests.models import REDIRECT_STATI
 from urllib.parse import unquote
 
@@ -295,6 +295,9 @@ class Url(models.Model):
         except ReadTimeout:
             self.message = 'Other Error: The read operation timed out'
             self.status = False
+        except ConnectionError as e:
+            self.message = format_connection_error(e)
+            self.status = False
         except Exception as e:
             self.message = 'Other Error: %s' % e
             self.status = False
@@ -368,3 +371,31 @@ def link_post_delete(sender, instance, **kwargs):
             url.delete()
     except Url.DoesNotExist:
         pass
+
+
+def format_connection_error(e):
+    """
+    Helper function to provide better readable output of connection errors
+    """
+    # If the exception message is wrapped in an "HTTPSConnectionPool", only give the underlying cause
+    reason = re.search("\(Caused by ([a-zA-Z]+\(.+\))\)", str(e))
+    if not reason:
+        return f"Connection Error: {e}"
+    reason = reason[1]
+    # If the underlying cause is a new connection error, provide additional formatting
+    if reason.startswith("NewConnectionError"):
+        return format_new_connection_error(reason)
+    return f"Connection Error: {reason}"
+
+
+def format_new_connection_error(reason):
+    """
+    Helper function to provide better readable output of new connection errors thrown by urllib3
+    """
+    connection_reason = re.search(
+        "NewConnectionError\('<urllib3\.connection\.HTTPSConnection object at 0x[0-9a-f]+>: (.+)'\)",
+        reason,
+    )
+    if connection_reason:
+        return f"New Connection Error: {connection_reason[1]}"
+    return reason
