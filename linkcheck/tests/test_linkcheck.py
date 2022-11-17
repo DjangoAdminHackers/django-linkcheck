@@ -284,7 +284,8 @@ class FindingLinksTestCase(TestCase):
         self.assertEqual(Url.objects.all().count(), 2)
         self.assertQuerysetEqual(
             Url.objects.all().order_by('url'),
-            ["<Url: http://www.example.org>", "<Url: http://www.example.org/logo.png>"]
+            ["http://www.example.org", "http://www.example.org/logo.png"],
+            transform=lambda obj: obj.url
         )
 
     def test_empty_url_field(self):
