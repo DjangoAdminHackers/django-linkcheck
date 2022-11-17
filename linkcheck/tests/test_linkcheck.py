@@ -173,6 +173,13 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
+    def test_external_check_200_missing_cert(self):
+        uv = Url(url="%s/http/200/" % self.live_server_url.replace("http://", "https://"), still_exists=True)
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, 'SSL Error: wrong version number')
+        self.assertEqual(uv.redirect_to, '')
+
     def test_external_check_200_utf8(self):
         uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url, still_exists=True)
         uv.check_url()
