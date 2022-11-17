@@ -277,7 +277,7 @@ class Url(models.Model):
             url = iri_to_uri(url)
 
         request_params = {
-            'verify': False, 'allow_redirects': True,
+            'allow_redirects': True,
             'headers': {'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN},
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
         }
@@ -385,6 +385,9 @@ def format_connection_error(e):
     # If the underlying cause is a new connection error, provide additional formatting
     if reason.startswith("NewConnectionError"):
         return format_new_connection_error(reason)
+    # If the underlying cause is an SSL error, provide additional formatting
+    if reason.startswith("SSLError"):
+        return format_ssl_error(reason)
     return f"Connection Error: {reason}"
 
 
@@ -398,4 +401,18 @@ def format_new_connection_error(reason):
     )
     if connection_reason:
         return f"New Connection Error: {connection_reason[1]}"
+    return reason
+
+
+def format_ssl_error(reason):
+    """
+    Helper function to provide better readable output of SSL errors thrown by urllib3
+    """
+    ssl_reason = re.search("SSLError\([a-zA-Z]+\((.+)\)\)", reason)
+    if ssl_reason:
+        # If the reason lies withing the ssl c library, hide additional debug output
+        ssl_c_reason = re.search("1, '\[SSL: [A-Z\d_]+\] (.+) \(_ssl\.c:\d+\)'", ssl_reason[1])
+        if ssl_c_reason:
+            return f"SSL Error: {ssl_c_reason[1]}"
+        return f"SSL Error: {ssl_reason[1]}"
     return reason
