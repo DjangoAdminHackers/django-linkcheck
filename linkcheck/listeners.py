@@ -13,7 +13,6 @@ from . import update_lock
 from .linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.models import Url, Link
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +28,18 @@ def linkcheck_worker(block=True):
             task = tasks_queue.get(block=block)
         except Empty:
             break
-        task['target'](*task['args'], **task['kwargs'])
+        # An error in any task should not stop the worker from continuing with the queue
+        try:
+            task['target'](*task['args'], **task['kwargs'])
+        except Exception as e:
+            logger.exception(
+                "%s while running %s with args=%r and kwargs=%r: %s",
+                type(e).__name__,
+                task['target'].__name__,
+                task['args'],
+                task['kwargs'],
+                e
+            )
         tasks_queue.task_done()
     worker_running = False
 
