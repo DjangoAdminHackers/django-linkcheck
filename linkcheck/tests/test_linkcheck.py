@@ -327,18 +327,40 @@ class FindingLinksTestCase(TestCase):
         self.assertEqual(Url.objects.all().count(), 2)
 
     def test_findlinks_command(self):
-        all_linklists = apps.get_app_config('linkcheck').all_linklists
-        all_linklists['Authors'].url_fields = []
-        Author.objects.create(name="John Smith", website="http://www.example.org/smith")
-        all_linklists['Authors'].url_fields = ['website']
-
-        out = StringIO()
-        call_command('findlinks', stdout=out)
-        self.assertEqual(
-            out.getvalue(),
-            "Finding all new links...\n"
-            "1 new Url object(s), 1 new Link object(s), 0 Url object(s) deleted\n"
-        )
+        # Disable listeners to only check the management command
+        with disable_listeners():
+            Author.objects.create(name="John Smith", website="https://www.example.org/smith")
+            self.assertEqual(
+                findlinks(),
+                "Updating all links...\n"
+                "Urls: 1 created, 0 deleted, 0 unchanged\n"
+                "Links: 1 created, 0 deleted, 0 unchanged\n"
+            )
+            Author.objects.create(name="John Doe", website="https://www.example.org/doe")
+            Book.objects.create(
+                title='My Title',
+                description="My fav author: <a href='https://www.example.org/doe'>John Doe</a>"
+            )
+            self.assertEqual(
+                findlinks(),
+                "Updating all links...\n"
+                "Urls: 1 created, 0 deleted, 1 unchanged\n"
+                "Links: 2 created, 0 deleted, 1 unchanged\n"
+            )
+            Author.objects.get(name="John Doe").delete()
+            self.assertEqual(
+                findlinks(),
+                "Updating all links...\n"
+                "Urls: 0 created, 0 deleted, 2 unchanged\n"
+                "Links: 0 created, 1 deleted, 2 unchanged\n"
+            )
+            Book.objects.first().delete()
+            self.assertEqual(
+                findlinks(),
+                "Updating all links...\n"
+                "Urls: 0 created, 1 deleted, 1 unchanged\n"
+                "Links: 0 created, 1 deleted, 1 unchanged\n"
+            )
 
 
 class ObjectsUpdateTestCase(TestCase):
@@ -487,10 +509,18 @@ class FilterCallableTestCase(TestCase):
         # assert there are two versions of the same journal
         self.assertEqual(Journal.objects.count(), 2)
         # assert command just finds the latest version of same journals
-        out = StringIO()
-        call_command('findlinks', stdout=out)
         self.assertEqual(
-            out.getvalue(),
-            "Finding all new links...\n"
-            "1 new Url object(s), 1 new Link object(s), 0 Url object(s) deleted\n"
+            findlinks(),
+            "Updating all links...\n"
+            "Urls: 1 created, 0 deleted, 0 unchanged\n"
+            "Links: 1 created, 0 deleted, 0 unchanged\n"
         )
+
+
+def findlinks():
+    """
+    Helper function for running the findlinks command and checking its output
+    """
+    out = StringIO()
+    call_command('findlinks', stdout=out)
+    return out.getvalue()
