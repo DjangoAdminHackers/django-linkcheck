@@ -1,5 +1,6 @@
 Unreleased
 
+* Remove unused field `still_exists` from `Url` model
 * Delete outdated `Url` and `Link` objects when
   running `findlinks` command (Timo Ludwig, #101)
 * Avoid crash when unexpected error in signal listener occurs
