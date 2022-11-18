@@ -73,49 +73,49 @@ class InternalCheckTestCase(TestCase):
         request.urlopen = mock_urlopen
 
     def test_internal_check_mailto(self):
-        uv = Url(url="mailto:nobody", still_exists=True)
+        uv = Url(url="mailto:nobody")
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Email link (not automatically checked)')
 
     def test_internal_check_blank(self):
-        uv = Url(url="", still_exists=True)
+        uv = Url(url="")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Empty link')
 
     def test_internal_check_anchor(self):
-        uv = Url(url="#some_anchor", still_exists=True)
+        uv = Url(url="#some_anchor")
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
 
     def test_internal_check_view_redirect(self):
-        uv = Url(url="/admin/linkcheck", still_exists=True)
+        uv = Url(url="/admin/linkcheck")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertIn(uv.message,
             ['This link redirects: code %s (Working redirect)' % status for status in [301, 302]]
         )
-        uv = Url(url="/http/brokenredirect/", still_exists=True)
+        uv = Url(url="/http/brokenredirect/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'This link redirects: code 302 (Broken redirect)')
 
     def test_internal_check_found(self):
-        uv = Url(url="/public/", still_exists=True)
+        uv = Url(url="/public/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
 
     def test_internal_check_broken_internal_link(self):
-        uv = Url(url="/broken/internal/link", still_exists=True)
+        uv = Url(url="/broken/internal/link")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken internal link')
 
     def test_internal_check_invalid_url(self):
-        uv = Url(url="invalid/url", still_exists=True)
+        uv = Url(url="invalid/url")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Invalid URL')
@@ -123,7 +123,7 @@ class InternalCheckTestCase(TestCase):
     def test_same_page_anchor(self):
         # TODO Make this test
         pass
-        #uv = Url(url="#anchor", still_exists=True)
+        #uv = Url(url="#anchor")
         #uv.check_url()
         #self.assertEqual(uv.status, None)
         #self.assertEqual(uv.message, "")
@@ -138,13 +138,13 @@ class InternalMediaCheckTestCase(TestCase):
         settings.MEDIA_ROOT = self.old_media_root
 
     def test_internal_check_media_missing(self):
-        uv = Url(url="/media/not_found", still_exists=True)
+        uv = Url(url="/media/not_found")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Missing Document')
 
     def test_internal_check_media_found(self):
-        uv = Url(url="/media/found", still_exists=True)
+        uv = Url(url="/media/found")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
@@ -153,12 +153,12 @@ class InternalMediaCheckTestCase(TestCase):
         media_file = os.path.join(os.path.dirname(__file__), 'media', 'rückmeldung')
         open(media_file, 'a').close()
         self.addCleanup(os.remove, media_file)
-        uv = Url(url="/media/r%C3%BCckmeldung", still_exists=True)
+        uv = Url(url="/media/r%C3%BCckmeldung")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
         # Also when the url is not encoded
-        uv = Url(url="/media/rückmeldung", still_exists=True)
+        uv = Url(url="/media/rückmeldung")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
@@ -169,77 +169,77 @@ class InternalMediaCheckTestCase(TestCase):
 @override_settings(SITE_DOMAIN='example.com')
 class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
-        uv = Url(url="%s/http/200/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/200/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_200_missing_cert(self):
-        uv = Url(url="%s/http/200/" % self.live_server_url.replace("http://", "https://"), still_exists=True)
+        uv = Url(url="%s/http/200/" % self.live_server_url.replace("http://", "https://"))
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'SSL Error: wrong version number')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_200_utf8(self):
-        uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         # Also when the url is not encoded
-        uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_301(self):
-        uv = Url(url="%s/http/301/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/301/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '301 moved permanently')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301_followed(self):
-        uv = Url(url="%s/http/redirect/301/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/redirect/301/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
     def test_external_check_302_followed(self):
-        uv = Url(url="%s/http/redirect/302/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/redirect/302/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '302 Found')
         self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
 
     def test_external_check_404(self):
-        uv = Url(url="%s/whatever/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/whatever/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '404 not found')
 
     def test_external_check_redirect_final_404(self):
-        uv = Url(url="%s/http/redirect_to_404/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/redirect_to_404/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '404 not found')
 
     def test_external_check_get_only(self):
         # An URL that allows GET but not HEAD, linkcheck should fallback on GET.
-        uv = Url(url="%s/http/getonly/405/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/getonly/405/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         # Same test with other 40x error
-        uv = Url(url="%s/http/getonly/400/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/http/getonly/400/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_timedout(self):
-        uv = Url(url="%s/timeout/" % self.live_server_url, still_exists=True)
+        uv = Url(url="%s/timeout/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')

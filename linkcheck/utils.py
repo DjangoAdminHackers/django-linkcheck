@@ -92,7 +92,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     Return the number of links effectively checked.
     """
 
-    urls = Url.objects.filter(still_exists=True)
+    urls = Url.objects.all()
 
     # An optimization for when check_internal is False
     if not check_internal:

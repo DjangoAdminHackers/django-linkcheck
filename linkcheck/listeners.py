@@ -104,7 +104,6 @@ def check_instance_links(sender, instance, **kwargs):
                 u, created = Url.objects.get_or_create(url=url)
                 l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
                 new_links.append(l.id)
-                u.still_exists = True
                 if internal_hash:
                     setattr(u, '_internal_hash', internal_hash)
                     setattr(u, '_instance', instance)
