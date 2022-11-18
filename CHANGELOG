@@ -1,5 +1,7 @@
 Unreleased
 
+* Delete outdated `Url` and `Link` objects when
+  running `findlinks` command (Timo Ludwig, #101)
 * Avoid crash when unexpected error in signal listener occurs
   (Sven Seeberg, #117)
 * Ignore Urls longer than `MAX_URL_LENGTH` in signal listeners

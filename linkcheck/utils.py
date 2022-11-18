@@ -113,7 +113,9 @@ def update_urls(urls, content_type, object_id):
 
     # Structure of urls param is [(field, link text, url), ... ]
 
-    new_urls = new_links = 0
+    urls_created = links_created = 0
+    new_url_ids = set()
+    new_link_ids = set()
 
     for field, link_text, url in urls:
 
@@ -136,12 +138,24 @@ def update_urls(urls, content_type, object_id):
             object_id=object_id,
         )
 
-        url.still_exists = True
-        url.save()
-        new_urls += url_created
-        new_links += link_created
+        # Keep track of how many objects were created
+        urls_created += url_created
+        links_created += link_created
 
-    return new_urls, new_links
+        # Keep track of object ids (no matter if created or existing)
+        new_url_ids.add(url.id)
+        new_link_ids.add(link.id)
+
+    return {
+        "urls": {
+            "created": urls_created,
+            "ids": new_url_ids,
+        },
+        "links": {
+            "created": links_created,
+            "ids": new_link_ids,
+        },
+    }
 
 
 def find_all_links(linklists=None):
@@ -149,10 +163,12 @@ def find_all_links(linklists=None):
     if linklists is None:
         linklists = apps.get_app_config('linkcheck').all_linklists
 
-    all_links_dict = {}
     urls_created = links_created = 0
+    new_url_ids = set()
+    new_link_ids = set()
 
-    Url.objects.all().update(still_exists=False)
+    urls_before = Url.objects.count()
+    links_before = Link.objects.count()
 
     for linklist_name, linklist_cls in linklists.items():
 
@@ -163,19 +179,33 @@ def find_all_links(linklists=None):
             object_id = linklist['object'].id
             urls = linklist['urls'] + linklist['images']
             if urls:
-                new_urls, new_links = update_urls(urls, content_type, object_id)
-                urls_created += new_urls
-                links_created += new_links
-        all_links_dict[linklist_name] = linklists
+                new = update_urls(urls, content_type, object_id)
 
-    deleted = Url.objects.filter(still_exists=False).count()
+                urls_created += new["urls"]["created"]
+                links_created += new["links"]["created"]
 
-    Url.objects.filter(still_exists=False).delete()
+                new_url_ids.update(new["urls"]["ids"])
+                new_link_ids.update(new["links"]["ids"])
+
+    # Delete all urls and links which are no longer part of the link lists
+    Url.objects.all().exclude(id__in=new_url_ids).delete()
+    Link.objects.all().exclude(id__in=new_link_ids).delete()
+
+    # Calculate diff
+    urls_after = Url.objects.count()
+    links_after = Link.objects.count()
 
     return {
-        'urls_deleted': deleted,
-        'urls_created': urls_created,
-        'links_created': links_created,
+        "urls": {
+            "created": urls_created,
+            "deleted": urls_before + urls_created - urls_after,
+            "unchanged": urls_after - urls_created,
+        },
+        "links": {
+            "created": links_created,
+            "deleted": links_before + links_created - links_after,
+            "unchanged": links_after - links_created,
+        },
     }
 
 
