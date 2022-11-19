@@ -1,8 +1,5 @@
 from datetime import datetime, timedelta
 from io import StringIO
-from unittest import skipIf
-from urllib import request
-from urllib.error import HTTPError
 import os
 import re
 
@@ -26,51 +23,8 @@ from linkcheck.views import get_jquery_min_js
 from .sampleapp.models import Author, Book, Journal
 
 
-#MOCK addinfurl
-class addinfourl():
-    """class to add info() and geturl(url=) methods to an open file."""
-
-    def __init__(self, url, code, msg):
-        self.headers = None
-        self.url = url
-        self.code = code
-        self.msg  = msg
-
-    def info(self):
-        return self.headers
-
-    def getcode(self):
-        return self.code
-
-    def geturl(self):
-        return self.url
-
-#
-# Mock Method so test can run independently
-#
-
-def mock_urlopen(url, data=None, **kwargs):
-    msg_dict = {'301': "Moved Permanently", '404': 'Not Found', '200': 'OK'}
-
-    code = '404'
-    msg  = msg_dict.get(code)
-
-    m = re.search("([0-9]*)$", url)
-    if m:
-        code = m.group(0)
-        msg  = msg_dict.get(code, 'Something Happened')
-        if code == "200":
-            return addinfourl(url, code, msg)
-
-    raise HTTPError(url, code, msg, None, None)
-
-
 @override_settings(ROOT_URLCONF='linkcheck.tests.urls')
 class InternalCheckTestCase(TestCase):
-
-    def setUp(self):
-        #replace urllib2.urlopen with mock method
-        request.urlopen = mock_urlopen
 
     def test_internal_check_mailto(self):
         uv = Url(url="mailto:nobody")
@@ -164,8 +118,6 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.message, 'Working file link')
 
 
-# See https://code.djangoproject.com/ticket/29849 (fixed in Django 2.1+)
-@skipIf(django.VERSION[:2]==(2, 0), 'LiveServerTestCase is broken on Django 2.0.x')
 @override_settings(SITE_DOMAIN='example.com')
 class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
@@ -271,8 +223,6 @@ class ModelTestCase(TestCase):
 
 
 class ChecklinksTestCase(TestCase):
-    def setUp(self):
-        request.urlopen = mock_urlopen
 
     def test_checklinks_command(self):
         Book.objects.create(title='My Title', description="""
