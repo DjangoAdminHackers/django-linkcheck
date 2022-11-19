@@ -1,5 +1,8 @@
 Unreleased
 
+* Breaking change: Treat broken hash anchors as valid
+  unless `LINKCHECK_TOLERATE_BROKEN_ANCHOR` is manually
+  set to `False` (Timo Ludwig, #98)
 * Remove unused field `still_exists` from `Url` model
 * Delete outdated `Url` and `Link` objects when
   running `findlinks` command (Timo Ludwig, #101)

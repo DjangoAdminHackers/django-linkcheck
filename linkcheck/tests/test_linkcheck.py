@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from io import StringIO
+from unittest.mock import patch
 import os
 import re
 
@@ -50,11 +51,18 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working internal hash anchor")
 
+    @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
     def test_broken_internal_anchor(self):
         uv = Url(url="/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Broken internal hash anchor")
+
+    def test_broken_internal_anchor_tolerated(self):
+        uv = Url(url="/http/anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Page OK, but broken internal hash anchor")
 
     def test_internal_check_view_redirect(self):
         uv = Url(url="/admin/linkcheck")
@@ -206,11 +214,18 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working external hash anchor")
 
+    @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
     def test_broken_external_anchor(self):
         uv = Url(url=f"{self.live_server_url}/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Broken external hash anchor")
+
+    def test_broken_external_anchor_tolerated(self):
+        uv = Url(url=f"{self.live_server_url}/http/anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Page OK, but broken external hash anchor")
 
 
 class ModelTestCase(TestCase):
