@@ -1,5 +1,6 @@
 import os
-from distutils.core import setup
+
+from setuptools import find_packages, setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -14,21 +15,7 @@ setup(
     author_email='andy@andybak.net',
     license='BSD',
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
-    packages=[
-        'linkcheck',
-        'linkcheck.management',
-        'linkcheck.management.commands',
-        'linkcheck.migrations',
-        'linkcheck.tests',
-        'linkcheck.tests.sampleapp',
-    ],
-    package_data={
-        'linkcheck': [
-            'templates/linkcheck/*.html',
-            'templates/linkcheck/*.xhtml',
-            'tests/media/*',
-        ]
-    },
+    include_package_data=True,
     install_requires=['requests'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
