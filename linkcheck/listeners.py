@@ -2,7 +2,7 @@ import logging
 import sys
 import time
 from contextlib import contextmanager
-from queue import LifoQueue
+from queue import Empty, LifoQueue
 from threading import Thread
 
 from django.apps import apps
@@ -22,10 +22,13 @@ worker_running = False
 tests_running = len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py')
 
 
-def linkcheck_worker():
+def linkcheck_worker(block=True):
     global worker_running
     while tasks_queue.not_empty:
-        task = tasks_queue.get()
+        try:
+            task = tasks_queue.get(block=block)
+        except Empty:
+            break
         task['target'](*task['args'], **task['kwargs'])
         tasks_queue.task_done()
     worker_running = False
