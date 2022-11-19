@@ -103,6 +103,9 @@ class Url(models.Model):
     def __str__(self):
         return self.url
 
+    def __repr__(self):
+        return f"<Url (id: {self.id}, url: {self.url})>"
+
     @property
     def external(self):
         return EXTERNAL_REGEX.match(self.url)
@@ -359,6 +362,12 @@ class Link(models.Model):
             if url_part == absolute_url:
                 return '#' + anchor_part
         return self.url.url
+
+    def __str__(self):
+        return f"{self.url.url} ({self.content_object})"
+
+    def __repr__(self):
+        return f"<Link (id: {self.id}, url: {self.url!r}, source: {self.content_object!r})>"
 
 
 def link_post_delete(sender, instance, **kwargs):
