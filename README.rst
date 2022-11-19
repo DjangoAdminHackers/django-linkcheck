@@ -34,7 +34,7 @@ Basic usage
 
 #. Install app to somewhere on your Python path (e.g. ``pip install
    django-linkcheck``).
-   
+
 #. Add ``'linkcheck'`` to your ``settings.INSTALLED_APPS``.
 
 #. Add a file named ``linklists.py`` to every app (see an example in ``examples/linklists.py``) that either:
@@ -193,6 +193,15 @@ www.mysite.com
 test.mysite.com
 
 If you instead set LINKCHECK_SITE_DOMAINS to be a list or tuple then you can explicitly list the domains that should be treated as internal.
+
+
+LINKCHECK_TOLERATE_BROKEN_ANCHOR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default: ``True``
+
+Whether links with broken hash anchors should be marked as valid.
+Disable this if you want that links to anchors which are not contained in the link target's HTML source are marked as invalid.
 
 
 django-filebrowser integration

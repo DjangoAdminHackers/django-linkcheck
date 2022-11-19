@@ -30,6 +30,7 @@ from .linkcheck_settings import (
     EXTERNAL_REGEX_STRING,
     EXTERNAL_RECHECK_INTERVAL,
     LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
+    TOLERATE_BROKEN_ANCHOR,
 )
 
 logger = logging.getLogger('linkcheck')
@@ -206,10 +207,17 @@ class Url(models.Model):
                     if hash in names:
                         self.message = 'Working internal hash anchor'
                         self.status = True
+                    elif TOLERATE_BROKEN_ANCHOR:
+                        self.message = 'Page OK, but broken internal hash anchor'
+                        self.status = True
                     else:
                         self.message = 'Broken internal hash anchor'
                 except UnicodeDecodeError:
-                    self.message = 'Failed to parse HTML for anchor'
+                    if TOLERATE_BROKEN_ANCHOR:
+                        self.message = 'Page OK, but failed to parse HTML for anchor'
+                        self.status = True
+                    else:
+                        self.message = 'Failed to parse HTML for anchor'
 
 
         elif tested_url.startswith('/'):
@@ -232,12 +240,17 @@ class Url(models.Model):
                         names = parse_anchors(response.content)
                         if anchor in names:
                             self.message = 'Working internal hash anchor'
-                            self.status = True
+                        elif TOLERATE_BROKEN_ANCHOR:
+                            self.message = 'Page OK, but broken internal hash anchor'
                         else:
                             self.message = 'Broken internal hash anchor'
                             self.status = False
                     except UnicodeDecodeError:
-                        self.message = 'Failed to parse HTML for anchor'
+                        if TOLERATE_BROKEN_ANCHOR:
+                            self.message = 'Page OK, but failed to parse HTML for anchor'
+                        else:
+                            self.message = 'Failed to parse HTML for anchor'
+                            self.status = False
 
             elif response.status_code == 302 or response.status_code == 301:
                 with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
@@ -314,6 +327,9 @@ class Url(models.Model):
                     names = parse_anchors(response.text)
                     if anchor in names:
                         self.message = 'Working external hash anchor'
+                        self.status = True
+                    elif TOLERATE_BROKEN_ANCHOR:
+                        self.message = 'Page OK, but broken external hash anchor'
                         self.status = True
                     else:
                         self.message = 'Broken external hash anchor'
