@@ -245,6 +245,31 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')
 
 
+class ModelTestCase(TestCase):
+
+    def test_str(self):
+        Author.objects.create(name="John Smith", website="http://www.example.org/smith")
+        self.assertEqual(
+            str(Url.objects.first()),
+            "http://www.example.org/smith",
+        )
+        self.assertEqual(
+            str(Link.objects.first()),
+            "http://www.example.org/smith (Author object (1))",
+        )
+
+    def test_repr(self):
+        Author.objects.create(name="John Smith", website="http://www.example.org/smith")
+        self.assertEqual(
+            repr(Url.objects.first()),
+            "<Url (id: 1, url: http://www.example.org/smith)>",
+        )
+        self.assertEqual(
+            repr(Link.objects.first()),
+            "<Link (id: 1, url: <Url (id: 1, url: http://www.example.org/smith)>, source: <Author: Author object (1)>)>",
+        )
+
+
 class ChecklinksTestCase(TestCase):
     def setUp(self):
         request.urlopen = mock_urlopen
