@@ -1,5 +1,7 @@
 Unreleased
 
+* Avoid crash when unexpected error in signal listener occurs
+  (Sven Seeberg, #117)
 * Ignore Urls longer than `MAX_URL_LENGTH` in signal listeners
   (Timo Ludwig, #115)
 * Verify SSL certificates (Timo Ludwig, #118)

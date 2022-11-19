@@ -2,7 +2,7 @@ import logging
 import sys
 import time
 from contextlib import contextmanager
-from queue import LifoQueue
+from queue import Empty, LifoQueue
 from threading import Thread
 
 from django.apps import apps
@@ -13,7 +13,6 @@ from . import update_lock
 from .linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.models import Url, Link
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -22,11 +21,25 @@ worker_running = False
 tests_running = len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endswith('runtests.py')
 
 
-def linkcheck_worker():
+def linkcheck_worker(block=True):
     global worker_running
     while tasks_queue.not_empty:
-        task = tasks_queue.get()
-        task['target'](*task['args'], **task['kwargs'])
+        try:
+            task = tasks_queue.get(block=block)
+        except Empty:
+            break
+        # An error in any task should not stop the worker from continuing with the queue
+        try:
+            task['target'](*task['args'], **task['kwargs'])
+        except Exception as e:
+            logger.exception(
+                "%s while running %s with args=%r and kwargs=%r: %s",
+                type(e).__name__,
+                task['target'].__name__,
+                task['args'],
+                task['kwargs'],
+                e
+            )
         tasks_queue.task_done()
     worker_running = False
 

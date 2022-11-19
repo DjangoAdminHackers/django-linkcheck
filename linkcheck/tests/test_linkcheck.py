@@ -16,7 +16,8 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from linkcheck.listeners import (
-    enable_listeners, disable_listeners, register_listeners, unregister_listeners,
+    enable_listeners, disable_listeners, linkcheck_worker, register_listeners,
+    tasks_queue, unregister_listeners,
 )
 from linkcheck.models import Link, Url
 from linkcheck.linkcheck_settings import MAX_URL_LENGTH
@@ -403,6 +404,31 @@ class RegisteringTests(TestCase):
         Author.objects.create(name="Jill Smith", website=self.good_url)
         self.assertEqual(Link.objects.count(), 1)
         register_listeners()
+
+
+class QueueTests(TestCase):
+    def test_queue_handling_continue_on_task_crash(self):
+        assert tasks_queue.empty() is True
+
+        def raising():
+            raise RuntimeError("Failing task")
+
+        def passing():
+            pass
+
+        for func in (raising, passing):
+            tasks_queue.put({
+                'target': func,
+                'args': (),
+                'kwargs': {},
+            })
+        with self.assertLogs() as cm:
+            linkcheck_worker(block=False)
+        self.assertEqual(
+            cm.output[0].split('\n')[0],
+            'ERROR:linkcheck.listeners:RuntimeError while running raising with '
+            'args=() and kwargs={}: Failing task'
+        )
 
 
 class ViewTestCase(TestCase):
