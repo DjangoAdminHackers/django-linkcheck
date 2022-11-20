@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 from io import StringIO
 from unittest.mock import patch
 import os
-import re
 
-import django
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User

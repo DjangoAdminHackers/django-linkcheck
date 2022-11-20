@@ -1,8 +1,6 @@
 import threading
 from html.parser import HTMLParser
 
-import django
-
 # A global lock, showing whether linkcheck is busy
 update_lock = threading.Lock()
 

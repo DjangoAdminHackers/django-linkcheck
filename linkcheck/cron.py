@@ -9,7 +9,7 @@
 
 from django_cron import cronScheduler
 from django_cron import Job
-from django_cron import HOUR, DAY, WEEK, MONTH
+from django_cron import WEEK
 
 from linkcheck.utils import check_links
 from linkcheck.utils import find_all_links
