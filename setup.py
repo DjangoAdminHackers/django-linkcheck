@@ -2,6 +2,7 @@ import os
 
 from setuptools import setup
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -18,7 +19,7 @@ setup(
     include_package_data=True,
     install_requires=['django', 'requests'],
     extras_require={
-        "dev": ["flake8", "pre-commit"],
+        "dev": ["flake8", "isort", "pre-commit"],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',

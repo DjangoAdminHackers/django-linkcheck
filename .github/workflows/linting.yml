@@ -16,3 +16,11 @@ jobs:
         run: pip install flake8
       - name: Run flake8
         run: flake8 --max-line-length=120 linkcheck
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: jamescurtin/isort-action@master
+        with:
+            configuration: --multi-line=3 --trailing-comma --check-only
