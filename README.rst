@@ -213,7 +213,7 @@ If django-filebrowser is present on your path then linkcheck will listen to the 
 Contributing
 ------------
 
-You can install all requirements of the development setup with:
+You can install all requirements of the development setup with the extra ``dev``:
 
 .. code-block:: bash
 
@@ -221,7 +221,7 @@ You can install all requirements of the development setup with:
     $ source .venv/bin/activate
     $ pip install -e .[dev]
 
-If you want to make use of the flake8 pre-commit hook, enable it with:
+If you want to make use of the flake8 and isort pre-commit hooks, enable them with:
 
 .. code-block:: bash
 

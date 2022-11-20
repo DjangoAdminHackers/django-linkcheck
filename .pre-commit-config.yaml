@@ -4,3 +4,8 @@ repos:
     hooks:
       - id: flake8
         args: [--max-line-length=120]
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        args: [--multi-line=3, --trailing-comma]
