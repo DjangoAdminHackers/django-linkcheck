@@ -16,7 +16,7 @@ setup(
     license='BSD',
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
     include_package_data=True,
-    install_requires=['requests'],
+    install_requires=['django', 'requests'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
