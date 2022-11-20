@@ -2,9 +2,7 @@ import json
 from itertools import groupby
 from operator import itemgetter
 
-import django
 from django import forms
-from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
