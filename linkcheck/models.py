@@ -202,23 +202,7 @@ class Url(models.Model):
                 html_content = ''
                 for field in instance._linklist.html_fields:
                     html_content += getattr(instance, field, '')
-                try:
-                    names = parse_anchors(html_content)
-                    if hash in names:
-                        self.message = 'Working internal hash anchor'
-                        self.status = True
-                    elif TOLERATE_BROKEN_ANCHOR:
-                        self.message = 'Page OK, but broken internal hash anchor'
-                        self.status = True
-                    else:
-                        self.message = 'Broken internal hash anchor'
-                except UnicodeDecodeError:
-                    if TOLERATE_BROKEN_ANCHOR:
-                        self.message = 'Page OK, but failed to parse HTML for anchor'
-                        self.status = True
-                    else:
-                        self.message = 'Failed to parse HTML for anchor'
-
+                self._check_anchor(hash, html_content)
 
         elif tested_url.startswith('/'):
             old_prepend_setting = settings.PREPEND_WWW
@@ -230,41 +214,24 @@ class Url(models.Model):
             if response.status_code == 200:
                 self.message = 'Working internal link'
                 self.status = True
-                # see if the internal link points an anchor
-                if tested_url[-1] == '#': # special case, point to #
-                    self.message = 'Working internal hash anchor'
-                elif tested_url.count('#'):
-                    anchor = tested_url.split('#')[1]
-                    from linkcheck import parse_anchors
-                    try:
-                        names = parse_anchors(response.content)
-                        if anchor in names:
-                            self.message = 'Working internal hash anchor'
-                        elif TOLERATE_BROKEN_ANCHOR:
-                            self.message = 'Page OK, but broken internal hash anchor'
-                        else:
-                            self.message = 'Broken internal hash anchor'
-                            self.status = False
-                    except UnicodeDecodeError:
-                        if TOLERATE_BROKEN_ANCHOR:
-                            self.message = 'Page OK, but failed to parse HTML for anchor'
-                        else:
-                            self.message = 'Failed to parse HTML for anchor'
-                            self.status = False
-
             elif response.status_code == 302 or response.status_code == 301:
+                redirect_type = "permanent" if response.status_code == 301 else "temporary"
                 with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
-                    redir_response = c.get(tested_url, follow=True)
-                if redir_response.status_code == 200:
-                    redir_state = 'Working redirect'
+                    response = c.get(tested_url, follow=True)
+                if response.status_code == 200:
+                    self.message = f'Working {redirect_type} redirect'
                     self.status = True
                 else:
-                    redir_state = 'Broken redirect'
-                    self.status = False
-                self.message = 'This link redirects: code %d (%s)' % (
-                    response.status_code, redir_state)
+                    self.message = f'Broken {redirect_type} redirect'
             else:
                 self.message = 'Broken internal link'
+            # see if the internal link points an anchor
+            if tested_url[-1] == '#':
+                # special case, point to #
+                self.message += ', working internal hash anchor'
+            elif tested_url.count('#'):
+                anchor = tested_url.split('#')[1]
+                self._check_anchor(anchor, response.content)
             settings.PREPEND_WWW = old_prepend_setting
         else:
             self.message = 'Invalid URL'
@@ -309,48 +276,42 @@ class Url(models.Model):
                 response = requests.get(url, **request_params)
         except ReadTimeout:
             self.message = 'Other Error: The read operation timed out'
-            self.status = False
         except ConnectionError as e:
             self.message = format_connection_error(e)
-            self.status = False
         except Exception as e:
             self.message = 'Other Error: %s' % e
-            self.status = False
         else:
-            self.message = ' '.join([str(response.status_code), response.reason])
-            self.status = 200 <= response.status_code < 400
+            self.message = f"{response.status_code} {response.reason}"
+
+            if response.ok and response.status_code not in REDIRECT_STATI:
+                self.status = True
+                # If initial response was a redirect, return the initial return code
+                if response.history:
+                    self.message = f"{response.history[0].status_code} {response.history[0].reason}"
+                    self.redirect_to = response.url
 
             if tested_url.count('#'):
                 anchor = tested_url.split('#')[1]
-                from linkcheck import parse_anchors
-                try:
-                    names = parse_anchors(response.text)
-                    if anchor in names:
-                        self.message = 'Working external hash anchor'
-                        self.status = True
-                    elif TOLERATE_BROKEN_ANCHOR:
-                        self.message = 'Page OK, but broken external hash anchor'
-                        self.status = True
-                    else:
-                        self.message = 'Broken external hash anchor'
-                        self.status = False
-
-                except:
-                    # The external web page is mal-formatted #or maybe other parse errors like encoding
-                    # I reckon a broken anchor on an otherwise good URL should count as a pass
-                    self.message = "Page OK but anchor can't be checked"
-                    self.status = True
-
-            if response.status_code in REDIRECT_STATI:
-                # This means it could not follow the redirection
-                self.status = False
-            elif response.status_code < 300 and response.history:
-                self.message = ' '.join([str(response.history[0].status_code), response.history[0].reason])
-                self.redirect_to = response.url
+                self._check_anchor(anchor, response.text, internal=False)
 
         self.last_checked = now()
         self.save()
 
+    def _check_anchor(self, anchor, html, internal=True):
+        from linkcheck import parse_anchors
+        scope = "internal" if internal else "external"
+        try:
+            names = parse_anchors(html)
+            if anchor in names:
+                self.message += f', working {scope} hash anchor'
+            else:
+                self.message += f', broken {scope} hash anchor'
+                if not TOLERATE_BROKEN_ANCHOR:
+                    self.status = False
+        except UnicodeDecodeError:
+            self.message += ', failed to parse HTML for anchor'
+            if not TOLERATE_BROKEN_ANCHOR:
+                self.status = False
 
 class Link(models.Model):
     """

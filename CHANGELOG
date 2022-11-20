@@ -1,5 +1,7 @@
 Unreleased
 
+* Fix incorrect message when redirect has broken anchor
+  (Timo Ludwig, #128)
 * Breaking change: Treat broken hash anchors as valid
   unless `LINKCHECK_TOLERATE_BROKEN_ANCHOR` is manually
   set to `False` (Timo Ludwig, #98)

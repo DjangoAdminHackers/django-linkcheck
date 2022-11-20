@@ -49,32 +49,49 @@ class InternalCheckTestCase(TestCase):
         uv = Url(url="/http/anchor/#anchor")
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, "Working internal hash anchor")
+        self.assertEqual(uv.message, "Working internal link, working internal hash anchor")
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
     def test_broken_internal_anchor(self):
         uv = Url(url="/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, "Broken internal hash anchor")
+        self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
 
     def test_broken_internal_anchor_tolerated(self):
         uv = Url(url="/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, "Page OK, but broken internal hash anchor")
+        self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
+
+    def test_redirect_working_internal_anchor(self):
+        uv = Url(url="/http/redirect_to_anchor/#anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Working temporary redirect, working internal hash anchor")
+
+    @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
+    def test_redirect_broken_internal_anchor(self):
+        uv = Url(url="/http/redirect_to_anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
+
+    def test_redirect_broken_internal_anchor_tolerated(self):
+        uv = Url(url="/http/redirect_to_anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
 
     def test_internal_check_view_redirect(self):
         uv = Url(url="/admin/linkcheck")
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertIn(uv.message,
-            ['This link redirects: code %s (Working redirect)' % status for status in [301, 302]]
-        )
+        self.assertEqual(uv.message, "Working temporary redirect")
         uv = Url(url="/http/brokenredirect/")
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, 'This link redirects: code 302 (Broken redirect)')
+        self.assertEqual(uv.message, 'Broken temporary redirect')
 
     def test_internal_check_found(self):
         uv = Url(url="/public/")
@@ -161,7 +178,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv = Url(url="%s/http/301/" % self.live_server_url)
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message.lower(), '301 moved permanently')
+        self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301_followed(self):
@@ -212,20 +229,39 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv = Url(url=f"{self.live_server_url}/http/anchor/#anchor")
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, "Working external hash anchor")
+        self.assertEqual(uv.message, "200 OK, working external hash anchor")
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
     def test_broken_external_anchor(self):
         uv = Url(url=f"{self.live_server_url}/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message, "Broken external hash anchor")
+        self.assertEqual(uv.message, "200 OK, broken external hash anchor")
 
     def test_broken_external_anchor_tolerated(self):
         uv = Url(url=f"{self.live_server_url}/http/anchor/#broken-anchor")
         uv.check_url()
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.message, "Page OK, but broken external hash anchor")
+        self.assertEqual(uv.message, "200 OK, broken external hash anchor")
+
+    def test_redirect_working_external_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/http/redirect_to_anchor/#anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "302 Found, working external hash anchor")
+
+    @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
+    def test_redirect_broken_external_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/http/redirect_to_anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, "302 Found, broken external hash anchor")
+
+    def test_redirect_broken_external_anchor_tolerated(self):
+        uv = Url(url=f"{self.live_server_url}/http/redirect_to_anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "302 Found, broken external hash anchor")
 
 
 class ModelTestCase(TestCase):

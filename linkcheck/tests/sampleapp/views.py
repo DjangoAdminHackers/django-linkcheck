@@ -26,3 +26,7 @@ def timeout(request):
 
 def http_response_with_anchor(request):
     return HttpResponse("<html><body><h1 id='anchor'>Anchor</h1></body></html>")
+
+
+def http_redirect_to_anchor(request):
+    return HttpResponseRedirect("/http/anchor/")
