@@ -5,7 +5,7 @@ from linkcheck.utils import unignore
 
 class Command(BaseCommand):
 
-    help = "Goes through all models registered with Linkcheck and records any links found"
+    help = "Updates the `ignore` status of all links to `False`"
 
     def execute(self, *args, **options):
         print("Unignoring all links")
