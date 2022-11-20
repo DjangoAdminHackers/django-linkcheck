@@ -30,7 +30,7 @@ def handle_upload(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=True, message='Working document link')
-        msg = "Please note. Uploading %s has corrected %s broken link%s. See the Link Manager for more details" % (url, count, count > 1 and 's' or '')
+        msg = f"Please note. Uploading {url} has corrected {count} broken link{count > 1 and 's' or ''}. See the Link Manager for more details"
         messages.info(sender, msg)
 
 
@@ -52,7 +52,7 @@ def handle_rename(sender, path=None, **kwargs):
     old_count = old_url_qs.count()
     if old_count:
         old_url_qs.update(status=False, message='Missing Document')
-        msg = "Warning. Renaming %s has caused %s link%s to break. Please use the Link Manager to fix them" % (old_url, old_count, old_count > 1 and 's' or '')
+        msg = f"Warning. Renaming {old_url} has caused {old_count} link{old_count > 1 and 's' or ''} to break. Please use the Link Manager to fix them"
         messages.info(sender, msg)
 
     # The new directory may fix some invalid links, so we also check for that
@@ -68,7 +68,7 @@ def handle_rename(sender, path=None, **kwargs):
         if new_count:
             new_url_qs.update(status=True, message='Working document link')
     if new_count:
-        msg = "Please note. Renaming %s has corrected %s broken link%s. See the Link Manager for more details" % (new_url, new_count, new_count > 1 and 's' or '')
+        msg = f"Please note. Renaming {new_url} has corrected {new_count} broken link{new_count > 1 and 's' or ''}. See the Link Manager for more details"
         messages.info(sender, msg)
 
 
@@ -79,7 +79,7 @@ def handle_delete(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=False, message='Missing Document')
-        msg = "Warning. Deleting %s has caused %s link%s to break. Please use the Link Manager to fix them" % (url, count, count > 1 and 's' or '')
+        msg = f"Warning. Deleting {url} has caused {count} link{count > 1 and 's' or ''} to break. Please use the Link Manager to fix them"
         messages.info(sender, msg)
 
 

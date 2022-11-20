@@ -265,7 +265,7 @@ class Url(models.Model):
 
         request_params = {
             'allow_redirects': True,
-            'headers': {'User-Agent' : "http://%s Linkchecker" % settings.SITE_DOMAIN},
+            'headers': {'User-Agent' : f"http://{settings.SITE_DOMAIN} Linkchecker"},
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
         }
         try:
@@ -284,7 +284,7 @@ class Url(models.Model):
         except ConnectionError as e:
             self.message = format_connection_error(e)
         except Exception as e:
-            self.message = 'Other Error: %s' % e
+            self.message = f'Other Error: {e}'
         else:
             self.message = f"{response.status_code} {response.reason}"
             logger.debug('Response message: %s', self.message)

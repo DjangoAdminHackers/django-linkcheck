@@ -148,77 +148,77 @@ class InternalMediaCheckTestCase(TestCase):
 @override_settings(SITE_DOMAIN='example.com')
 class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200(self):
-        uv = Url(url="%s/http/200/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/200/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_200_missing_cert(self):
-        uv = Url(url="%s/http/200/" % self.live_server_url.replace("http://", "https://"))
+        uv = Url(url=f"{self.live_server_url.replace('http://', 'https://')}/http/200/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'SSL Error: wrong version number')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_200_utf8(self):
-        uv = Url(url="%s/http/200/r%%C3%%BCckmeldung/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/200/r%C3%BCckmeldung/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         # Also when the url is not encoded
-        uv = Url(url="%s/http/200/rückmeldung/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/200/rückmeldung/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_301(self):
-        uv = Url(url="%s/http/301/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/301/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, '')
 
     def test_external_check_301_followed(self):
-        uv = Url(url="%s/http/redirect/301/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/redirect/301/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '301 Moved Permanently')
-        self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
+        self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
 
     def test_external_check_302_followed(self):
-        uv = Url(url="%s/http/redirect/302/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/redirect/302/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '302 Found')
-        self.assertEqual(uv.redirect_to, '%s/http/200/' % self.live_server_url)
+        self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
 
     def test_external_check_404(self):
-        uv = Url(url="%s/whatever/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/whatever/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '404 not found')
 
     def test_external_check_redirect_final_404(self):
-        uv = Url(url="%s/http/redirect_to_404/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/redirect_to_404/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message.lower(), '404 not found')
 
     def test_external_check_get_only(self):
         # An URL that allows GET but not HEAD, linkcheck should fallback on GET.
-        uv = Url(url="%s/http/getonly/405/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/getonly/405/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         # Same test with other 40x error
-        uv = Url(url="%s/http/getonly/400/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/http/getonly/400/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
 
     def test_external_check_timedout(self):
-        uv = Url(url="%s/timeout/" % self.live_server_url)
+        uv = Url(url=f"{self.live_server_url}/timeout/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')
