@@ -17,5 +17,6 @@ urlpatterns = [
     path('http/redirect/<int:code>/', views.http_redirect),
     path('http/redirect_to_404/', views.http_redirect_to_404),
     path('http/brokenredirect/', RedirectView.as_view(url='/non-existent/')),
+    path('http/anchor/', views.http_response_with_anchor),
     path('timeout/', views.timeout),
 ]
