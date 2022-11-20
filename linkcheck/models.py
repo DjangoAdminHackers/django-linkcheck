@@ -75,7 +75,7 @@ class Url(models.Model):
             return 'mailto'
         if self.url.startswith('tel'):
             return 'phone'
-        elif str(self.url)=='':
+        elif self.url == '':
             return 'empty'
         elif self.url.startswith('#'):
             return 'anchor'
@@ -138,7 +138,7 @@ class Url(models.Model):
             elif root_domain.startswith('test.'):
                 root_domain = root_domain[5:]
             internal_exceptions = [
-                'http://'+root_domain, 'http://www.'+root_domain, 'http://test.'+root_domain,
+                'http://' + root_domain, 'http://www.' + root_domain, 'http://test.' + root_domain,
                 'https://' + root_domain, 'https://www.' + root_domain, 'https://test.' + root_domain,
             ]
 
@@ -164,7 +164,7 @@ class Url(models.Model):
 
         from linkcheck.utils import LinkCheckHandler
 
-        if not(tested_url):
+        if not tested_url:
             self.message = 'Empty link'
 
         elif tested_url.startswith('mailto:'):
@@ -199,7 +199,7 @@ class Url(models.Model):
                 self.message = 'Working internal hash anchor'
                 self.status = True
             else:
-                hash = hash[1:] #'#something' => 'something'
+                hash = hash[1:]  # '#something' => 'something'
                 html_content = ''
                 for field in instance._linklist.html_fields:
                     html_content += getattr(instance, field, '')
@@ -275,11 +275,10 @@ class Url(models.Model):
             else:
                 # Might as well just do a HEAD request
                 response = requests.head(url, **request_params)
-
-            if response.status_code >= 400:
-                logger.debug('HEAD is not allowed, retry with GET')
                 # If HEAD is not allowed, let's try with GET
-                response = requests.get(url, **request_params)
+                if response.status_code >= 400:
+                    logger.debug('HEAD is not allowed, retry with GET')
+                    response = requests.get(url, **request_params)
         except ReadTimeout:
             self.message = 'Other Error: The read operation timed out'
         except ConnectionError as e:
@@ -357,8 +356,8 @@ class Link(models.Model):
 
 def link_post_delete(sender, instance, **kwargs):
     try:
-        #url.delete() => link.delete() => link_post_delete
-        #in this case link.url is already deleted from db, so we need a try here.
+        # url.delete() => link.delete() => link_post_delete
+        # in this case link.url is already deleted from db, so we need a try here.
         url = instance.url
         count = url.links.all().count()
         if count == 0:
@@ -373,7 +372,7 @@ def format_connection_error(e):
     Helper function to provide better readable output of connection errors
     """
     # If the exception message is wrapped in an "HTTPSConnectionPool", only give the underlying cause
-    reason = re.search("\(Caused by ([a-zA-Z]+\(.+\))\)", str(e))
+    reason = re.search(r"\(Caused by ([a-zA-Z]+\(.+\))\)", str(e))
     if not reason:
         return f"Connection Error: {e}"
     reason = reason[1]
@@ -391,7 +390,7 @@ def format_new_connection_error(reason):
     Helper function to provide better readable output of new connection errors thrown by urllib3
     """
     connection_reason = re.search(
-        "NewConnectionError\('<urllib3\.connection\.HTTPSConnection object at 0x[0-9a-f]+>: (.+)'\)",
+        r"NewConnectionError\('<urllib3\.connection\.HTTPSConnection object at 0x[0-9a-f]+>: (.+)'\)",
         reason,
     )
     if connection_reason:
@@ -403,10 +402,10 @@ def format_ssl_error(reason):
     """
     Helper function to provide better readable output of SSL errors thrown by urllib3
     """
-    ssl_reason = re.search("SSLError\([a-zA-Z]+\((.+)\)\)", reason)
+    ssl_reason = re.search(r"SSLError\([a-zA-Z]+\((.+)\)\)", reason)
     if ssl_reason:
         # If the reason lies withing the ssl c library, hide additional debug output
-        ssl_c_reason = re.search("1, '\[SSL: [A-Z\d_]+\] (.+) \(_ssl\.c:\d+\)'", ssl_reason[1])
+        ssl_c_reason = re.search(r"1, '\[SSL: [A-Z\d_]+\] (.+) \(_ssl\.c:\d+\)'", ssl_reason[1])
         if ssl_c_reason:
             return f"SSL Error: {ssl_c_reason[1]}"
         return f"SSL Error: {ssl_reason[1]}"

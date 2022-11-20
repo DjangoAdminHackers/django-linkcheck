@@ -103,7 +103,7 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
     for u in urls:
         status = u.check_url(check_internal=check_internal, check_external=check_external)
         check_count += 1 if status is not None else 0
-        if limit > -1 and check_count >= limit:
+        if -1 < limit <= check_count:
             break
 
     return check_count
