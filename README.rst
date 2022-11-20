@@ -210,23 +210,41 @@ django-filebrowser integration
 If django-filebrowser is present on your path then linkcheck will listen to the post-upload, delete and rename signals and update itself according
 
 
-Running tests
--------------
+Contributing
+------------
 
-Tests can be run standalone by using the runtests.py script in linkcheck root:
+You can install all requirements of the development setup with:
+
+.. code-block:: bash
+
+    $ python3 -m venv .venv
+    $ source .venv/bin/activate
+    $ pip install -e .
+
+Running tests
+~~~~~~~~~~~~~
+
+Tests can be run standalone by using the ``runtests.py`` script in linkcheck root:
+
+.. code-block:: bash
+
     $ python runtests.py
 
-If you want to run linkcheck tests in the context of your project, you should include 'linkcheck.tests.sampleapp' in your INSTALLED_APPS setting.
+If you want to run linkcheck tests in the context of your project, you should include ``'linkcheck.tests.sampleapp'`` in your ``INSTALLED_APPS`` setting.
 
 Linkcheck gives you two context managers to enable or disable listeners in your
 own tests. For example:
+
+.. code-block:: python3
 
     def test_something_without_listeners(self):
         with listeners.disable_listeners():
             # Create/update here without linkcheck intervening.
 
-In the case you defined the LINKCHECK_DISABLE_LISTENERS setting, you can
+In the case you defined the ``LINKCHECK_DISABLE_LISTENERS`` setting, you can
 temporarily enable it by:
+
+.. code-block:: python3
 
     def test_something_with_listeners(self):
         with listeners.enable_listeners():
