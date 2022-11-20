@@ -1,13 +1,10 @@
-import re
-import os.path
-
-from datetime import timedelta
 import logging
-import requests
-from requests.exceptions import ConnectionError, ReadTimeout
-from requests.models import REDIRECT_STATI
+import os.path
+import re
+from datetime import timedelta
 from urllib.parse import unquote
 
+import requests
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -16,6 +13,8 @@ from django.test.client import Client
 from django.test.utils import modify_settings
 from django.utils.encoding import iri_to_uri
 from django.utils.timezone import now
+from requests.exceptions import ConnectionError, ReadTimeout
+from requests.models import REDIRECT_STATI
 
 try:
     from reversion.revisions import revision_context_manager
@@ -24,12 +23,12 @@ except ImportError:
     USE_REVERSION = False
 
 from .linkcheck_settings import (
+    EXTERNAL_RECHECK_INTERVAL,
+    EXTERNAL_REGEX_STRING,
+    LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
     MAX_URL_LENGTH,
     MEDIA_PREFIX,
     SITE_DOMAINS,
-    EXTERNAL_REGEX_STRING,
-    EXTERNAL_RECHECK_INTERVAL,
-    LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
     TOLERATE_BROKEN_ANCHOR,
 )
 

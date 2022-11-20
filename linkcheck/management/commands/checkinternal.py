@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from linkcheck.utils import check_links
 from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
+from linkcheck.utils import check_links
 
 
 class Command(BaseCommand):

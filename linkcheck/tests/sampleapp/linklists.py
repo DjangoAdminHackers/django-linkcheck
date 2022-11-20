@@ -1,4 +1,5 @@
-from django.db.models import Subquery, OuterRef
+from django.db.models import OuterRef, Subquery
+
 from linkcheck import Linklist
 from linkcheck.tests.sampleapp.models import Author, Book, Journal
 

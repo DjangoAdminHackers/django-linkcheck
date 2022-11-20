@@ -1,7 +1,7 @@
+import os
 from datetime import datetime, timedelta
 from io import StringIO
 from unittest.mock import patch
-import os
 
 from django.apps import apps
 from django.conf import settings
@@ -11,12 +11,16 @@ from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
+from linkcheck.linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.listeners import (
-    enable_listeners, disable_listeners, linkcheck_worker, register_listeners,
-    tasks_queue, unregister_listeners,
+    disable_listeners,
+    enable_listeners,
+    linkcheck_worker,
+    register_listeners,
+    tasks_queue,
+    unregister_listeners,
 )
 from linkcheck.models import Link, Url
-from linkcheck.linkcheck_settings import MAX_URL_LENGTH
 from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book, Journal

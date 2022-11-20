@@ -5,10 +5,12 @@ from django.conf import settings
 from django.contrib import messages
 
 try:
-    from filebrowser.views import filebrowser_post_upload
-    from filebrowser.views import filebrowser_post_rename
-    from filebrowser.views import filebrowser_post_delete
     from filebrowser.settings import DIRECTORY
+    from filebrowser.views import (
+        filebrowser_post_delete,
+        filebrowser_post_rename,
+        filebrowser_post_upload,
+    )
     FILEBROWSER_PRESENT = True
 except ImportError:
     FILEBROWSER_PRESENT = False

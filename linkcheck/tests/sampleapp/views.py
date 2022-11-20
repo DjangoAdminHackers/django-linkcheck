@@ -1,5 +1,10 @@
 import time
-from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseRedirect
+
+from django.http import (
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 
 
 def http_response(request, code):

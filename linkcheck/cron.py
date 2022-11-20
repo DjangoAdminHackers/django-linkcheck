@@ -7,15 +7,13 @@
 #
 # Links are checked via signals any time a link-containing object is saved by Django
 
-from django_cron import cronScheduler
-from django_cron import Job
-from django_cron import WEEK
+from django_cron import WEEK, Job, cronScheduler
 
-from linkcheck.utils import check_links
-from linkcheck.utils import find_all_links
-
-from linkcheck.linkcheck_settings import EXTERNAL_RECHECK_INTERVAL
-from linkcheck.linkcheck_settings import MAX_CHECKS_PER_RUN
+from linkcheck.linkcheck_settings import (
+    EXTERNAL_RECHECK_INTERVAL,
+    MAX_CHECKS_PER_RUN,
+)
+from linkcheck.utils import check_links, find_all_links
 
 
 class RunLinkCheckFind(Job):
