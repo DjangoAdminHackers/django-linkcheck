@@ -22,3 +22,7 @@ def http_redirect_to_404(request):
 def timeout(request):
     time.sleep(2)
     return HttpResponse("")
+
+
+def http_response_with_anchor(request):
+    return HttpResponse("<html><body><h1 id='anchor'>Anchor</h1></body></html>")

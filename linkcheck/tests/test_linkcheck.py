@@ -38,11 +38,23 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Empty link')
 
-    def test_internal_check_anchor(self):
+    def test_same_page_anchor(self):
         uv = Url(url="#some_anchor")
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
+
+    def test_working_internal_anchor(self):
+        uv = Url(url="/http/anchor/#anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Working internal hash anchor")
+
+    def test_broken_internal_anchor(self):
+        uv = Url(url="/http/anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, "Broken internal hash anchor")
 
     def test_internal_check_view_redirect(self):
         uv = Url(url="/admin/linkcheck")
@@ -73,14 +85,6 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Invalid URL')
-
-    def test_same_page_anchor(self):
-        # TODO Make this test
-        pass
-        #uv = Url(url="#anchor")
-        #uv.check_url()
-        #self.assertEqual(uv.status, None)
-        #self.assertEqual(uv.message, "")
 
 
 class InternalMediaCheckTestCase(TestCase):
@@ -195,6 +199,18 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')
+
+    def test_working_external_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/http/anchor/#anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "Working external hash anchor")
+
+    def test_broken_external_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/http/anchor/#broken-anchor")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, "Broken external hash anchor")
 
 
 class ModelTestCase(TestCase):
