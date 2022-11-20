@@ -6,7 +6,7 @@ class Book(models.Model):
     description = models.TextField()
 
     def get_absolute_url(self):
-        return "/book/%s/" % self.id
+        return f"/book/{self.id}/"
 
 
 class Author(models.Model):

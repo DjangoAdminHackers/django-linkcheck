@@ -310,7 +310,7 @@ def get_coverage_data():
                         break
             if should_append:
                 all_model_list.append({
-                    'name': '%s.%s' % (model._meta.app_label, model._meta.object_name),
+                    'name': f'{model._meta.app_label}.{model._meta.object_name}',
                     'is_covered': is_model_covered(model),
                     'suggested_config': get_suggested_linklist_config(model),
                 })

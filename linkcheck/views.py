@@ -124,7 +124,7 @@ def report(request):
                 admin_url = object.get_admin_url()  # TODO allow method name to be configurable
             except AttributeError:
                 try:
-                    admin_url = reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=[ok])
+                    admin_url = reverse(f'admin:{content_type.app_label}_{content_type.model}_change', args=[ok])
                 except NoReverseMatch:
                     admin_url = None
 

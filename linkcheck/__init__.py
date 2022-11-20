@@ -29,7 +29,7 @@ class URLLister(Lister):
         elif tag == 'img' and self.in_a:
             src = [v for k, v in attrs if k == 'src']
             if src:
-                self.text += ' [image:%s] ' % src[0]
+                self.text += f' [image:{src[0]}] '
 
     def handle_endtag(self, tag):
         if tag == 'a' and self.in_a:
