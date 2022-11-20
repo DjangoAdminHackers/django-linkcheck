@@ -33,7 +33,7 @@ from .linkcheck_settings import (
     TOLERATE_BROKEN_ANCHOR,
 )
 
-logger = logging.getLogger('linkcheck')
+logger = logging.getLogger(__name__)
 
 
 EXTERNAL_REGEX = re.compile(EXTERNAL_REGEX_STRING)
@@ -160,6 +160,7 @@ class Url(models.Model):
         return self.status
 
     def _check_internal(self, tested_url):
+        logger.debug('checking internal link: %s', tested_url)
 
         from linkcheck.utils import LinkCheckHandler
 
@@ -244,10 +245,14 @@ class Url(models.Model):
         self.save()
 
     def _check_external(self, tested_url, external_recheck_interval):
-        logger.info('checking external link: %s' % tested_url)
+        logger.info('checking external link: %s', tested_url)
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
 
         if self.last_checked and (self.last_checked > external_recheck_datetime):
+            logger.debug(
+                'URL was last checked in the last %s minutes, so not checking it again',
+                external_recheck_interval
+            )
             return self.status
 
         # Remove URL fragment identifiers
@@ -272,6 +277,7 @@ class Url(models.Model):
                 response = requests.head(url, **request_params)
 
             if response.status_code >= 400:
+                logger.debug('HEAD is not allowed, retry with GET')
                 # If HEAD is not allowed, let's try with GET
                 response = requests.get(url, **request_params)
         except ReadTimeout:
@@ -282,11 +288,13 @@ class Url(models.Model):
             self.message = 'Other Error: %s' % e
         else:
             self.message = f"{response.status_code} {response.reason}"
+            logger.debug('Response message: %s', self.message)
 
             if response.ok and response.status_code not in REDIRECT_STATI:
                 self.status = True
                 # If initial response was a redirect, return the initial return code
                 if response.history:
+                    logger.debug('Redirect history: %r', response.history)
                     self.message = f"{response.history[0].status_code} {response.history[0].reason}"
                     self.redirect_to = response.url
 
@@ -308,7 +316,8 @@ class Url(models.Model):
                 self.message += f', broken {scope} hash anchor'
                 if not TOLERATE_BROKEN_ANCHOR:
                     self.status = False
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
+            logger.debug('UnicodeDecodeError while parsing anchors: %s', e)
             self.message += ', failed to parse HTML for anchor'
             if not TOLERATE_BROKEN_ANCHOR:
                 self.status = False
@@ -353,6 +362,7 @@ def link_post_delete(sender, instance, **kwargs):
         url = instance.url
         count = url.links.all().count()
         if count == 0:
+            logger.debug('This was the last link for %r, so deleting it', url)
             url.delete()
     except Url.DoesNotExist:
         pass
