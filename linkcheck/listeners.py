@@ -8,10 +8,10 @@ from threading import Thread
 from django.apps import apps
 from django.db.models import signals as model_signals
 
-from . import filebrowser
-from . import update_lock
+from linkcheck.models import Link, Url
+
+from . import filebrowser, update_lock
 from .linkcheck_settings import MAX_URL_LENGTH
-from linkcheck.models import Url, Link
 
 logger = logging.getLogger(__name__)
 

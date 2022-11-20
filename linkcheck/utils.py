@@ -1,14 +1,18 @@
 import logging
+from datetime import timedelta
+
 from django.apps import apps
 from django.db import models
 from django.test.client import ClientHandler
 from django.utils import timezone
 
-from datetime import timedelta
-
+from .linkcheck_settings import (
+    HTML_FIELD_CLASSES,
+    IMAGE_FIELD_CLASSES,
+    MAX_URL_LENGTH,
+    URL_FIELD_CLASSES,
+)
 from .models import Link, Url
-from .linkcheck_settings import MAX_URL_LENGTH, HTML_FIELD_CLASSES, IMAGE_FIELD_CLASSES, URL_FIELD_CLASSES
-
 
 logger = logging.getLogger(__name__)
 

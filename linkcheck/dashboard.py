@@ -1,8 +1,7 @@
 from admin_tools.dashboard import modules
-from linkcheck.views import get_status_message
-
 from django.urls import reverse
 
+from linkcheck.views import get_status_message
 
 linkcheck_dashboard_module = modules.LinkList(
     title="Linkchecker",

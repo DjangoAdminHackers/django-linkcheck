@@ -1,5 +1,6 @@
-from linkcheck import Linklist
 from cms.models import Page
+
+from linkcheck import Linklist
 
 
 class PageLinklist(Linklist):
