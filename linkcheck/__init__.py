@@ -47,7 +47,7 @@ class ImageLister(Lister):
 
     def handle_starttag(self, tag, attrs):
         if tag == 'img':
-            src = [v for k, v in attrs if k=='src']
+            src = [v for k, v in attrs if k == 'src']
             if src:
                 self.urls.append(('', src[0]))
 
@@ -62,17 +62,17 @@ class AnchorLister(HTMLParser):
         self.names = []
 
     def handle_starttag(self, tag, attributes):
-        name = [v for k, v in attributes if k=='id']
+        name = [v for k, v in attributes if k == 'id']
         if name:
             self.names.append(name[0])
         if tag == 'a':
-            name = [v for k, v in attributes if k=='name']
+            name = [v for k, v in attributes if k == 'name']
             if name:
                 self.names.append(name[0])
 
 
 def parse(obj, field, parser):
-    html = getattr(obj,field)
+    html = getattr(obj, field)
     if html:
         parser.feed(html)
         parser.close()

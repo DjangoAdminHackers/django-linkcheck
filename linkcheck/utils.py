@@ -18,13 +18,14 @@ class LinkCheckHandler(ClientHandler):
     # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
-        self.ignore_keywords = ['reversion.middleware','MaintenanceModeMiddleware']
+        self.ignore_keywords = ['reversion.middleware', 'MaintenanceModeMiddleware']
         super().load_middleware()
         new_request_middleware = []
 
-        #############################_request_middleware#################################
-        # _request_middleware is removed in newer django.
-        if getattr(self, '_request_middleware', None):
+        ####################################################
+        # _request_middleware (is removed in newer django) #
+        ####################################################
+        if getattr(self, "_request_middleware", None):
             for method in self._request_middleware:
                 ignored = False
                 for keyword in self.ignore_keywords:
@@ -35,7 +36,9 @@ class LinkCheckHandler(ClientHandler):
                     new_request_middleware.append(method)
             self._request_middleware = new_request_middleware
 
-        #############################_view_middleware#################################
+        ####################
+        # _view_middleware #
+        ####################
         new_view_middleware = []
         for method in self._view_middleware:
             ignored = False
@@ -47,8 +50,10 @@ class LinkCheckHandler(ClientHandler):
                 new_view_middleware.append(method)
         self._view_middleware = new_view_middleware
 
-        #############################_response_middleware#################################
-        if getattr(self, '_response_middleware', None):
+        ##########################
+        # _response_middleware## #
+        ##########################
+        if getattr(self, "_response_middleware", None):
             new_response_middleware = []
             for method in self._response_middleware:
                 ignored = False
@@ -60,9 +65,10 @@ class LinkCheckHandler(ClientHandler):
                     new_response_middleware.append(method)
             self._response_middleware = new_response_middleware
 
-
-        #############################_template_response_middleware#################################
-        if getattr(self, '_template_response_middleware', None):
+        #################################
+        # _template_response_middleware #
+        #################################
+        if getattr(self, "_template_response_middleware", None):
             new_template_response_middleware = []
             for method in self._template_response_middleware:
                 ignored = False
@@ -74,7 +80,9 @@ class LinkCheckHandler(ClientHandler):
                     new_template_response_middleware.append(method)
             self._template_response_middleware = new_template_response_middleware
 
-        #############################_exception_middleware#################################
+        #########################
+        # _exception_middleware #
+        #########################
         new_exception_middleware = []
         for method in self._exception_middleware:
             ignored = False

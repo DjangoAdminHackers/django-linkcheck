@@ -5,7 +5,10 @@ from django.views.generic import RedirectView
 
 from linkcheck.tests.sampleapp import views
 
-handler404 = lambda *args, **kwargs: http.HttpResponseNotFound('')
+
+def handler404(*args, **kwargs):
+    return http.HttpResponseNotFound("")
+
 
 urlpatterns = [
     path('admin/linkcheck/', include('linkcheck.urls')),

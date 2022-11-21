@@ -9,7 +9,8 @@ class Command(BaseCommand):
     help = 'Check and record internal link status'
 
     def add_arguments(self, parser):
-        parser.add_argument('-l', '--limit', type=int,
+        parser.add_argument(
+            '-l', '--limit', type=int,
             help='Specifies the maximum number (int) of links to be checked. '
                  'Defaults to linkcheck_config setting.  Value less than 1 will check all')
 
