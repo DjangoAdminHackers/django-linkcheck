@@ -79,7 +79,7 @@ def check_instance_links(sender, instance, **kwargs):
             new_links = []
             old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)
 
-            linklists = linklist_cls().get_linklist(extra_filter={'pk':instance.pk,})
+            linklists = linklist_cls().get_linklist(extra_filter={'pk': instance.pk})
 
             if not linklists:
                 # This object is no longer watched by linkcheck according to object_filter
@@ -102,7 +102,9 @@ def check_instance_links(sender, instance, **kwargs):
                     continue
 
                 u, created = Url.objects.get_or_create(url=url)
-                l, created = Link.objects.get_or_create(url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk)
+                l, created = Link.objects.get_or_create(
+                    url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk
+                )
                 new_links.append(l.id)
                 if internal_hash:
                     setattr(u, '_internal_hash', internal_hash)

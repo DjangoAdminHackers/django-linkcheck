@@ -29,8 +29,11 @@ def handle_upload(sender, path=None, **kwargs):
     url_qs = Url.objects.filter(url=url).filter(status=False)
     count = url_qs.count()
     if count:
-        url_qs.update(status=True, message='Working document link')
-        msg = f"Please note. Uploading {url} has corrected {count} broken link{count > 1 and 's' or ''}. See the Link Manager for more details"
+        url_qs.update(status=True, message="Working document link")
+        msg = (
+            f"Please note. Uploading {url} has corrected {count} broken link{count > 1 and 's' or ''}. "
+            "See the Link Manager for more details"
+        )
         messages.info(sender, msg)
 
 
@@ -51,8 +54,11 @@ def handle_rename(sender, path=None, **kwargs):
         old_url_qs = Url.objects.filter(url__startswith=old_url).filter(status=True)
     old_count = old_url_qs.count()
     if old_count:
-        old_url_qs.update(status=False, message='Missing Document')
-        msg = f"Warning. Renaming {old_url} has caused {old_count} link{old_count > 1 and 's' or ''} to break. Please use the Link Manager to fix them"
+        old_url_qs.update(status=False, message="Missing Document")
+        msg = (
+            f"Warning. Renaming {old_url} has caused {old_count} link{old_count > 1 and 's' or ''} to break. "
+            "Please use the Link Manager to fix them"
+        )
         messages.info(sender, msg)
 
     # The new directory may fix some invalid links, so we also check for that
@@ -68,7 +74,10 @@ def handle_rename(sender, path=None, **kwargs):
         if new_count:
             new_url_qs.update(status=True, message='Working document link')
     if new_count:
-        msg = f"Please note. Renaming {new_url} has corrected {new_count} broken link{new_count > 1 and 's' or ''}. See the Link Manager for more details"
+        msg = (
+            f"Please note. Renaming {new_url} has corrected {new_count} broken link{new_count > 1 and 's' or ''}. "
+            "See the Link Manager for more details"
+        )
         messages.info(sender, msg)
 
 
@@ -78,8 +87,11 @@ def handle_delete(sender, path=None, **kwargs):
     url_qs = Url.objects.filter(url=url).filter(status=True)
     count = url_qs.count()
     if count:
-        url_qs.update(status=False, message='Missing Document')
-        msg = f"Warning. Deleting {url} has caused {count} link{count > 1 and 's' or ''} to break. Please use the Link Manager to fix them"
+        url_qs.update(status=False, message="Missing Document")
+        msg = (
+            f"Warning. Deleting {url} has caused {count} link{count > 1 and 's' or ''} to break. "
+            "Please use the Link Manager to fix them"
+        )
         messages.info(sender, msg)
 
 

@@ -29,10 +29,10 @@ class BaseLinkcheckConfig(AppConfig):
                     if k in self.all_linklists.keys():
                         raise AlreadyRegistered(f'The key {k} is already registered in all_linklists')
 
-                for l in the_module.linklists.values():
-                    for l2 in self.all_linklists.values():
-                        if l.model == l2.model:
-                            raise AlreadyRegistered(f'The LinkList {l} is already registered in all_linklists')
+                for link_list in the_module.linklists.values():
+                    for link_list2 in self.all_linklists.values():
+                        if link_list.model == link_list2.model:
+                            raise AlreadyRegistered(f"The LinkList {link_list} is already registered in all_linklists")
                 self.all_linklists.update(the_module.linklists)
             except AttributeError:
                 pass

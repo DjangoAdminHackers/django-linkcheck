@@ -96,8 +96,8 @@ def report(request):
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
 
     try:
-        page = int(request.GET.get('page', '1'))
-    except:
+        page = int(request.GET.get("page", "1"))
+    except ValueError:
         page = 0
     # offset = (page - 1) * RESULTS_PER_PAGE
     links = paginated_links.page(page)
@@ -130,7 +130,8 @@ def report(request):
 
             objects.append({
                 'object': object,
-                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),  # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
+                # Convert values_list back to queryset. Do we need to get values() or do we just need a list of ids?
+                'link_list': Link.objects.in_bulk([x['id'] for x in og]).values(),
                 'admin_url': admin_url,
             })
         content_types_list.append({

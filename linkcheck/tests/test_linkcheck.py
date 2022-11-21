@@ -283,7 +283,10 @@ class ModelTestCase(TestCase):
         )
         self.assertEqual(
             repr(Link.objects.first()),
-            "<Link (id: 1, url: <Url (id: 1, url: http://www.example.org/smith)>, source: <Author: Author object (1)>)>",
+            (
+                "<Link (id: 1, url: <Url (id: 1, url: http://www.example.org/smith)>, "
+                "source: <Author: Author object (1)>)>"
+            ),
         )
 
 
@@ -340,13 +343,20 @@ class FindingLinksTestCase(TestCase):
     def test_urls_exceeding_max_length(self):
         self.assertEqual(Url.objects.all().count(), 0)
         with self.assertLogs(logger="linkcheck", level="WARN") as cm:
-            Book.objects.create(title='My Title', description=f"""
-                Here's a link: <a href="http://www.example.org">Example</a>,
-                and here's a url exceeding the max length: <img src="http://www.example.org/{MAX_URL_LENGTH * "X"}" alt="logo">""")
+            Book.objects.create(
+                title="My Title",
+                description=(
+                    "Here's a link: <a href='http://www.example.org'>Example</a>, and here's a url exceeding "
+                    f"the max length: <img src='http://www.example.org/{MAX_URL_LENGTH * 'X'}' alt='logo'>"
+                ),
+            )
         # We skip urls which are too long because we can't store them in the database
         self.assertIn(
-            f"WARNING:linkcheck.listeners:URL exceeding max length will be skipped: http://www.example.org/{MAX_URL_LENGTH * 'X'}",
-            cm.output
+            (
+                "WARNING:linkcheck.listeners:URL exceeding max length will be skipped: "
+                f"http://www.example.org/{MAX_URL_LENGTH * 'X'}"
+            ),
+            cm.output,
         )
         self.assertEqual(Url.objects.all().count(), 1)
 
@@ -498,12 +508,14 @@ class ViewTestCase(TestCase):
         User.objects.create_superuser('admin', 'admin@example.org', 'password')
 
     def test_display_url(self):
-        Book.objects.create(title='My Title', description="""Here's a link: <a href="http://www.example.org">Example</a>""")
+        Book.objects.create(
+            title='My Title', description="Here's a link: <a href='http://www.example.org'>Example</a>"
+        )
         Author.objects.create(name="John Smith", website="http://www.example.org#john")
         self.assertEqual(Link.objects.count(), 2)
         self.assertEqual(
-            set([l.display_url for l in Link.objects.all()]),
-            set(['http://www.example.org', 'http://www.example.org#john'])
+            set([link.display_url for link in Link.objects.all()]),
+            set(["http://www.example.org", "http://www.example.org#john"]),
         )
 
     def test_report_view(self):

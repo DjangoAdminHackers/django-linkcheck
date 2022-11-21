@@ -5,7 +5,10 @@ from linkcheck.utils import find_all_links
 
 class Command(BaseCommand):
 
-    help = "Goes through all models registered with Linkcheck, records any new links found and removes all outdated links"
+    help = (
+        "Goes through all models registered with Linkcheck, records any new links found"
+        "and removes all outdated links"
+    )
 
     def handle(self, *args, **options):
         self.stdout.write("Updating all links...")

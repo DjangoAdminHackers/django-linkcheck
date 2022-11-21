@@ -61,7 +61,8 @@ class Url(models.Model):
     Represents a distinct URL found somewhere in the models registered with linkcheck
     A single Url can have multiple Links associated with it.
     """
-    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)  # See http://www.boutell.com/newfaq/misc/urllength.html
+    # See http://www.boutell.com/newfaq/misc/urllength.html
+    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
     last_checked = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
@@ -180,8 +181,9 @@ class Url(models.Model):
             self.message = 'Link to within the same page (not automatically checked)'
 
         elif tested_url.startswith(MEDIA_PREFIX):
-            # TODO Assumes a direct mapping from media url to local filesystem path. This will break quite easily for alternate setups
-            path = settings.MEDIA_ROOT + unquote(tested_url)[len(MEDIA_PREFIX)-1:]
+            # TODO: Assumes a direct mapping from media url to local filesystem path.
+            # This will break quite easily for alternate setups
+            path = settings.MEDIA_ROOT + unquote(tested_url)[len(MEDIA_PREFIX) - 1:]
             decoded_path = html_decode(path)
             if os.path.exists(path) or os.path.exists(decoded_path):
                 self.message = 'Working file link'
@@ -191,11 +193,9 @@ class Url(models.Model):
 
         elif getattr(self, '_internal_hash', False) and getattr(self, '_instance', None):
             # This is a hash link pointing to itself
-            from linkcheck import parse_anchors
-
             hash = self._internal_hash
             instance = self._instance
-            if hash == '#': # special case, point to #
+            if hash == '#':  # special case, point to #
                 self.message = 'Working internal hash anchor'
                 self.status = True
             else:
@@ -265,7 +265,7 @@ class Url(models.Model):
 
         request_params = {
             'allow_redirects': True,
-            'headers': {'User-Agent' : f"http://{settings.SITE_DOMAIN} Linkchecker"},
+            'headers': {'User-Agent': f"http://{settings.SITE_DOMAIN} Linkchecker"},
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
         }
         try:
@@ -320,6 +320,7 @@ class Url(models.Model):
             self.message += ', failed to parse HTML for anchor'
             if not TOLERATE_BROKEN_ANCHOR:
                 self.status = False
+
 
 class Link(models.Model):
     """
