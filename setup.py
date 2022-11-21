@@ -17,6 +17,9 @@ setup(
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
     include_package_data=True,
     install_requires=['django', 'requests'],
+    extras_require={
+        "dev": ["flake8", "pre-commit"],
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
