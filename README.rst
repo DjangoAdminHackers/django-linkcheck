@@ -219,7 +219,13 @@ You can install all requirements of the development setup with:
 
     $ python3 -m venv .venv
     $ source .venv/bin/activate
-    $ pip install -e .
+    $ pip install -e .[dev]
+
+If you want to make use of the flake8 pre-commit hook, enable it with:
+
+.. code-block:: bash
+
+    $ pre-commit install
 
 Running tests
 ~~~~~~~~~~~~~
