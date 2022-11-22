@@ -260,6 +260,7 @@ temporarily enable it by:
 Translations
 ~~~~~~~~~~~~
 
+At the moment this app is available in English and German.
 If you want to contribute translations for ``LOCALE``, run:
 
 .. code-block:: bash

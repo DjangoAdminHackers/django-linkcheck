@@ -1,5 +1,6 @@
 Unreleased
 
+* Add German translations for the templates
 * Fix `type` property for internal URLs
 * Fix incorrect message when redirect has broken anchor
   (Timo Ludwig, #128)
