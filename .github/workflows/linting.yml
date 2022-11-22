@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: pip install flake8
       - name: Run flake8
-        run: flake8 --max-line-length=120 linkcheck
+        run: flake8 --max-line-length=120 --per-file-ignores='linkcheck/migrations/*:E501' linkcheck
   isort:
     runs-on: ubuntu-latest
     steps:
