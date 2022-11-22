@@ -220,6 +220,7 @@ You can install all requirements of the development setup with the extra ``dev``
     $ python3 -m venv .venv
     $ source .venv/bin/activate
     $ pip install -e .[dev]
+    $ django-admin compilemessages --ignore=.venv  # Optionally compile translation file
 
 If you want to make use of the flake8 and isort pre-commit hooks, enable them with:
 
@@ -255,3 +256,14 @@ temporarily enable it by:
     def test_something_with_listeners(self):
         with listeners.enable_listeners():
             # Create/update here and see linkcheck activated.
+
+Translations
+~~~~~~~~~~~~
+
+If you want to contribute translations for ``LOCALE``, run:
+
+.. code-block:: bash
+
+    django-admin makemessages --locale LOCALE
+
+and edit the corresponding file in ``linkcheck/locale/LOCALE/LC_MESSAGES/django.po``.
