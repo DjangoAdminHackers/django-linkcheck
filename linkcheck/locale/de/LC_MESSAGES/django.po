@@ -1,0 +1,128 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-22 23:03+0100\n"
+"Language: German\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: linkcheck/templates/linkcheck/base_linkcheck.html:5
+#: linkcheck/templates/linkcheck/base_linkcheck.html:11
+#: linkcheck/templates/linkcheck/base_linkcheck.html:17
+#: linkcheck/templates/linkcheck/coverage.html:14
+msgid "Link Checker"
+msgstr ""
+
+#: linkcheck/templates/linkcheck/base_linkcheck.html:10
+#: linkcheck/templates/linkcheck/coverage.html:13
+msgid "Home"
+msgstr ""
+
+#: linkcheck/templates/linkcheck/coverage.html:8
+#: linkcheck/templates/linkcheck/coverage.html:15
+msgid "Coverage"
+msgstr "Abdeckung"
+
+#: linkcheck/templates/linkcheck/coverage.html:22
+msgid "Model"
+msgstr "Datenbank-Modell"
+
+#: linkcheck/templates/linkcheck/coverage.html:23
+msgid "Covered"
+msgstr "Überprüft"
+
+#: linkcheck/templates/linkcheck/coverage.html:24
+msgid "Suggested config"
+msgstr "Empfohlene Konfiguration"
+
+#: linkcheck/templates/linkcheck/coverage.html:30
+msgid "Yes,No"
+msgstr "Ja,Nein"
+
+#: linkcheck/templates/linkcheck/paginator.html:7
+msgid "First"
+msgstr "Erste"
+
+#: linkcheck/templates/linkcheck/paginator.html:11
+#: linkcheck/templates/linkcheck/paginator.html:13
+msgid "Previous"
+msgstr "Vorherige"
+
+#: linkcheck/templates/linkcheck/paginator.html:17
+#, python-format
+msgid "Page %(current)s of %(max)s"
+msgstr "Seite %(current)s von %(max)s"
+
+#: linkcheck/templates/linkcheck/paginator.html:21
+#: linkcheck/templates/linkcheck/paginator.html:23
+msgid "Next"
+msgstr "Nächste"
+
+#: linkcheck/templates/linkcheck/paginator.html:27
+#: linkcheck/templates/linkcheck/paginator.html:29
+msgid "Last"
+msgstr "Letze"
+
+#: linkcheck/templates/linkcheck/report.html:145
+msgid "Show"
+msgstr "Anzeigen"
+
+#: linkcheck/templates/linkcheck/report.html:146 linkcheck/views.py:86
+msgid "Valid links"
+msgstr "Gültige Links"
+
+#: linkcheck/templates/linkcheck/report.html:147 linkcheck/views.py:95
+msgid "Broken links"
+msgstr "Ungültige Links"
+
+#: linkcheck/templates/linkcheck/report.html:148 linkcheck/views.py:89
+msgid "Untested links"
+msgstr "Ungetestete Links"
+
+#: linkcheck/templates/linkcheck/report.html:149 linkcheck/views.py:92
+msgid "Ignored links"
+msgstr "Ignorierte Links"
+
+#: linkcheck/templates/linkcheck/report.html:160
+#, python-format
+msgid "View %(content_type_name)s"
+msgstr "%(content_type_name)s anzeigen"
+
+#: linkcheck/templates/linkcheck/report.html:161
+#, python-format
+msgid "Edit %(content_type_name)s"
+msgstr "%(content_type_name)s bearbeiten"
+
+#: linkcheck/templates/linkcheck/report.html:163
+msgid "Destination"
+msgstr "Ziel"
+
+#: linkcheck/templates/linkcheck/report.html:164
+msgid "Linked Text"
+msgstr "Link-Text"
+
+#: linkcheck/templates/linkcheck/report.html:165
+msgid "Field to edit"
+msgstr "Zu bearbeitendes Feld"
+
+#: linkcheck/templates/linkcheck/report.html:166
+msgid "Status"
+msgstr ""
+
+#: linkcheck/templates/linkcheck/report.html:177
+msgid "Recheck"
+msgstr "Erneut prüfen"
+
+#: linkcheck/templates/linkcheck/report.html:184
+msgid "Ignore"
+msgstr "Ignorieren"
+
+#: linkcheck/templates/linkcheck/report.html:186
+msgid "Unignore"
+msgstr "Nicht ignorieren"
+
+#: linkcheck/templates/linkcheck/report.html:193
+msgid "Redirects to"
+msgstr "Leitet weiter zu"
