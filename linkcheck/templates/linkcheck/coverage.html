@@ -1,20 +1,33 @@
 {% extends "linkcheck/base_linkcheck.html" %}
+{% load i18n %}
 {% load  linkcheck_coverage_tags %}
 
 {% block extrahead %}{% endblock %}
 
+{% block title %}
+    {% translate "Coverage" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate "Home" %}</a> &rsaquo;
+        <a href="{% url 'linkcheck_report' %}">{% translate "Link Checker" %}</a> &rsaquo;
+        {% translate "Coverage" %}
+    </div>
+{% endblock %}
+
 {% block innercontent %}
     <table>
         <tr>
-            <th>Model</th>
-            <th>Covered</th>
-            <th>Suggested config</th>
+            <th>{% translate "Model" %}</th>
+            <th>{% translate "Covered" %}</th>
+            <th>{% translate "Suggested config" %}</th>
         </tr>
         {% for model in coverage_data %}
             <tr>
                 <td>{{ model.name }}</td>
                 <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
-                    {{ model.is_covered }}
+                    {{ model.is_covered|yesno:_("Yes,No") }}
                 </td>
                 <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
                     {% if not model.is_covered %}

@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import NoReverseMatch, reverse
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck import update_lock
@@ -82,16 +83,16 @@ def report(request):
     qset = Link.objects.order_by('-url__last_checked')
     if link_filter == 'show_valid':
         qset = qset.filter(ignore=False, url__status__exact=True)
-        report_type = 'Good Links'
+        report_type = _('Valid links')
     elif link_filter == 'show_unchecked':
         qset = qset.filter(ignore=False, url__last_checked__exact=None)
-        report_type = 'Untested Links'
+        report_type = _('Untested links')
     elif link_filter == 'ignored':
         qset = qset.filter(ignore=True)
-        report_type = 'Ignored Links'
+        report_type = _('Ignored links')
     else:
         qset = qset.filter(ignore=False, url__status__exact=False)
-        report_type = 'Broken Links'
+        report_type = _('Broken links')
 
     paginated_links = Paginator(qset, RESULTS_PER_PAGE, 0, True)
 
