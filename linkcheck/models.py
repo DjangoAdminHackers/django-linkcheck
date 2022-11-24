@@ -137,8 +137,7 @@ class Url(models.Model):
             elif root_domain.startswith('test.'):
                 root_domain = root_domain[5:]
             internal_exceptions = [
-                'http://' + root_domain, 'http://www.' + root_domain, 'http://test.' + root_domain,
-                'https://' + root_domain, 'https://www.' + root_domain, 'https://test.' + root_domain,
+                f'{protocol}://{sub}{root_domain}' for sub in ['', 'www.', 'test.'] for protocol in ['http', 'https']
             ]
 
         for ex in internal_exceptions:
