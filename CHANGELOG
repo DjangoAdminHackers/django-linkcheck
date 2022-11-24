@@ -1,7 +1,9 @@
 Unreleased
 
+* Use `django.db.models.BigAutoField` as default auto field
+  (Timo Ludwig, #137)
 * Add German translations for the templates
-* Fix `type` property for internal URLs
+* Fix `type` property for internal URLs (Timo Ludwig, #141)
 * Fix incorrect message when redirect has broken anchor
   (Timo Ludwig, #128)
 * Breaking change: Treat broken hash anchors as valid
