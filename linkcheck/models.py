@@ -12,6 +12,7 @@ from django.db import models
 from django.test.client import Client
 from django.test.utils import modify_settings
 from django.utils.encoding import iri_to_uri
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from requests.exceptions import ConnectionError, ReadTimeout
 from requests.models import REDIRECT_STATI
@@ -69,7 +70,7 @@ class Url(models.Model):
 
     @property
     def type(self):
-        if EXTERNAL_REGEX.match(self.url):
+        if self.external:
             return 'external'
         if self.url.startswith('mailto'):
             return 'mailto'
@@ -81,8 +82,10 @@ class Url(models.Model):
             return 'anchor'
         elif self.url.startswith(MEDIA_PREFIX):
             return 'file'
+        elif self.internal_url.startswith('/'):
+            return 'internal'
         else:
-            return 'unknown'
+            return 'invalid'
 
     @property
     def get_message(self):
@@ -106,9 +109,61 @@ class Url(models.Model):
     def __repr__(self):
         return f"<Url (id: {self.id}, url: {self.url})>"
 
+    @cached_property
+    def internal_url(self):
+        """
+        Remove current domain from URLs as the test client chokes when trying to test them during a page save
+        They shouldn't generally exist but occasionally slip through
+        If settings.SITE_DOMAINS isn't set then use settings.SITE_DOMAIN
+        but also check for variants: example.org, www.example.org, test.example.org
+
+        In case the URLs is external, `None` is returned.
+        """
+
+        # If the URL is not external, directly return it without processing
+        if not EXTERNAL_REGEX.match(self.url):
+            return self.url
+
+        # May receive transformation before being checked
+        prepared_url = self.url
+
+        internal_exceptions = []
+        if SITE_DOMAINS:  # If the setting is present
+            internal_exceptions = SITE_DOMAINS
+        elif getattr(settings, 'SITE_DOMAIN', None):  # try using SITE_DOMAIN
+            root_domain = settings.SITE_DOMAIN
+            if root_domain.startswith('www.'):
+                root_domain = root_domain[4:]
+            elif root_domain.startswith('test.'):
+                root_domain = root_domain[5:]
+            internal_exceptions = [
+                f'{protocol}://{sub}{root_domain}' for sub in ['', 'www.', 'test.'] for protocol in ['http', 'https']
+            ]
+
+        for ex in internal_exceptions:
+            if ex and prepared_url.startswith(ex):
+                prepared_url = prepared_url.replace(ex, '', 1)
+
+        # If the URL is still external, return `None`
+        if EXTERNAL_REGEX.match(prepared_url):
+            return None
+
+        logger.debug('Internal URL: %s', prepared_url)
+        return prepared_url
+
+    @property
+    def internal(self):
+        """
+        Check whether this URL is internal
+        """
+        return self.internal_url is not None
+
     @property
     def external(self):
-        return EXTERNAL_REGEX.match(self.url)
+        """
+        Check whether this URL is external
+        """
+        return not self.internal
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -120,39 +175,11 @@ class Url(models.Model):
 
         self.status = False
 
-        # Remove current domain from URLs as the test client chokes when trying to test them during a page save
-        # They shouldn't generally exist but occasionally slip through
-        # If settings.SITE_DOMAINS isn't set then use settings.SITE_DOMAIN
-        # but also check for variants: example.org, www.example.org, test.example.org
+        if check_internal and self.internal:
+            self._check_internal(self.internal_url)
 
-        tested_url = self.url  # May receive transformation before being checked
-
-        internal_exceptions = []
-        if SITE_DOMAINS:  # If the setting is present
-            internal_exceptions = SITE_DOMAINS
-
-        elif getattr(settings, 'SITE_DOMAIN', None):  # try using SITE_DOMAIN
-            root_domain = settings.SITE_DOMAIN
-            if root_domain.startswith('www.'):
-                root_domain = root_domain[4:]
-            elif root_domain.startswith('test.'):
-                root_domain = root_domain[5:]
-            internal_exceptions = [
-                'http://' + root_domain, 'http://www.' + root_domain, 'http://test.' + root_domain,
-                'https://' + root_domain, 'https://www.' + root_domain, 'https://test.' + root_domain,
-            ]
-
-        for ex in internal_exceptions:
-            if ex and tested_url.startswith(ex):
-                tested_url = tested_url.replace(ex, '', 1)
-
-        external = bool(EXTERNAL_REGEX.match(tested_url))
-
-        if check_internal and not external:
-            self._check_internal(tested_url)
-
-        elif check_external and external:
-            self._check_external(tested_url, external_recheck_interval)
+        elif check_external and self.external:
+            self._check_external(self.url, external_recheck_interval)
 
         else:
             return None
