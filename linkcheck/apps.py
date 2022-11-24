@@ -12,6 +12,8 @@ class BaseLinkcheckConfig(AppConfig):
     name = 'linkcheck'
     verbose_name = "Linkcheck"
 
+    default_auto_field = "django.db.models.BigAutoField"
+
     all_linklists = {}
 
     def ready(self):
