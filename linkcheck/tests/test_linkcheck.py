@@ -100,6 +100,15 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
+        self.assertEqual(uv.type, 'internal')
+
+    def test_internal_check_with_protocol(self):
+        # "localhost" is configured as SITE_DOMAIN in settings
+        uv = Url(url="http://localhost/public/")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, 'Working internal link')
+        self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_broken_internal_link(self):
         uv = Url(url="/broken/internal/link")
