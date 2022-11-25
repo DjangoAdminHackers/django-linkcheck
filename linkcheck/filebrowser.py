@@ -4,6 +4,8 @@ import os.path
 
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 try:
     from filebrowser.settings import DIRECTORY
@@ -37,11 +39,16 @@ def handle_upload(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=True, message="Working document link")
-        msg = (
-            f"Please note. Uploading {url} has corrected {count} broken link{count > 1 and 's' or ''}. "
-            "See the Link Manager for more details"
-        )
-        messages.success(sender, msg)
+        msg = ngettext(
+            "Uploading {} has corrected {} broken link.",
+            "Uploading {} has corrected {} broken links.",
+            count,
+        ).format(url, count)
+        messages.success(sender, '{}: {} {}'.format(
+            _('Please note'),
+            msg,
+            _('See the Link Checker for more details.')
+        ))
 
 
 def handle_rename(sender, path=None, **kwargs):
@@ -63,11 +70,16 @@ def handle_rename(sender, path=None, **kwargs):
     old_count = old_url_qs.count()
     if old_count:
         old_url_qs.update(status=False, message="Missing Document")
-        msg = (
-            f"Warning. Renaming {old_url} has caused {old_count} link{old_count > 1 and 's' or ''} to break. "
-            "Please use the Link Manager to fix them"
-        )
-        messages.warning(sender, msg)
+        msg = ngettext(
+            "Renaming {} has caused {} link to break.",
+            "Renaming {} has caused {} links to break.",
+            old_count,
+        ).format(old_url, old_count)
+        messages.warning(sender, '{}: {} {}'.format(
+            _('Warning'),
+            msg,
+            _('Please use the Link Checker to fix them.')
+        ))
 
     # The new directory may fix some invalid links, so we also check for that
     if isdir(kwargs['new_name']):
@@ -82,11 +94,16 @@ def handle_rename(sender, path=None, **kwargs):
         if new_count:
             new_url_qs.update(status=True, message='Working document link')
     if new_count:
-        msg = (
-            f"Please note. Renaming {new_url} has corrected {new_count} broken link{new_count > 1 and 's' or ''}. "
-            "See the Link Manager for more details"
-        )
-        messages.success(sender, msg)
+        msg = ngettext(
+            "Renaming {} has corrected {} broken link.",
+            "Renaming {} has corrected {} broken links.",
+            new_count,
+        ).format(new_url, new_count)
+        messages.success(sender, '{}: {} {}'.format(
+            _('Please note'),
+            msg,
+            _('See the Link Checker for more details.')
+        ))
 
 
 def handle_delete(sender, path=None, **kwargs):
@@ -97,11 +114,16 @@ def handle_delete(sender, path=None, **kwargs):
     count = url_qs.count()
     if count:
         url_qs.update(status=False, message="Missing Document")
-        msg = (
-            f"Warning. Deleting {url} has caused {count} link{count > 1 and 's' or ''} to break. "
-            "Please use the Link Manager to fix them"
-        )
-        messages.warning(sender, msg)
+        msg = ngettext(
+            "Deleting {} has caused {} link to break.",
+            "Deleting {} has caused {} links to break.",
+            count,
+        ).format(url, count)
+        messages.warning(sender, '{}: {} {}'.format(
+            _('Warning'),
+            msg,
+            _('Please use the Link Checker to fix them.')
+        ))
 
 
 def register_listeners():
