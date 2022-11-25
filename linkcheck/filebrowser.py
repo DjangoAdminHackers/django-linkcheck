@@ -1,4 +1,5 @@
 """Integrate with django-filebrowser if present."""
+import logging
 import os.path
 
 from django.conf import settings
@@ -6,7 +7,7 @@ from django.contrib import messages
 
 try:
     from filebrowser.settings import DIRECTORY
-    from filebrowser.views import (
+    from filebrowser.signals import (
         filebrowser_post_delete,
         filebrowser_post_rename,
         filebrowser_post_upload,
@@ -16,6 +17,8 @@ except ImportError:
     FILEBROWSER_PRESENT = False
 
 from linkcheck.models import Url
+
+logger = logging.getLogger(__name__)
 
 
 def get_relative_media_url():
@@ -27,7 +30,9 @@ def get_relative_media_url():
 
 
 def handle_upload(sender, path=None, **kwargs):
-    url = os.path.join(get_relative_media_url(), kwargs['file'].url_relative)
+    logger.debug('uploaded path %s with kwargs %r', path, kwargs)
+
+    url = os.path.join(get_relative_media_url(), kwargs['file'].url)
     url_qs = Url.objects.filter(url=url).filter(status=False)
     count = url_qs.count()
     if count:
@@ -36,10 +41,11 @@ def handle_upload(sender, path=None, **kwargs):
             f"Please note. Uploading {url} has corrected {count} broken link{count > 1 and 's' or ''}. "
             "See the Link Manager for more details"
         )
-        messages.info(sender, msg)
+        messages.success(sender, msg)
 
 
 def handle_rename(sender, path=None, **kwargs):
+    logger.debug('renamed path %s with kwargs %r', path, kwargs)
 
     def isdir(filename):
         if filename.count('.'):
@@ -47,12 +53,12 @@ def handle_rename(sender, path=None, **kwargs):
         else:
             return True
 
-    old_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
-    new_url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['new_filename'])
+    old_url = os.path.join(get_relative_media_url(), DIRECTORY, path)
+    new_url = os.path.join(get_relative_media_url(), DIRECTORY, path.replace(kwargs['name'], kwargs['new_name']))
     # Renaming a file will cause it's urls to become invalid
     # Renaming a directory will cause the urls of all it's contents to become invalid
     old_url_qs = Url.objects.filter(url=old_url).filter(status=True)
-    if isdir(kwargs['filename']):
+    if isdir(kwargs['name']):
         old_url_qs = Url.objects.filter(url__startswith=old_url).filter(status=True)
     old_count = old_url_qs.count()
     if old_count:
@@ -61,10 +67,10 @@ def handle_rename(sender, path=None, **kwargs):
             f"Warning. Renaming {old_url} has caused {old_count} link{old_count > 1 and 's' or ''} to break. "
             "Please use the Link Manager to fix them"
         )
-        messages.info(sender, msg)
+        messages.warning(sender, msg)
 
     # The new directory may fix some invalid links, so we also check for that
-    if isdir(kwargs['new_filename']):
+    if isdir(kwargs['new_name']):
         new_count = 0
         new_url_qs = Url.objects.filter(url__startswith=new_url).filter(status=False)
         for url in new_url_qs:
@@ -80,12 +86,13 @@ def handle_rename(sender, path=None, **kwargs):
             f"Please note. Renaming {new_url} has corrected {new_count} broken link{new_count > 1 and 's' or ''}. "
             "See the Link Manager for more details"
         )
-        messages.info(sender, msg)
+        messages.success(sender, msg)
 
 
 def handle_delete(sender, path=None, **kwargs):
+    logger.debug('deleted path %s with kwargs %r', path, kwargs)
 
-    url = os.path.join(get_relative_media_url(), DIRECTORY, path, kwargs['filename'])
+    url = os.path.join(get_relative_media_url(), DIRECTORY, path)
     url_qs = Url.objects.filter(url=url).filter(status=True)
     count = url_qs.count()
     if count:
@@ -94,7 +101,7 @@ def handle_delete(sender, path=None, **kwargs):
             f"Warning. Deleting {url} has caused {count} link{count > 1 and 's' or ''} to break. "
             "Please use the Link Manager to fix them"
         )
-        messages.info(sender, msg)
+        messages.warning(sender, msg)
 
 
 def register_listeners():
