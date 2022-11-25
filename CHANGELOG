@@ -1,5 +1,6 @@
 Unreleased
 
+* Fix django-filebrowser integration (Timo Ludwig, #144)
 * Use `django.db.models.BigAutoField` as default auto field
   (Timo Ludwig, #137)
 * Add German translations for the templates
