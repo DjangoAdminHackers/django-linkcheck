@@ -1,6 +1,6 @@
 import os
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 def read(fname):
@@ -16,6 +16,7 @@ setup(
     author_email='andy@andybak.net',
     license='BSD',
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
+    packages=find_packages(),
     include_package_data=True,
     install_requires=['django', 'requests'],
     extras_require={
