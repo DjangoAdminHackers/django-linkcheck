@@ -11,7 +11,6 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext as _
-from django.views.decorators.csrf import csrf_exempt
 
 from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
@@ -37,7 +36,6 @@ def coverage(request):
 
 
 @staff_member_required
-@csrf_exempt
 def report(request):
 
     outerkeyfunc = itemgetter('content_type_id')

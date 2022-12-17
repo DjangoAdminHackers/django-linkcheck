@@ -25,8 +25,10 @@
 
     $(document).ready(function() {
 
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
         $(".ignore").submit(function(){
-            $.post(this.action, (data) => {
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
                 $('tr#link' + data.link).hide('medium');
                 var ignored_count = parseInt($('#ignored_count').text());
                 ignored_count++;
@@ -36,7 +38,7 @@
         });
 
         $(".unignore").submit(function(){
-            $.post(this.action, (data) => {
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
                 $('tr#link' + data.link).hide('medium');
                 var ignored_count = parseInt($('#ignored_count').text());
                 ignored_count--;
@@ -48,7 +50,7 @@
         $(".recheck").submit(function(){
             $(this).closest('tr').find('td.link_message').html('Checking<span id="progressDots"></span>');
             showProgressDots(1);
-            $.post(this.action, (data) => {
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
                 var links = data['links'];
                 for (var link in links) {
                     $('tr#link'+links[link]).find('td.link_message').text(data['message']).css('color', data['colour']);
@@ -177,6 +179,7 @@
             </td></tr>
         </table>
     {% endfor %}
+    {% csrf_token %}
     {% if content_types_list %}
         {% include "linkcheck/paginator.html" %}
     {% endif %}

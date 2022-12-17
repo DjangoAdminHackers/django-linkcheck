@@ -1,6 +1,7 @@
 Unreleased
 
 * Skip checking of hash anchors for non-html files
+* Avoid decorating the `report` view with `csrf_exempt` (#155)
 * recheck/ignore/unignore requests were using an obsolete `request.is_ajax` call
   (#147)
 
