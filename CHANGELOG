@@ -1,3 +1,8 @@
+Unreleased
+
+* recheck/ignore/unignore requests were using an obsolete `request.is_ajax` call
+  (#147)
+
 2.0.0 (2022-12-17)
 
 * Add German translations for filebrowser integration

@@ -518,7 +518,7 @@ class QueueTests(TestCase):
 
 class ViewTestCase(TestCase):
     def setUp(self):
-        User.objects.create_superuser('admin', 'admin@example.org', 'password')
+        self.user = User.objects.create_superuser('admin', 'admin@example.org', 'password')
 
     def test_display_url(self):
         Book.objects.create(
@@ -532,12 +532,46 @@ class ViewTestCase(TestCase):
         )
 
     def test_report_view(self):
-        self.client.login(username='admin', password='password')
+        self.client.force_login(self.user)
         response = self.client.get(reverse('linkcheck_report'))
         self.assertContains(response, "<h1>Link Checker</h1>")
 
+    def test_report_ignore_unignore(self):
+        Author.objects.create(name="John Smith", website="http://www.example.org/john")
+        self.client.force_login(self.user)
+        link = Link.objects.first()
+        self.assertFalse(link.ignore)
+        response = self.client.post(
+            reverse('linkcheck_report') + f"?ignore={link.pk}",
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.json(), {'link': link.pk})
+        link.refresh_from_db()
+        self.assertTrue(link.ignore)
+        response = self.client.post(
+            reverse('linkcheck_report') + f"?unignore={link.pk}",
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.json(), {'link': link.pk})
+        link.refresh_from_db()
+        self.assertFalse(link.ignore)
+
+    def test_report_recheck(self):
+        Author.objects.create(name="John Smith", website="http://www.example.org/john")
+        self.client.force_login(self.user)
+        link = Link.objects.first()
+        response = self.client.post(
+            reverse('linkcheck_report') + f"?recheck={link.pk}",
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.json(), {
+            'colour': 'red',
+            'links': [link.pk],
+            'message': '404 Not Found',
+        })
+
     def test_coverage_view(self):
-        self.client.login(username='admin', password='password')
+        self.client.force_login(self.user)
         response = self.client.get(reverse('linkcheck_coverage'))
         self.assertContains(
             response,
