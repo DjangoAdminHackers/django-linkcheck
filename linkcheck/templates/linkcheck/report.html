@@ -26,34 +26,21 @@
     $(document).ready(function() {
 
         $(".ignore").submit(function(){
-            var url = this.action;
-            $.ajax({
-                url: url,
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    var link = data['link'];
-                    $('tr#link'+link).hide('medium');
-                    var ignored_count = parseInt($('#ignored_count').text())
-                    ignored_count++;
-                    $('#ignored_count').text(ignored_count)
-                }
+            $.post(this.action, (data) => {
+                $('tr#link' + data.link).hide('medium');
+                var ignored_count = parseInt($('#ignored_count').text());
+                ignored_count++;
+                $('#ignored_count').text(ignored_count);
             });
             return false;
         });
 
         $(".unignore").submit(function(){
-            $.ajax({
-                url: this.action,
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    var link = data['link'];
-                    $('tr#link'+link).hide('medium');
-                    var ignored_count = parseInt($('#ignored_count').text())
-                    ignored_count--;
-                    $('#ignored_count').text(ignored_count)
-                }
+            $.post(this.action, (data) => {
+                $('tr#link' + data.link).hide('medium');
+                var ignored_count = parseInt($('#ignored_count').text());
+                ignored_count--;
+                $('#ignored_count').text(ignored_count);
             });
             return false;
         });
@@ -61,24 +48,15 @@
         $(".recheck").submit(function(){
             $(this).closest('tr').find('td.link_message').html('Checking<span id="progressDots"></span>');
             showProgressDots(1);
-            $.ajax({
-                url: this.action,
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    var links = data['links']
-                    for (var link in links) {
-                        $('tr#link'+links[link]).find('td.link_message').text(data['message']).css('color', data['colour']);
-                    }
+            $.post(this.action, (data) => {
+                var links = data['links'];
+                for (var link in links) {
+                    $('tr#link'+links[link]).find('td.link_message').text(data['message']).css('color', data['colour']);
                 }
             });
             return false;
         });
-
     });
-
-
-
 </script>
 
 <style type="text/css">

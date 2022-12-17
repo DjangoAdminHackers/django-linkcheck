@@ -1,4 +1,3 @@
-import json
 from itertools import groupby
 from operator import itemgetter
 
@@ -7,7 +6,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import NoReverseMatch, reverse
@@ -51,18 +50,18 @@ def report(request):
             link = Link.objects.get(id=ignore_link_id)
             link.ignore = True
             link.save()
-            if request.is_ajax():
-                json_data = json.dumps({'link': ignore_link_id})
-                return HttpResponse(json_data, content_type='application/javascript')
+            if is_ajax(request):
+                json_data = {'link': link.pk}
+                return JsonResponse(json_data)
 
         unignore_link_id = request.GET.get('unignore', None)
         if unignore_link_id is not None:
             link = Link.objects.get(id=unignore_link_id)
             link.ignore = False
             link.save()
-            if request.is_ajax():
-                json_data = json.dumps({'link': unignore_link_id})
-                return HttpResponse(json_data, content_type='application/javascript')
+            if is_ajax(request):
+                json_data = {'link': link.pk}
+                return JsonResponse(json_data)
 
         recheck_link_id = request.GET.get('recheck', None)
         if recheck_link_id is not None:
@@ -70,13 +69,13 @@ def report(request):
             url = link.url
             url.check_url(external_recheck_interval=0)
             links = [x[0] for x in url.links.values_list('id')]
-            if request.is_ajax():
-                json_data = json.dumps({
+            if is_ajax(request):
+                json_data = ({
                     'links': links,
                     'message': url.message,
                     'colour': url.colour,
                 })
-                return HttpResponse(json_data, content_type='application/javascript')
+                return JsonResponse(json_data)
 
     link_filter = request.GET.get('filters', 'show_invalid')
 
@@ -181,3 +180,7 @@ def get_status_message():
             )
         else:
             return ''
+
+
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
