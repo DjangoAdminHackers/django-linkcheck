@@ -191,22 +191,22 @@ class Url(models.Model):
 
         from linkcheck.utils import LinkCheckHandler
 
-        if not tested_url:
+        if self.type == 'empty':
             self.message = 'Empty link'
 
-        elif tested_url.startswith('mailto:'):
+        elif self.type == 'mailto':
             self.status = None
             self.message = 'Email link (not automatically checked)'
 
-        elif tested_url.startswith('tel:'):
+        elif self.type == 'phone':
             self.status = None
             self.message = 'Phone number (not automatically checked)'
 
-        elif tested_url.startswith('#'):
+        elif self.type == 'anchor':
             self.status = None
             self.message = 'Link to within the same page (not automatically checked)'
 
-        elif tested_url.startswith(MEDIA_PREFIX):
+        elif self.type == 'file':
             # TODO: Assumes a direct mapping from media url to local filesystem path.
             # This will break quite easily for alternate setups
             path = settings.MEDIA_ROOT + unquote(tested_url)[len(MEDIA_PREFIX) - 1:]
@@ -231,7 +231,7 @@ class Url(models.Model):
                     html_content += getattr(instance, field, '')
                 self._check_anchor(hash, html_content)
 
-        elif tested_url.startswith('/'):
+        elif self.type == 'internal':
             old_prepend_setting = settings.PREPEND_WWW
             settings.PREPEND_WWW = False
             c = Client()
