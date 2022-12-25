@@ -151,6 +151,27 @@ class Url(models.Model):
         logger.debug('Internal URL: %s', prepared_url)
         return prepared_url
 
+    @cached_property
+    def external_url(self):
+        """
+        Prepare an external URL to be checked with requests:
+        - Remove hash anchors
+        - Ensure correct encoding
+        """
+        # If the URL is internal, return `None`
+        if self.internal:
+            return None
+
+        # Remove URL fragment identifiers
+        external_url = self.url.rsplit('#')[0]
+        # Check that non-ascii chars are properly encoded
+        try:
+            external_url.encode('ascii')
+        except UnicodeEncodeError:
+            external_url = iri_to_uri(external_url)
+        logger.debug('External URL: %s', external_url)
+        return external_url
+
     @property
     def internal(self):
         """
@@ -281,14 +302,6 @@ class Url(models.Model):
             )
             return self.status
 
-        # Remove URL fragment identifiers
-        url = tested_url.rsplit('#')[0]
-        # Check that non-ascii chars are properly encoded
-        try:
-            url.encode('ascii')
-        except UnicodeEncodeError:
-            url = iri_to_uri(url)
-
         request_params = {
             'allow_redirects': True,
             'headers': {'User-Agent': f"http://{settings.SITE_DOMAIN} Linkchecker"},
@@ -297,14 +310,14 @@ class Url(models.Model):
         try:
             if tested_url.count('#'):
                 # We have to get the content so we can check the anchors
-                response = requests.get(url, **request_params)
+                response = requests.get(self.external_url, **request_params)
             else:
                 # Might as well just do a HEAD request
-                response = requests.head(url, **request_params)
+                response = requests.head(self.external_url, **request_params)
                 # If HEAD is not allowed, let's try with GET
                 if response.status_code >= 400:
                     logger.debug('HEAD is not allowed, retry with GET')
-                    response = requests.get(url, **request_params)
+                    response = requests.get(self.external_url, **request_params)
         except ReadTimeout:
             self.message = 'Other Error: The read operation timed out'
         except ConnectionError as e:
