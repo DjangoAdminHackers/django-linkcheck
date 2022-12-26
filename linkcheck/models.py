@@ -197,7 +197,7 @@ class Url(models.Model):
         self.status = False
 
         if check_internal and self.internal:
-            self._check_internal(self.internal_url)
+            self._check_internal()
 
         elif check_external and self.external:
             self._check_external(self.url, external_recheck_interval)
@@ -207,8 +207,8 @@ class Url(models.Model):
 
         return self.status
 
-    def _check_internal(self, tested_url):
-        logger.debug('checking internal link: %s', tested_url)
+    def _check_internal(self):
+        logger.debug('checking internal link: %s', self.internal_url)
 
         from linkcheck.utils import LinkCheckHandler
 
@@ -230,7 +230,7 @@ class Url(models.Model):
         elif self.type == 'file':
             # TODO: Assumes a direct mapping from media url to local filesystem path.
             # This will break quite easily for alternate setups
-            path = settings.MEDIA_ROOT + unquote(tested_url)[len(MEDIA_PREFIX) - 1:]
+            path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1:]
             decoded_path = html_decode(path)
             if os.path.exists(path) or os.path.exists(decoded_path):
                 self.message = 'Working file link'
@@ -258,14 +258,14 @@ class Url(models.Model):
             c = Client()
             c.handler = LinkCheckHandler()
             with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
-                response = c.get(tested_url)
+                response = c.get(self.internal_url)
             if response.status_code == 200:
                 self.message = 'Working internal link'
                 self.status = True
             elif response.status_code == 302 or response.status_code == 301:
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
                 with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
-                    response = c.get(tested_url, follow=True)
+                    response = c.get(self.internal_url, follow=True)
                 if response.status_code == 200:
                     self.message = f'Working {redirect_type} redirect'
                     self.status = True
@@ -274,11 +274,11 @@ class Url(models.Model):
             else:
                 self.message = 'Broken internal link'
             # see if the internal link points an anchor
-            if tested_url[-1] == '#':
+            if self.internal_url[-1] == '#':
                 # special case, point to #
                 self.message += ', working internal hash anchor'
-            elif tested_url.count('#'):
-                anchor = tested_url.split('#')[1]
+            elif self.internal_url.count('#'):
+                anchor = self.internal_url.split('#')[1]
                 self._check_anchor(anchor, response.content)
             settings.PREPEND_WWW = old_prepend_setting
         else:
