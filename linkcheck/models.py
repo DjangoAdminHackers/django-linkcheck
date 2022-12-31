@@ -200,7 +200,7 @@ class Url(models.Model):
             self._check_internal()
 
         elif check_external and self.external:
-            self._check_external(self.url, external_recheck_interval)
+            self._check_external(external_recheck_interval)
 
         else:
             return None
@@ -291,8 +291,8 @@ class Url(models.Model):
         self.last_checked = now()
         self.save()
 
-    def _check_external(self, tested_url, external_recheck_interval):
-        logger.info('checking external link: %s', tested_url)
+    def _check_external(self, external_recheck_interval):
+        logger.info('checking external link: %s', self.url)
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
 
         if self.last_checked and (self.last_checked > external_recheck_datetime):
@@ -308,7 +308,7 @@ class Url(models.Model):
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
         }
         try:
-            if tested_url.count('#'):
+            if self.url.count('#'):
                 # We have to get the content so we can check the anchors
                 response = requests.get(self.external_url, **request_params)
             else:
@@ -336,8 +336,8 @@ class Url(models.Model):
                     self.message = f"{response.history[0].status_code} {response.history[0].reason}"
                     self.redirect_to = response.url
 
-            if tested_url.count('#'):
-                anchor = tested_url.split('#')[1]
+            if self.url.count('#'):
+                anchor = self.url.split('#')[1]
                 self._check_anchor(anchor, response.text, internal=False)
 
         self.last_checked = now()
