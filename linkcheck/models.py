@@ -197,17 +197,24 @@ class Url(models.Model):
         self.status = False
 
         if check_internal and self.internal:
-            self._check_internal()
+            self.check_internal()
 
         elif check_external and self.external:
-            self._check_external(external_recheck_interval)
+            self.check_external(external_recheck_interval)
 
         else:
             return None
 
         return self.status
 
-    def _check_internal(self):
+    def check_internal(self):
+        """
+        Check an internal URL
+        """
+        if not self.internal:
+            logger.info('URL %r is not internal', self)
+            return None
+
         logger.debug('checking internal link: %s', self.internal_url)
 
         from linkcheck.utils import LinkCheckHandler
@@ -291,7 +298,14 @@ class Url(models.Model):
         self.last_checked = now()
         self.save()
 
-    def _check_external(self, external_recheck_interval):
+    def check_external(self, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
+        """
+        Check an external URL
+        """
+        if not self.external:
+            logger.info('URL %r is not external', self)
+            return None
+
         logger.info('checking external link: %s', self.url)
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
 
