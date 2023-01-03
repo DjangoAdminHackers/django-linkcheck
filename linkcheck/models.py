@@ -88,6 +88,14 @@ class Url(models.Model):
             return 'invalid'
 
     @property
+    def has_anchor(self):
+        return '#' in self.url
+
+    @property
+    def anchor(self):
+        return self.url.split('#')[1] if self.has_anchor else None
+
+    @property
     def get_message(self):
         if self.last_checked:
             return self.message
@@ -280,13 +288,10 @@ class Url(models.Model):
                     self.message = f'Broken {redirect_type} redirect'
             else:
                 self.message = 'Broken internal link'
-            # see if the internal link points an anchor
-            if self.internal_url[-1] == '#':
-                # special case, point to #
-                self.message += ', working internal hash anchor'
-            elif self.internal_url.count('#'):
-                anchor = self.internal_url.split('#')[1]
-                self._check_anchor(anchor, response.content)
+
+            # Check the anchor (if it exists)
+            self.check_anchor(response.content)
+
             settings.PREPEND_WWW = old_prepend_setting
         else:
             self.message = 'Invalid URL'
@@ -350,29 +355,36 @@ class Url(models.Model):
                     self.message = f"{response.history[0].status_code} {response.history[0].reason}"
                     self.redirect_to = response.url
 
-            if self.url.count('#'):
-                anchor = self.url.split('#')[1]
-                self._check_anchor(anchor, response.text, internal=False)
+            # Check the anchor (if it exists)
+            self.check_anchor(response.text)
 
         self.last_checked = now()
         self.save()
 
-    def _check_anchor(self, anchor, html, internal=True):
+    def check_anchor(self, html):
         from linkcheck import parse_anchors
-        scope = "internal" if internal else "external"
-        try:
-            names = parse_anchors(html)
-            if anchor in names:
+
+        scope = "internal" if self.internal else "external"
+
+        # Only check when the URL contains an anchor
+        if self.has_anchor:
+            # Empty fragment '#' is always valid
+            if not self.anchor:
                 self.message += f', working {scope} hash anchor'
             else:
-                self.message += f', broken {scope} hash anchor'
-                if not TOLERATE_BROKEN_ANCHOR:
-                    self.status = False
-        except UnicodeDecodeError as e:
-            logger.debug('UnicodeDecodeError while parsing anchors: %s', e)
-            self.message += ', failed to parse HTML for anchor'
-            if not TOLERATE_BROKEN_ANCHOR:
-                self.status = False
+                try:
+                    names = parse_anchors(html)
+                    if self.anchor in names:
+                        self.message += f', working {scope} hash anchor'
+                    else:
+                        self.message += f', broken {scope} hash anchor'
+                        if not TOLERATE_BROKEN_ANCHOR:
+                            self.status = False
+                except UnicodeDecodeError as e:
+                    logger.debug('UnicodeDecodeError while parsing anchors: %s', e)
+                    self.message += ', failed to parse HTML for anchor'
+                    if not TOLERATE_BROKEN_ANCHOR:
+                        self.status = False
 
 
 class Link(models.Model):
