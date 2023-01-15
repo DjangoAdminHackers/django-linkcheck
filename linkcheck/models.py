@@ -327,16 +327,20 @@ class Url(models.Model):
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
         }
         try:
-            if self.url.count('#'):
-                # We have to get the content so we can check the anchors
+            # At first try a HEAD request
+            response = requests.head(self.external_url, **request_params)
+            # If HEAD is not allowed, let's try with GET
+            if response.status_code >= 400:
+                logger.debug('HEAD is not allowed, retry with GET')
                 response = requests.get(self.external_url, **request_params)
-            else:
-                # Might as well just do a HEAD request
-                response = requests.head(self.external_url, **request_params)
-                # If HEAD is not allowed, let's try with GET
-                if response.status_code >= 400:
-                    logger.debug('HEAD is not allowed, retry with GET')
-                    response = requests.get(self.external_url, **request_params)
+            # If URL contains hash anchor and is a valid HTML document, let's repeat with GET
+            elif (
+                self.has_anchor and
+                response.ok and
+                'text/html' in response.headers.get('content-type')
+            ):
+                logger.debug('Retrieve content for anchor check')
+                response = requests.get(self.external_url, **request_params)
         except ReadTimeout:
             self.message = 'Other Error: The read operation timed out'
         except ConnectionError as e:
@@ -354,9 +358,9 @@ class Url(models.Model):
                     logger.debug('Redirect history: %r', response.history)
                     self.message = f"{response.history[0].status_code} {response.history[0].reason}"
                     self.redirect_to = response.url
-
             # Check the anchor (if it exists)
-            self.check_anchor(response.text)
+            if response.request.method == 'GET':
+                self.check_anchor(response.text)
 
         self.last_checked = now()
         self.save()

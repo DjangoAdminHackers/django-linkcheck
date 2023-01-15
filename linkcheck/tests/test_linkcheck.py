@@ -274,6 +274,12 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "302 Found, broken external hash anchor")
 
+    def test_video_with_time_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/static-files/video.mp4#t=2.0")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "200 OK")
+
 
 class ModelTestCase(TestCase):
 
