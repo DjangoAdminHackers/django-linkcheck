@@ -23,4 +23,5 @@ urlpatterns = [
     path('http/brokenredirect/', RedirectView.as_view(url='/non-existent/')),
     path('http/anchor/', views.http_response_with_anchor),
     path('timeout/', views.timeout),
+    path('static-files/video.mp4', views.static_video),
 ]

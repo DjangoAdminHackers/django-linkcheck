@@ -35,3 +35,7 @@ def http_response_with_anchor(request):
 
 def http_redirect_to_anchor(request):
     return HttpResponseRedirect("/http/anchor/")
+
+
+def static_video(request):
+    return HttpResponse(b"", content_type='video/mp4')
