@@ -38,4 +38,8 @@ def http_redirect_to_anchor(request):
 
 
 def static_video(request):
-    return HttpResponse(b"", content_type='video/mp4')
+    return HttpResponse(b'', content_type='video/mp4')
+
+
+def static_video_forged_content_type(request):
+    return HttpResponse(b'<![x02\x00\xa0\xcc', content_type='text/html')

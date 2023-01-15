@@ -24,4 +24,5 @@ urlpatterns = [
     path('http/anchor/', views.http_response_with_anchor),
     path('timeout/', views.timeout),
     path('static-files/video.mp4', views.static_video),
+    path('static-files/fake-video.mp4', views.static_video_forged_content_type),
 ]

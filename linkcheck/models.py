@@ -378,17 +378,23 @@ class Url(models.Model):
             else:
                 try:
                     names = parse_anchors(html)
+                # Known possible errors include: AssertionError, NotImplementedError, UnicodeDecodeError
+                except Exception as e:
+                    logger.debug(
+                        '%s while parsing anchors: %s',
+                        type(e).__name__,
+                        e
+                    )
+                    self.message += ', failed to parse HTML for anchor'
+                    if not TOLERATE_BROKEN_ANCHOR:
+                        self.status = False
+                else:
                     if self.anchor in names:
                         self.message += f', working {scope} hash anchor'
                     else:
                         self.message += f', broken {scope} hash anchor'
                         if not TOLERATE_BROKEN_ANCHOR:
                             self.status = False
-                except UnicodeDecodeError as e:
-                    logger.debug('UnicodeDecodeError while parsing anchors: %s', e)
-                    self.message += ', failed to parse HTML for anchor'
-                    if not TOLERATE_BROKEN_ANCHOR:
-                        self.status = False
 
 
 class Link(models.Model):
