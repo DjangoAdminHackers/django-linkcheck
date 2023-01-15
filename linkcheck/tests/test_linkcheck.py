@@ -280,6 +280,12 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK")
 
+    def test_forged_video_with_time_anchor(self):
+        uv = Url(url=f"{self.live_server_url}/static-files/fake-video.mp4#t=2.0")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, "200 OK, failed to parse HTML for anchor")
+
 
 class ModelTestCase(TestCase):
 
