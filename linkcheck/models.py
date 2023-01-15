@@ -15,7 +15,6 @@ from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from requests.exceptions import ConnectionError, ReadTimeout
-from requests.models import REDIRECT_STATI
 
 try:
     from reversion.revisions import revision_context_manager
@@ -194,6 +193,14 @@ class Url(models.Model):
         """
         return not self.internal
 
+    def reset_for_check(self):
+        """
+        Reset all fields which depend on the status after checking a URL.
+        This is done to ensure that results from the last check do not remain if the fields are not overwritten.
+        """
+        # Reset all database fields
+        self.status = None
+
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
         Return:
@@ -202,18 +209,12 @@ class Url(models.Model):
          * None if the link was not checked
         """
 
-        self.status = False
-
         if check_internal and self.internal:
-            self.check_internal()
-
+            return self.check_internal()
         elif check_external and self.external:
-            self.check_external(external_recheck_interval)
-
+            return self.check_external(external_recheck_interval)
         else:
             return None
-
-        return self.status
 
     def check_internal(self):
         """
@@ -225,21 +226,22 @@ class Url(models.Model):
 
         logger.debug('checking internal link: %s', self.internal_url)
 
+        # Reset all fields in case they were already set
+        self.reset_for_check()
+
         from linkcheck.utils import LinkCheckHandler
 
         if self.type == 'empty':
+            self.status = False
             self.message = 'Empty link'
 
         elif self.type == 'mailto':
-            self.status = None
             self.message = 'Email link (not automatically checked)'
 
         elif self.type == 'phone':
-            self.status = None
             self.message = 'Phone number (not automatically checked)'
 
         elif self.type == 'anchor':
-            self.status = None
             self.message = 'Link to within the same page (not automatically checked)'
 
         elif self.type == 'file':
@@ -247,11 +249,8 @@ class Url(models.Model):
             # This will break quite easily for alternate setups
             path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1:]
             decoded_path = html_decode(path)
-            if os.path.exists(path) or os.path.exists(decoded_path):
-                self.message = 'Working file link'
-                self.status = True
-            else:
-                self.message = 'Missing Document'
+            self.status = os.path.exists(path) or os.path.exists(decoded_path)
+            self.message = 'Working file link' if self.status else 'Missing Document'
 
         elif getattr(self, '_internal_hash', False) and getattr(self, '_instance', None):
             # This is a hash link pointing to itself
@@ -274,19 +273,17 @@ class Url(models.Model):
             c.handler = LinkCheckHandler()
             with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
                 response = c.get(self.internal_url)
-            if response.status_code == 200:
+            if response.status_code < 300:
                 self.message = 'Working internal link'
                 self.status = True
-            elif response.status_code == 302 or response.status_code == 301:
+            elif response.status_code < 400:
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
-                with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
-                    response = c.get(self.internal_url, follow=True)
-                if response.status_code == 200:
-                    self.message = f'Working {redirect_type} redirect'
-                    self.status = True
-                else:
-                    self.message = f'Broken {redirect_type} redirect'
+                response = c.get(self.internal_url, follow=True)
+                self.status = response.status_code < 300
+                redirect_result = "Working" if self.status else "Broken"
+                self.message = f'{redirect_result} {redirect_type} redirect'
             else:
+                self.status = False
                 self.message = 'Broken internal link'
 
             # Check the anchor (if it exists)
@@ -294,6 +291,7 @@ class Url(models.Model):
 
             settings.PREPEND_WWW = old_prepend_setting
         else:
+            self.status = False
             self.message = 'Invalid URL'
 
         if USE_REVERSION:
@@ -302,6 +300,7 @@ class Url(models.Model):
 
         self.last_checked = now()
         self.save()
+        return self.status
 
     def check_external(self, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -320,6 +319,9 @@ class Url(models.Model):
                 external_recheck_interval
             )
             return self.status
+
+        # Reset all fields in case they were already set
+        self.reset_for_check()
 
         request_params = {
             'allow_redirects': True,
@@ -353,22 +355,26 @@ class Url(models.Model):
                 logger.debug('Retrieve content for anchor check')
                 response = requests.get(self.external_url, **request_params)
         except ReadTimeout:
+            self.status = False
             self.message = 'Other Error: The read operation timed out'
         except ConnectionError as e:
+            self.status = False
             self.message = format_connection_error(e)
         except Exception as e:
+            self.status = False
             self.message = f'Other Error: {e}'
         else:
+            self.status = response.status_code < 300
             self.message = f"{response.status_code} {response.reason}"
             logger.debug('Response message: %s', self.message)
 
-            if response.ok and response.status_code not in REDIRECT_STATI:
-                self.status = True
-                # If initial response was a redirect, return the initial return code
-                if response.history:
-                    logger.debug('Redirect history: %r', response.history)
-                    self.message = f"{response.history[0].status_code} {response.history[0].reason}"
-                    self.redirect_to = response.url
+            # If initial response was a redirect, return the initial return code
+            if response.history:
+                logger.debug('Redirect history: %r', response.history)
+                if response.ok:
+                    self.message = f'{response.history[0].status_code} {response.history[0].reason}'
+                self.redirect_to = response.url
+
             # Check the anchor (if it exists)
             if response.request.method == 'GET':
                 self.check_anchor(response.text)
@@ -377,6 +383,7 @@ class Url(models.Model):
 
         self.last_checked = now()
         self.save()
+        return self.status
 
     def check_anchor(self, html):
         from linkcheck import parse_anchors
