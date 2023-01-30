@@ -325,10 +325,21 @@ class Url(models.Model):
             'allow_redirects': True,
             'headers': {'User-Agent': f"http://{settings.SITE_DOMAIN} Linkchecker"},
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
+            'verify': True,
         }
         try:
-            # At first try a HEAD request
-            response = requests.head(self.external_url, **request_params)
+            try:
+                # At first try a HEAD request
+                response = requests.head(self.external_url, **request_params)
+            except ConnectionError as e:
+                # This error could also be caused by an incomplete root certificate bundle,
+                # so let's retry without verifying the certificate
+                if "unable to get local issuer certificate" in str(e):
+                    request_params['verify'] = False
+                    response = requests.head(self.external_url, **request_params)
+                else:
+                    # Re-raise exception if it's definitely not a false positive
+                    raise
             # If HEAD is not allowed, let's try with GET
             if response.status_code >= 400:
                 logger.debug('HEAD is not allowed, retry with GET')
@@ -361,6 +372,8 @@ class Url(models.Model):
             # Check the anchor (if it exists)
             if response.request.method == 'GET':
                 self.check_anchor(response.text)
+            if not request_params['verify']:
+                self.message += ', SSL certificate could not be verified'
 
         self.last_checked = now()
         self.save()

@@ -174,6 +174,27 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.message, 'SSL Error: wrong version number')
         self.assertEqual(uv.redirect_to, '')
 
+    def test_external_check_200_incomplete_cert(self):
+        uv = Url(url="https://incomplete-chain.badssl.com/")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK, SSL certificate could not be verified')
+        self.assertEqual(uv.redirect_to, '')
+
+    def test_external_check_200_broken_anchor_incomplete_cert(self):
+        uv = Url(url="https://incomplete-chain.badssl.com/#broken")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK, broken external hash anchor, SSL certificate could not be verified')
+        self.assertEqual(uv.redirect_to, '')
+
+    def test_external_check_404_incomplete_cert(self):
+        uv = Url(url="https://incomplete-chain.badssl.com/404")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, '404 Not Found, SSL certificate could not be verified')
+        self.assertEqual(uv.redirect_to, '')
+
     def test_external_check_200_utf8(self):
         uv = Url(url=f"{self.live_server_url}/http/200/r%C3%BCckmeldung/")
         uv.check_url()
