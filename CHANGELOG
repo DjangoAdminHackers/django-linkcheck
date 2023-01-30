@@ -1,5 +1,6 @@
 Unreleased
 
+* Fix `SSL Error` for missing root certificates (Timo Ludwig, #157)
 * Fix `NotImplementedError`/`AssertionError` when checking
   video links with hash anchors (Timo Ludwig, #150)
 * Skip checking of hash anchors for non-html files
