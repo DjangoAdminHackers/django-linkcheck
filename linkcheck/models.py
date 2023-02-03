@@ -72,15 +72,15 @@ class Url(models.Model):
     def type(self):
         if self.external:
             return 'external'
-        if self.url.startswith('mailto'):
+        if self.url.startswith('mailto:'):
             return 'mailto'
-        if self.url.startswith('tel'):
+        if self.url.startswith('tel:'):
             return 'phone'
-        elif self.url == '':
+        elif self.internal_url == '':
             return 'empty'
-        elif self.url.startswith('#'):
+        elif self.internal_url.startswith('#'):
             return 'anchor'
-        elif self.url.startswith(MEDIA_PREFIX):
+        elif self.internal_url.startswith(MEDIA_PREFIX):
             return 'file'
         elif self.internal_url.startswith('/'):
             return 'internal'
