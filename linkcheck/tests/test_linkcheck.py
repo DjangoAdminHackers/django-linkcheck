@@ -111,13 +111,15 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
 
-    def test_internal_check_view_redirect(self):
+    def test_internal_check_working_redirect(self):
         uv = Url(url="/admin/linkcheck")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
+
+    def test_internal_check_broken_redirect(self):
         uv = Url(url="/http/brokenredirect/")
         uv.check_url()
         self.assertEqual(uv.status, False)
@@ -256,7 +258,8 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
-        # Also when the url is not encoded
+
+    def test_external_check_200_utf8_not_encoded(self):
         uv = Url(url=f"{self.live_server_url}/http/200/rückmeldung/")
         uv.check_url()
         self.assertEqual(uv.status, True)
@@ -307,7 +310,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
         self.assertEqual(uv.type, 'external')
 
-    def test_external_check_get_only(self):
+    def test_external_check_get_only_405(self):
         # An URL that allows GET but not HEAD, linkcheck should fallback on GET.
         uv = Url(url=f"{self.live_server_url}/http/getonly/405/")
         uv.check_url()
@@ -315,7 +318,8 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
-        # Same test with other 40x error
+
+    def test_external_check_get_only_400(self):
         uv = Url(url=f"{self.live_server_url}/http/getonly/400/")
         uv.check_url()
         self.assertEqual(uv.status, True)
