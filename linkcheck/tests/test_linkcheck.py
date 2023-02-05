@@ -35,6 +35,12 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Email link (not automatically checked)')
 
+    def test_internal_check_tel(self):
+        uv = Url(url="tel:+123456789")
+        uv.check_url()
+        self.assertEqual(uv.status, None)
+        self.assertEqual(uv.message, 'Phone number (not automatically checked)')
+
     def test_internal_check_blank(self):
         uv = Url(url="")
         uv.check_url()
