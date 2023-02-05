@@ -1,0 +1,175 @@
+# This file is distributed under the same license as the django-linkcheck package.
+# Paroz Claude <claude@2xlibre.net>, 2023
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-linkcheck master\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-05 11:05+0100\n"
+"PO-Revision-Date: 2023-02-05 12:00+0100\n"
+"Last-Translator: Paroz Claude <claude@2xlibre.net>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: linkcheck/filebrowser.py:43
+msgid "Uploading {} has corrected {} broken link."
+msgid_plural "Uploading {} has corrected {} broken links."
+msgstr[0] "L’envoi de {} a corrigé {} lien brisé."
+msgstr[1] "L’envoi de {} a corrigé {} liens brisés."
+
+#: linkcheck/filebrowser.py:48 linkcheck/filebrowser.py:103
+msgid "Please note"
+msgstr "Prenez note"
+
+#: linkcheck/filebrowser.py:50 linkcheck/filebrowser.py:105
+msgid "See the Link Checker for more details."
+msgstr "Consultez le Contrôleur de liens pour plus de détails."
+
+#: linkcheck/filebrowser.py:74
+msgid "Renaming {} has caused {} link to break."
+msgid_plural "Renaming {} has caused {} links to break."
+msgstr[0] "Le renommage de {} a brisé {} lien."
+msgstr[1] "Le renommage de {} a brisé {} liens."
+
+#: linkcheck/filebrowser.py:79 linkcheck/filebrowser.py:123
+msgid "Warning"
+msgstr "Avertissement"
+
+#: linkcheck/filebrowser.py:81 linkcheck/filebrowser.py:125
+msgid "Please use the Link Checker to fix them."
+msgstr "Veuillez utiliser le Contrôleur de liens pour les corriger."
+
+#: linkcheck/filebrowser.py:98
+msgid "Renaming {} has corrected {} broken link."
+msgid_plural "Renaming {} has corrected {} broken links."
+msgstr[0] "Le renommage de {} a corrigé {} lien brisé."
+msgstr[1] "Le renommage de {} a corrigé {} liens brisés."
+
+#: linkcheck/filebrowser.py:118
+msgid "Deleting {} has caused {} link to break."
+msgid_plural "Deleting {} has caused {} links to break."
+msgstr[0] "La suppression de {} a brisé {} lien."
+msgstr[1] "La suppression de {} a brisé {} liens."
+
+#: linkcheck/templates/linkcheck/base_linkcheck.html:5
+#: linkcheck/templates/linkcheck/base_linkcheck.html:11
+#: linkcheck/templates/linkcheck/base_linkcheck.html:17
+#: linkcheck/templates/linkcheck/coverage.html:14
+msgid "Link Checker"
+msgstr "Contrôleur de liens"
+
+#: linkcheck/templates/linkcheck/base_linkcheck.html:10
+#: linkcheck/templates/linkcheck/coverage.html:13
+msgid "Home"
+msgstr "Accueil"
+
+#: linkcheck/templates/linkcheck/coverage.html:8
+#: linkcheck/templates/linkcheck/coverage.html:15
+msgid "Coverage"
+msgstr "Couverture"
+
+#: linkcheck/templates/linkcheck/coverage.html:22
+msgid "Model"
+msgstr "Modèle"
+
+#: linkcheck/templates/linkcheck/coverage.html:23
+msgid "Covered"
+msgstr "Couvert"
+
+#: linkcheck/templates/linkcheck/coverage.html:24
+msgid "Suggested config"
+msgstr "Configuration suggérée"
+
+#: linkcheck/templates/linkcheck/coverage.html:30
+msgid "Yes,No"
+msgstr "Oui,Non"
+
+#: linkcheck/templates/linkcheck/paginator.html:7
+msgid "First"
+msgstr "Première"
+
+#: linkcheck/templates/linkcheck/paginator.html:11
+#: linkcheck/templates/linkcheck/paginator.html:13
+msgid "Previous"
+msgstr "Précédente"
+
+#: linkcheck/templates/linkcheck/paginator.html:17
+#, python-format
+msgid "Page %(current)s of %(max)s"
+msgstr "Page %(current)s sur %(max)s"
+
+#: linkcheck/templates/linkcheck/paginator.html:21
+#: linkcheck/templates/linkcheck/paginator.html:23
+msgid "Next"
+msgstr "Suivante"
+
+#: linkcheck/templates/linkcheck/paginator.html:27
+#: linkcheck/templates/linkcheck/paginator.html:29
+msgid "Last"
+msgstr "Dernière"
+
+#: linkcheck/templates/linkcheck/report.html:125
+msgid "Show"
+msgstr "Afficher"
+
+#: linkcheck/templates/linkcheck/report.html:126 linkcheck/views.py:83
+msgid "Valid links"
+msgstr "Liens valables"
+
+#: linkcheck/templates/linkcheck/report.html:127 linkcheck/views.py:92
+msgid "Broken links"
+msgstr "Liens brisés"
+
+#: linkcheck/templates/linkcheck/report.html:128 linkcheck/views.py:86
+msgid "Untested links"
+msgstr "Liens non testés"
+
+#: linkcheck/templates/linkcheck/report.html:129 linkcheck/views.py:89
+msgid "Ignored links"
+msgstr "Liens ignorés"
+
+#: linkcheck/templates/linkcheck/report.html:140
+#, python-format
+msgid "View %(content_type_name)s"
+msgstr "Voir %(content_type_name)s"
+
+#: linkcheck/templates/linkcheck/report.html:141
+#, python-format
+msgid "Edit %(content_type_name)s"
+msgstr "Modifier %(content_type_name)s"
+
+#: linkcheck/templates/linkcheck/report.html:143
+msgid "Destination"
+msgstr "Destination"
+
+#: linkcheck/templates/linkcheck/report.html:144
+msgid "Linked Text"
+msgstr "Texte de lien"
+
+#: linkcheck/templates/linkcheck/report.html:145
+msgid "Field to edit"
+msgstr "Champ à modifier"
+
+#: linkcheck/templates/linkcheck/report.html:146
+msgid "Status"
+msgstr "Statut"
+
+#: linkcheck/templates/linkcheck/report.html:157
+msgid "Recheck"
+msgstr "Recontrôler"
+
+#: linkcheck/templates/linkcheck/report.html:164
+msgid "Ignore"
+msgstr "Ignorer"
+
+#: linkcheck/templates/linkcheck/report.html:166
+msgid "Unignore"
+msgstr "Ne plus ignorer"
+
+#: linkcheck/templates/linkcheck/report.html:173
+msgid "Redirects to"
+msgstr "Redirige vers"
