@@ -286,6 +286,7 @@ class Url(models.Model):
             elif response.status_code < 400:
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
                 response = c.get(self.internal_url, follow=True)
+                self.redirect_to, _ = response.redirect_chain[-1]
                 self.status = response.status_code < 300
                 redirect_result = "Working" if self.status else "Broken"
                 self.message = f'{redirect_result} {redirect_type} redirect'

@@ -99,7 +99,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, working internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
@@ -109,7 +109,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
     def test_redirect_broken_internal_anchor_tolerated(self):
@@ -118,7 +118,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_working_redirect(self):
@@ -127,7 +127,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.redirect_to, '/admin/login/?next=/admin/linkcheck')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_broken_redirect(self):
@@ -136,7 +136,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken temporary redirect')
         self.assertEqual(uv.get_status_code_display(), '302 Found')
-        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.redirect_to, '/non-existent/')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_found(self):
