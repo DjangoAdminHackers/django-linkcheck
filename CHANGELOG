@@ -1,5 +1,6 @@
 Unreleased
 
+* Also set `redirect_to` on internal redirects (Timo Ludwig, #163)
 * Add `status_code` field to `Url` model
 * Add French translations.
 
