@@ -34,6 +34,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Email link (not automatically checked)')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'mailto')
 
     def test_internal_check_tel(self):
@@ -41,6 +42,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Phone number (not automatically checked)')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'phone')
 
     def test_internal_check_blank(self):
@@ -48,6 +50,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Empty link')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'empty')
 
     def test_same_page_anchor(self):
@@ -55,6 +58,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'anchor')
 
     def test_working_internal_anchor(self):
@@ -62,6 +66,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working internal link, working internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'internal')
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
@@ -70,6 +75,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'internal')
 
     def test_broken_internal_anchor_tolerated(self):
@@ -77,6 +83,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'internal')
 
     def test_redirect_working_internal_anchor(self):
@@ -84,6 +91,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, working internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
@@ -92,6 +100,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
 
     def test_redirect_broken_internal_anchor_tolerated(self):
@@ -99,6 +108,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_view_redirect(self):
@@ -106,11 +116,13 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
         uv = Url(url="/http/brokenredirect/")
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken temporary redirect')
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_found(self):
@@ -118,6 +130,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_with_protocol(self):
@@ -126,6 +139,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_broken_internal_link(self):
@@ -133,6 +147,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken internal link')
+        self.assertEqual(uv.get_status_code_display(), '404 Not Found')
         self.assertEqual(uv.type, 'internal')
 
     def test_internal_check_invalid_url(self):
@@ -140,6 +155,7 @@ class InternalCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Invalid URL')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'invalid')
 
 
@@ -156,6 +172,7 @@ class InternalMediaCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Missing Document')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'file')
 
     def test_internal_check_media_found(self):
@@ -163,6 +180,7 @@ class InternalMediaCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'file')
 
     def test_internal_check_media_utf8(self):
@@ -173,12 +191,14 @@ class InternalMediaCheckTestCase(TestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'file')
         # Also when the url is not encoded
         uv = Url(url="/media/rückmeldung")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'file')
 
 
@@ -189,6 +209,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -197,6 +218,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'SSL Error: wrong version number')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -205,6 +227,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK, SSL certificate could not be verified')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -213,6 +236,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK, broken external hash anchor, SSL certificate could not be verified')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -221,6 +245,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '404 Not Found, SSL certificate could not be verified')
+        self.assertEqual(uv.get_status_code_display(), '404 Not Found')
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -229,12 +254,14 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
         # Also when the url is not encoded
         uv = Url(url=f"{self.live_server_url}/http/200/rückmeldung/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     def test_external_check_301(self):
@@ -242,6 +269,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -250,6 +278,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
         self.assertEqual(uv.type, 'external')
 
@@ -258,6 +287,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '302 Found')
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
         self.assertEqual(uv.type, 'external')
 
@@ -265,14 +295,16 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv = Url(url=f"{self.live_server_url}/whatever/")
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message.lower(), '404 not found')
+        self.assertEqual(uv.message, '404 Not Found')
+        self.assertEqual(uv.get_status_code_display(), '404 Not Found')
         self.assertEqual(uv.type, 'external')
 
     def test_external_check_redirect_final_404(self):
         uv = Url(url=f"{self.live_server_url}/http/redirect_to_404/")
         uv.check_url()
         self.assertEqual(uv.status, False)
-        self.assertEqual(uv.message.lower(), '404 not found')
+        self.assertEqual(uv.message, '404 Not Found')
+        self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
         self.assertEqual(uv.type, 'external')
 
     def test_external_check_get_only(self):
@@ -281,12 +313,14 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
         # Same test with other 40x error
         uv = Url(url=f"{self.live_server_url}/http/getonly/400/")
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     def test_external_check_timedout(self):
@@ -294,6 +328,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')
+        self.assertEqual(uv.get_status_code_display(), None)
         self.assertEqual(uv.type, 'external')
 
     def test_working_external_anchor(self):
@@ -301,6 +336,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, working external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
@@ -309,6 +345,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "200 OK, broken external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     def test_broken_external_anchor_tolerated(self):
@@ -316,6 +353,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, broken external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     def test_redirect_working_external_anchor(self):
@@ -323,6 +361,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "302 Found, working external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'external')
 
     @patch("linkcheck.models.TOLERATE_BROKEN_ANCHOR", False)
@@ -331,6 +370,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "302 Found, broken external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'external')
 
     def test_redirect_broken_external_anchor_tolerated(self):
@@ -338,6 +378,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "302 Found, broken external hash anchor")
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
         self.assertEqual(uv.type, 'external')
 
     def test_video_with_time_anchor(self):
@@ -345,6 +386,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
     def test_forged_video_with_time_anchor(self):
@@ -352,6 +394,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         uv.check_url()
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, failed to parse HTML for anchor")
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
         self.assertEqual(uv.type, 'external')
 
 

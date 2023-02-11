@@ -1,5 +1,6 @@
 Unreleased
 
+* Add `status_code` field to `Url` model
 * Add French translations.
 
 2.1.0 (2023-02-05)
