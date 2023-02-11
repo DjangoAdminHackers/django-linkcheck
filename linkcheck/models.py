@@ -2,6 +2,7 @@ import logging
 import os.path
 import re
 from datetime import timedelta
+from http import HTTPStatus
 from urllib.parse import unquote
 
 import requests
@@ -55,6 +56,9 @@ def html_decode(s):
     return s
 
 
+STATUS_CODE_CHOICES = [(s.value, f'{s.value} {s.phrase}') for s in HTTPStatus]
+
+
 class Url(models.Model):
     """
     Represents a distinct URL found somewhere in the models registered with linkcheck
@@ -64,6 +68,7 @@ class Url(models.Model):
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
     last_checked = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(null=True)
+    status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
     redirect_to = models.TextField(blank=True)
 
@@ -200,6 +205,7 @@ class Url(models.Model):
         """
         # Reset all database fields
         self.status = None
+        self.status_code = None
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -273,6 +279,7 @@ class Url(models.Model):
             c.handler = LinkCheckHandler()
             with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
                 response = c.get(self.internal_url)
+            self.status_code = response.status_code
             if response.status_code < 300:
                 self.message = 'Working internal link'
                 self.status = True
@@ -374,6 +381,9 @@ class Url(models.Model):
                 if response.ok:
                     self.message = f'{response.history[0].status_code} {response.history[0].reason}'
                 self.redirect_to = response.url
+                self.status_code = response.history[0].status_code
+            else:
+                self.status_code = response.status_code
 
             # Check the anchor (if it exists)
             if response.request.method == 'GET':
