@@ -1,7 +1,9 @@
 Unreleased
 
 * Also set `redirect_to` on internal redirects (Timo Ludwig, #163)
-* Add `status_code` field to `Url` model
+* Add new fields to `Url` model:
+  * `status_code`: The HTTP status code of the initial request
+  * `redirect_status_code`: The HTTP status code of the final request
 * Add French translations.
 
 2.1.0 (2023-02-05)

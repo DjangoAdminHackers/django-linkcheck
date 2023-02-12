@@ -69,6 +69,7 @@ class Url(models.Model):
     last_checked = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(null=True)
     status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
+    redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
     redirect_to = models.TextField(blank=True)
 
@@ -206,6 +207,7 @@ class Url(models.Model):
         # Reset all database fields
         self.status = None
         self.status_code = None
+        self.redirect_status_code = None
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -287,6 +289,7 @@ class Url(models.Model):
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
                 response = c.get(self.internal_url, follow=True)
                 self.redirect_to, _ = response.redirect_chain[-1]
+                self.redirect_status_code = response.status_code
                 self.status = response.status_code < 300
                 redirect_result = "Working" if self.status else "Broken"
                 self.message = f'{redirect_result} {redirect_type} redirect'
@@ -382,6 +385,7 @@ class Url(models.Model):
                 if response.ok:
                     self.message = f'{response.history[0].status_code} {response.history[0].reason}'
                 self.redirect_to = response.url
+                self.redirect_status_code = response.status_code
                 self.status_code = response.history[0].status_code
             else:
                 self.status_code = response.status_code

@@ -35,6 +35,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Email link (not automatically checked)')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'mailto')
 
@@ -44,6 +45,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Phone number (not automatically checked)')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'phone')
 
@@ -53,6 +55,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Empty link')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'empty')
 
@@ -62,6 +65,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, None)
         self.assertEqual(uv.message, 'Link to within the same page (not automatically checked)')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'anchor')
 
@@ -71,6 +75,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working internal link, working internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -81,6 +86,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -90,6 +96,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working internal link, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -99,6 +106,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, working internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
@@ -109,6 +117,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
@@ -118,6 +127,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect, broken internal hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '/http/anchor/')
         self.assertEqual(uv.type, 'internal')
 
@@ -127,6 +137,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "Working temporary redirect")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, '/admin/login/?next=/admin/linkcheck')
         self.assertEqual(uv.type, 'internal')
 
@@ -136,6 +147,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken temporary redirect')
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '404 Not Found')
         self.assertEqual(uv.redirect_to, '/non-existent/')
         self.assertEqual(uv.type, 'internal')
 
@@ -145,6 +157,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -155,6 +168,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working internal link')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -164,6 +178,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Broken internal link')
         self.assertEqual(uv.get_status_code_display(), '404 Not Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'internal')
 
@@ -173,6 +188,7 @@ class InternalCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Invalid URL')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'invalid')
 
@@ -191,6 +207,7 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Missing Document')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'file')
 
@@ -200,6 +217,7 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'file')
 
@@ -212,6 +230,7 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'file')
         # Also when the url is not encoded
@@ -220,6 +239,7 @@ class InternalMediaCheckTestCase(TestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, 'Working file link')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'file')
 
@@ -232,6 +252,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -241,6 +262,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'SSL Error: wrong version number')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -250,6 +272,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK, SSL certificate could not be verified')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -259,6 +282,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK, broken external hash anchor, SSL certificate could not be verified')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -268,6 +292,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '404 Not Found, SSL certificate could not be verified')
         self.assertEqual(uv.get_status_code_display(), '404 Not Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -277,6 +302,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -286,6 +312,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -295,6 +322,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -304,6 +332,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '301 Moved Permanently')
         self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
         self.assertEqual(uv.type, 'external')
 
@@ -313,6 +342,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '302 Found')
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/200/')
         self.assertEqual(uv.type, 'external')
 
@@ -322,6 +352,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '404 Not Found')
         self.assertEqual(uv.get_status_code_display(), '404 Not Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -331,6 +362,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, '404 Not Found')
         self.assertEqual(uv.get_status_code_display(), '301 Moved Permanently')
+        self.assertEqual(uv.get_redirect_status_code_display(), '404 Not Found')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/404/')
         self.assertEqual(uv.type, 'external')
 
@@ -341,6 +373,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -350,6 +383,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -359,6 +393,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, 'Other Error: The read operation timed out')
         self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -368,6 +403,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, working external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -378,6 +414,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "200 OK, broken external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -387,6 +424,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, broken external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -396,6 +434,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "302 Found, working external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/anchor/')
         self.assertEqual(uv.type, 'external')
 
@@ -406,6 +445,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.message, "302 Found, broken external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/anchor/')
         self.assertEqual(uv.type, 'external')
 
@@ -415,6 +455,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "302 Found, broken external hash anchor")
         self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
         self.assertEqual(uv.redirect_to, f'{self.live_server_url}/http/anchor/')
         self.assertEqual(uv.type, 'external')
 
@@ -424,6 +465,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
@@ -433,6 +475,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, "200 OK, failed to parse HTML for anchor")
         self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
