@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-22 11:34+0100\n"
+"POT-Creation-Date: 2023-02-22 22:35+0100\n"
 "Language: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -53,21 +53,37 @@ msgstr[0] ""
 msgstr[1] ""
 "Das Löschen von {} hat dazu geführt, dass {} Links nicht mehr funktionieren."
 
-#: models.py:110
+#: models.py:111
 msgid "Working empty anchor"
 msgstr "Funktionierender leerer Anker"
 
-#: models.py:112
+#: models.py:113
 msgid "Anchor could not be checked"
 msgstr "Anker konnte nicht geprüft werden"
 
-#: models.py:114
+#: models.py:115
 msgid "Broken anchor"
 msgstr "Ungültiger Anker"
 
-#: models.py:115
+#: models.py:116
 msgid "Working anchor"
 msgstr "Funktionierender Anker"
+
+#: models.py:123
+msgid "Insecure link"
+msgstr "Unsicherer Link"
+
+#: models.py:125
+msgid "SSL certificate could not be checked"
+msgstr "SSL-Zertifikat konnte nicht überprüft werden"
+
+#: models.py:127
+msgid "Broken SSL certificate"
+msgstr "Fehlerhaftes SSL-Zertifikat"
+
+#: models.py:128
+msgid "Valid SSL certificate"
+msgstr "Valides SSL-Zertifikat"
 
 #: templates/linkcheck/base_linkcheck.html:5
 #: templates/linkcheck/base_linkcheck.html:11

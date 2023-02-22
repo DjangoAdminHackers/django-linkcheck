@@ -69,6 +69,7 @@ class Url(models.Model):
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
     last_checked = models.DateTimeField(blank=True, null=True)
     anchor_status = models.BooleanField(null=True)
+    ssl_status = models.BooleanField(null=True)
     status = models.BooleanField(null=True)
     status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
@@ -113,6 +114,18 @@ class Url(models.Model):
         elif self.anchor_status is False:
             return _('Broken anchor')
         return _('Working anchor')
+
+    @property
+    def ssl_message(self):
+        if self.internal:
+            return ''
+        if self.external_url.startswith('http://'):
+            return _('Insecure link')
+        if self.ssl_status is None:
+            return _('SSL certificate could not be checked')
+        elif self.ssl_status is False:
+            return _('Broken SSL certificate')
+        return _('Valid SSL certificate')
 
     @property
     def get_message(self):
@@ -223,6 +236,7 @@ class Url(models.Model):
         self.status = None
         self.status_code = None
         self.redirect_status_code = None
+        self.ssl_status = None
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -357,6 +371,9 @@ class Url(models.Model):
         }
         try:
             try:
+                # If no exceptions occur, the SSL certificate is valid
+                if self.external_url.startswith('https://'):
+                    self.ssl_status = True
                 # At first try a HEAD request
                 response = requests.head(self.external_url, **request_params)
             except ConnectionError as e:
@@ -364,6 +381,7 @@ class Url(models.Model):
                 # so let's retry without verifying the certificate
                 if "unable to get local issuer certificate" in str(e):
                     request_params['verify'] = False
+                    self.ssl_status = None
                     response = requests.head(self.external_url, **request_params)
                 else:
                     # Re-raise exception if it's definitely not a false positive
@@ -386,6 +404,8 @@ class Url(models.Model):
         except ConnectionError as e:
             self.status = False
             self.message = format_connection_error(e)
+            if 'SSLError' in str(e):
+                self.ssl_status = False
         except Exception as e:
             self.status = False
             self.message = f'Other Error: {e}'
