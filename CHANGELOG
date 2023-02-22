@@ -4,6 +4,9 @@ Unreleased
 * Add new fields to `Url` model:
   * `status_code`: The HTTP status code of the initial request
   * `redirect_status_code`: The HTTP status code of the final request
+  * `anchor_status`: The validity of the HTML hash anchor
+* Add new properties to `Url` model:
+  * `anchor_message`: The human-readable meaning of the `anchor_status`
 * Add French translations.
 
 2.1.0 (2023-02-05)
