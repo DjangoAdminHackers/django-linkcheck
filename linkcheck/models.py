@@ -15,6 +15,7 @@ from django.test.utils import modify_settings
 from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.timezone import now
+from django.utils.translation import gettext as _
 from requests.exceptions import ConnectionError, ReadTimeout
 
 try:
@@ -67,6 +68,7 @@ class Url(models.Model):
     # See http://www.boutell.com/newfaq/misc/urllength.html
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
     last_checked = models.DateTimeField(blank=True, null=True)
+    anchor_status = models.BooleanField(null=True)
     status = models.BooleanField(null=True)
     status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
@@ -99,6 +101,18 @@ class Url(models.Model):
     @property
     def anchor(self):
         return self.url.split('#')[1] if self.has_anchor else None
+
+    @property
+    def anchor_message(self):
+        if not self.has_anchor or not self.last_checked:
+            return ''
+        if self.anchor == '':
+            return _('Working empty anchor')
+        if self.anchor_status is None:
+            return _('Anchor could not be checked')
+        elif self.anchor_status is False:
+            return _('Broken anchor')
+        return _('Working anchor')
 
     @property
     def get_message(self):
@@ -205,6 +219,7 @@ class Url(models.Model):
         This is done to ensure that results from the last check do not remain if the fields are not overwritten.
         """
         # Reset all database fields
+        self.anchor_status = None
         self.status = None
         self.status_code = None
         self.redirect_status_code = None
@@ -409,6 +424,7 @@ class Url(models.Model):
         if self.has_anchor:
             # Empty fragment '#' is always valid
             if not self.anchor:
+                self.anchor_status = True
                 self.message += f', working {scope} hash anchor'
             else:
                 try:
@@ -425,11 +441,14 @@ class Url(models.Model):
                         self.status = False
                 else:
                     if self.anchor in names:
+                        self.anchor_status = True
                         self.message += f', working {scope} hash anchor'
                     else:
+                        self.anchor_status = False
                         self.message += f', broken {scope} hash anchor'
                         if not TOLERATE_BROKEN_ANCHOR:
                             self.status = False
+        return self.anchor_status, self.anchor_message
 
 
 class Link(models.Model):
