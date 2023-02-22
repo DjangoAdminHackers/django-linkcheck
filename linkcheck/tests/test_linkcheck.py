@@ -502,6 +502,32 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
+    def test_external_check_blocked_user_agent(self):
+        uv = Url(url=f"{self.live_server_url}/http/block-user-agent/")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, None)
+        self.assertEqual(uv.ssl_message, 'Insecure link')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
+    def test_external_check_blocked_user_agent_blocked_head(self):
+        uv = Url(url=f"{self.live_server_url}/http/block-user-agent/block-head/")
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, None)
+        self.assertEqual(uv.ssl_message, 'Insecure link')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
     def test_external_check_timedout(self):
         uv = Url(url=f"{self.live_server_url}/timeout/")
         uv.check_url()

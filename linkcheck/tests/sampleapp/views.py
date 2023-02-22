@@ -1,5 +1,6 @@
 import time
 
+from django.core.exceptions import PermissionDenied
 from django.http import (
     HttpResponse,
     HttpResponsePermanentRedirect,
@@ -14,6 +15,14 @@ def http_response(request, code):
 def http_response_get_only(request, code):
     status = int(code) if request.method == 'HEAD' else 200
     return HttpResponse("", status=status)
+
+
+def http_block_user_agent(request, block_head=False):
+    if block_head and request.method == 'HEAD':
+        return HttpResponse('', status=405)
+    if 'Linkchecker' in request.headers.get('User-Agent', ''):
+        raise PermissionDenied()
+    return HttpResponse('')
 
 
 def http_redirect(request, code):

@@ -17,6 +17,8 @@ urlpatterns = [
     path('http/<int:code>/', views.http_response),
     path('http/<int:code>/rückmeldung/', views.http_response),
     path('http/getonly/<int:code>/', views.http_response_get_only),
+    path('http/block-user-agent/', views.http_block_user_agent),
+    path('http/block-user-agent/block-head/', views.http_block_user_agent, {'block_head': True}),
     path('http/redirect/<int:code>/', views.http_redirect),
     path('http/redirect_to_404/', views.http_redirect_to_404),
     path('http/redirect_to_anchor/', views.http_redirect_to_anchor),

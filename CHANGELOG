@@ -1,5 +1,6 @@
 Unreleased
 
+* Retry with fallback user agent on forbidden response (Timo Ludwig, #159)
 * Also set `redirect_to` on internal redirects (Timo Ludwig, #163)
 * Add new fields to `Url` model:
   * `status_code`: The HTTP status code of the initial request

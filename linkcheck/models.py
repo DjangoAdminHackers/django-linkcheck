@@ -58,6 +58,8 @@ def html_decode(s):
 
 
 STATUS_CODE_CHOICES = [(s.value, f'{s.value} {s.phrase}') for s in HTTPStatus]
+DEFAULT_USER_AGENT = f'{settings.SITE_DOMAIN} Linkchecker'
+FALLBACK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'
 
 
 class Url(models.Model):
@@ -365,7 +367,7 @@ class Url(models.Model):
 
         request_params = {
             'allow_redirects': True,
-            'headers': {'User-Agent': f"http://{settings.SITE_DOMAIN} Linkchecker"},
+            'headers': {'User-Agent': DEFAULT_USER_AGENT},
             'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
             'verify': True,
         }
@@ -375,29 +377,38 @@ class Url(models.Model):
                 if self.external_url.startswith('https://'):
                     self.ssl_status = True
                 # At first try a HEAD request
-                response = requests.head(self.external_url, **request_params)
+                fetch = requests.head
+                response = fetch(self.external_url, **request_params)
             except ConnectionError as e:
                 # This error could also be caused by an incomplete root certificate bundle,
                 # so let's retry without verifying the certificate
                 if "unable to get local issuer certificate" in str(e):
                     request_params['verify'] = False
                     self.ssl_status = None
-                    response = requests.head(self.external_url, **request_params)
+                    response = fetch(self.external_url, **request_params)
                 else:
                     # Re-raise exception if it's definitely not a false positive
                     raise
             # If HEAD is not allowed, let's try with GET
-            if response.status_code >= 400:
+            if response.status_code in [HTTPStatus.BAD_REQUEST, HTTPStatus.METHOD_NOT_ALLOWED]:
                 logger.debug('HEAD is not allowed, retry with GET')
-                response = requests.get(self.external_url, **request_params)
+                fetch = requests.get
+                response = fetch(self.external_url, **request_params)
+            # If access is denied, possibly the user agent is blocked
+            if response.status_code == HTTPStatus.FORBIDDEN:
+                logger.debug('Forbidden, retry with different user agent')
+                request_params['headers'] = {'User-Agent': FALLBACK_USER_AGENT}
+                response = fetch(self.external_url, **request_params)
             # If URL contains hash anchor and is a valid HTML document, let's repeat with GET
             elif (
                 self.has_anchor and
                 response.ok and
+                fetch == requests.head and
                 'text/html' in response.headers.get('content-type')
             ):
                 logger.debug('Retrieve content for anchor check')
-                response = requests.get(self.external_url, **request_params)
+                fetch = requests.get
+                response = fetch(self.external_url, **request_params)
         except ReadTimeout:
             self.status = False
             self.message = 'Other Error: The read operation timed out'
@@ -426,7 +437,7 @@ class Url(models.Model):
                 self.status_code = response.status_code
 
             # Check the anchor (if it exists)
-            if response.request.method == 'GET':
+            if fetch == requests.get:
                 self.check_anchor(response.text)
             if not request_params['verify']:
                 self.message += ', SSL certificate could not be verified'
