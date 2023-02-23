@@ -6,6 +6,7 @@ from setuptools import find_packages, setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
 setup(
     name='django-linkcheck',
     version='2.1.0',
@@ -18,7 +19,7 @@ setup(
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django', 'requests'],
+    install_requires=['django', 'django-db-mutex', 'requests'],
     extras_require={
         "dev": ["flake8", "isort", "pre-commit"],
     },

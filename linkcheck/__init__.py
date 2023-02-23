@@ -1,8 +1,4 @@
-import threading
 from html.parser import HTMLParser
-
-# A global lock, showing whether linkcheck is busy
-update_lock = threading.Lock()
 
 
 class Lister(HTMLParser):

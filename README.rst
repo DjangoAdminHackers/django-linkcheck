@@ -35,7 +35,7 @@ Basic usage
 #. Install app to somewhere on your Python path (e.g. ``pip install
    django-linkcheck``).
 
-#. Add ``'linkcheck'`` to your ``settings.INSTALLED_APPS``.
+#. Add ``'linkcheck'`` and ``'db_mutex'`` to your ``settings.INSTALLED_APPS``.
 
 #. Add a file named ``linklists.py`` to every app (see an example in ``examples/linklists.py``) that either:
 

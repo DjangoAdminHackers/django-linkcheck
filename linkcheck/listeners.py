@@ -5,12 +5,14 @@ from contextlib import contextmanager
 from queue import Empty, LifoQueue
 from threading import Thread
 
+from db_mutex import DBMutexError
+from db_mutex.db_mutex import db_mutex
 from django.apps import apps
 from django.db.models import signals as model_signals
 
 from linkcheck.models import Link, Url
 
-from . import filebrowser, update_lock
+from . import filebrowser
 from .linkcheck_settings import MAX_URL_LENGTH
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,11 @@ def linkcheck_worker(block=True):
         # An error in any task should not stop the worker from continuing with the queue
         try:
             task['target'](*task['args'], **task['kwargs'])
+        except DBMutexError:
+            # Wait and reschedule the task
+            logger.debug("Lock is busy, waiting and rescheduling the task...")
+            time.sleep(0.1)
+            tasks_queue.put(task)
         except Exception as e:
             logger.exception(
                 "%s while running %s with args=%r and kwargs=%r: %s",
@@ -74,7 +81,7 @@ def check_instance_links(sender, instance, **kwargs):
 
         if wait:
             time.sleep(0.1)
-        with update_lock:
+        with db_mutex('linkcheck'):
             content_type = linklist_cls.content_type()
             new_links = []
             old_links = Link.objects.filter(content_type=content_type, object_id=instance.pk)

@@ -1,6 +1,7 @@
 import importlib
 
 from django.apps import AppConfig, apps
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_delete
 
 
@@ -17,6 +18,11 @@ class BaseLinkcheckConfig(AppConfig):
     all_linklists = {}
 
     def ready(self):
+        if not apps.is_installed('db_mutex'):
+            raise ImproperlyConfigured(
+                'This library depends on django-db-mutex, '
+                'please add "db_mutex" to your INSTALLED_APPS setting.'
+            )
         self.build_linklists()
 
     def build_linklists(self):

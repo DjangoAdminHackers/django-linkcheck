@@ -13,7 +13,7 @@ if not settings.configured:
         'INSTALLED_APPS': [
             'django.contrib.admin', 'django.contrib.auth',
             'django.contrib.sessions', 'django.contrib.contenttypes',
-            'django.contrib.messages',
+            'django.contrib.messages', 'db_mutex',
             'linkcheck', 'linkcheck.tests.sampleapp',
         ],
         'ROOT_URLCONF': "linkcheck.tests.urls",

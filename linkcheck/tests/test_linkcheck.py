@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from io import StringIO
 from unittest.mock import patch
 
+from db_mutex import DBMutexError
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -994,6 +995,28 @@ class QueueTests(TestCase):
             cm.output[0].split('\n')[0],
             'ERROR:linkcheck.listeners:RuntimeError while running raising with '
             'args=() and kwargs={}: Failing task'
+        )
+
+    def test_reschedule_busy_lock(self):
+        global attempt
+        attempt = 0
+
+        def busy():
+            global attempt
+            if attempt < 5:
+                attempt += 1
+                raise DBMutexError("Could not acquire lock")
+
+        tasks_queue.put({
+            'target': busy,
+            'args': (),
+            'kwargs': {},
+        })
+        with self.assertLogs(level='DEBUG') as cm:
+            linkcheck_worker(block=False)
+        self.assertEqual(
+            cm.output,
+            ['DEBUG:linkcheck.listeners:Lock is busy, waiting and rescheduling the task...'] * 5
         )
 
 

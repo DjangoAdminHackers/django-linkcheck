@@ -1,6 +1,8 @@
 from itertools import groupby
 from operator import itemgetter
 
+from db_mutex import DBMutexError
+from db_mutex.db_mutex import db_mutex
 from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
@@ -12,7 +14,6 @@ from django.templatetags.static import static
 from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext as _
 
-from linkcheck import update_lock
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
 from linkcheck.models import Link
 from linkcheck.utils import get_coverage_data
@@ -163,21 +164,22 @@ def get_jquery_min_js():
 
 
 def get_status_message():
-    if update_lock.locked():
-        return "Still checking. Please refresh this page in a short while. "
-    else:
-        broken_links = Link.objects.filter(ignore=False, url__status=False).count()
-        if broken_links:
-            return (
-                "<span style='color: red;'>We've found {} broken link{}.</span><br>"
-                "<a href='{}'>View/fix broken links</a>".format(
-                    broken_links,
-                    "s" if broken_links > 1 else "",
-                    reverse('linkcheck_report'),
+    try:
+        with db_mutex('linkcheck'):
+            broken_links = Link.objects.filter(ignore=False, url__status=False).count()
+            if broken_links:
+                return (
+                    "<span style='color: red;'>We've found {} broken link{}.</span><br>"
+                    "<a href='{}'>View/fix broken links</a>".format(
+                        broken_links,
+                        "s" if broken_links > 1 else "",
+                        reverse('linkcheck_report'),
+                    )
                 )
-            )
-        else:
-            return ''
+            else:
+                return ''
+    except DBMutexError:
+        return 'Still checking. Please refresh this page in a short while.'
 
 
 def is_ajax(request):

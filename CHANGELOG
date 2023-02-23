@@ -1,5 +1,8 @@
 Unreleased
 
+* Breaking change: Migrated from `threading.Lock()` to `django-db-mutex`
+  to avoid race conditions between multiple processes.
+  Please add `'db_mutex'` to your `INSTALLED_APPS` setting.
 * Enable internationalization for URL status messages (Timo Ludwig, #125)
 * Enable re-checking after rate limit was hit (Timo Ludwig, #153)
 * Ignore raw `post_save` signal (Timo Ludwig, #106)
