@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-28 23:01+0100\n"
+"POT-Creation-Date: 2023-03-19 14:38+0100\n"
 "Language: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -210,19 +210,19 @@ msgstr "Letze"
 msgid "Show"
 msgstr "Anzeigen"
 
-#: templates/linkcheck/report.html:126 views.py:83
+#: templates/linkcheck/report.html:126 views.py:85
 msgid "Valid links"
 msgstr "Gültige Links"
 
-#: templates/linkcheck/report.html:127 views.py:92
+#: templates/linkcheck/report.html:127 views.py:94
 msgid "Broken links"
 msgstr "Ungültige Links"
 
-#: templates/linkcheck/report.html:128 views.py:86
+#: templates/linkcheck/report.html:128 views.py:88
 msgid "Untested links"
 msgstr "Ungetestete Links"
 
-#: templates/linkcheck/report.html:129 views.py:89
+#: templates/linkcheck/report.html:129 views.py:91
 msgid "Ignored links"
 msgstr "Ignorierte Links"
 
@@ -267,6 +267,20 @@ msgstr "Nicht ignorieren"
 #: templates/linkcheck/report.html:173
 msgid "Redirects to"
 msgstr "Leitet weiter zu"
+
+#: views.py:175
+msgid "We've found {} broken link."
+msgid_plural "We've found {} broken links."
+msgstr[0] "Es wurde {} ungültiger Link gefunden."
+msgstr[1] "Es wurden {} ungültige Links gefunden."
+
+#: views.py:180
+msgid "View/fix broken links"
+msgstr "Ungültige Links anzeigen/beheben"
+
+#: views.py:186
+msgid "Still checking. Please refresh this page in a short while."
+msgstr "Es wird noch geprüft. Bitte aktualisieren Sie diese Seite später."
 
 #~ msgid "Link to section on same page"
 #~ msgstr "Link zu Abschnitt auf derselben Seite"

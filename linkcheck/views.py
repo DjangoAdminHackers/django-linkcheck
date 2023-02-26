@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from linkcheck.linkcheck_settings import RESULTS_PER_PAGE
 from linkcheck.models import Link
@@ -169,17 +170,20 @@ def get_status_message():
             broken_links = Link.objects.filter(ignore=False, url__status=False).count()
             if broken_links:
                 return (
-                    "<span style='color: red;'>We've found {} broken link{}.</span><br>"
-                    "<a href='{}'>View/fix broken links</a>".format(
-                        broken_links,
-                        "s" if broken_links > 1 else "",
+                    "<span style='color: red;'>{}</span><br><a href='{}'>{}</a>".format(
+                        ngettext(
+                            "We've found {} broken link.",
+                            "We've found {} broken links.",
+                            broken_links
+                        ).format(broken_links),
                         reverse('linkcheck_report'),
+                        _('View/fix broken links'),
                     )
                 )
             else:
                 return ''
     except DBMutexError:
-        return 'Still checking. Please refresh this page in a short while.'
+        return _('Still checking. Please refresh this page in a short while.')
 
 
 def is_ajax(request):
