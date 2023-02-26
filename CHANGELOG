@@ -9,6 +9,7 @@ Unreleased
   * `redirect_status_code`: The HTTP status code of the final request
   * `anchor_status`: The validity of the HTML hash anchor
   * `ssl_status` The validity of the SSL certificate
+  * `error_message` The error message if the request failed
 * Add new properties to `Url` model:
   * `anchor_message`: The human-readable meaning of the `anchor_status`
   * `ssl_message` The human-readable meaning of the `ssl_status`

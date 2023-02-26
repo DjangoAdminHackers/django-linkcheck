@@ -76,6 +76,7 @@ class Url(models.Model):
     status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
+    error_message = models.CharField(max_length=1024, default='', blank=True)
     redirect_to = models.TextField(blank=True)
 
     @property
@@ -239,6 +240,8 @@ class Url(models.Model):
         self.status_code = None
         self.redirect_status_code = None
         self.ssl_status = None
+        self.error_message = ''
+        self.message = ''
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -398,14 +401,16 @@ class Url(models.Model):
         except ReadTimeout:
             self.status = False
             self.message = 'Other Error: The read operation timed out'
+            self.error_message = 'The read operation timed out'
         except ConnectionError as e:
             self.status = False
-            self.message = format_connection_error(e)
+            self.message = self.error_message = format_connection_error(e)
             if 'SSLError' in str(e):
                 self.ssl_status = False
         except Exception as e:
             self.status = False
             self.message = f'Other Error: {e}'
+            self.error_message = str(e)
         else:
             self.status = response.status_code < 300
             self.message = f"{response.status_code} {response.reason}"
