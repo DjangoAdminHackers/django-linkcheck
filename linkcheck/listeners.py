@@ -91,9 +91,7 @@ def check_instance_links(sender, instance, **kwargs):
             for link in links:
                 # url structure = (field, link text, url)
                 url = link[2]
-                internal_hash = False
                 if url.startswith('#'):
-                    internal_hash = url
                     url = instance.get_absolute_url() + url
 
                 if len(url) > MAX_URL_LENGTH:
@@ -106,9 +104,6 @@ def check_instance_links(sender, instance, **kwargs):
                     url=u, field=link[0], text=link[1], content_type=content_type, object_id=instance.pk
                 )
                 new_links.append(l.id)
-                if internal_hash:
-                    setattr(u, '_internal_hash', internal_hash)
-                    setattr(u, '_instance', instance)
                 u.check_url()
 
             gone_links = old_links.exclude(id__in=new_links)

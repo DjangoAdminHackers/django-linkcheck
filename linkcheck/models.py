@@ -291,20 +291,6 @@ class Url(models.Model):
             self.status = os.path.exists(path) or os.path.exists(decoded_path)
             self.message = 'Working file link' if self.status else 'Missing Document'
 
-        elif getattr(self, '_internal_hash', False) and getattr(self, '_instance', None):
-            # This is a hash link pointing to itself
-            hash = self._internal_hash
-            instance = self._instance
-            if hash == '#':  # special case, point to #
-                self.message = 'Working internal hash anchor'
-                self.status = True
-            else:
-                hash = hash[1:]  # '#something' => 'something'
-                html_content = ''
-                for field in instance._linklist.html_fields:
-                    html_content += getattr(instance, field, '')
-                self._check_anchor(hash, html_content)
-
         elif self.type == 'internal':
             old_prepend_setting = settings.PREPEND_WWW
             settings.PREPEND_WWW = False
