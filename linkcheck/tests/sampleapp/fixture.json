@@ -1,5 +1,12 @@
 [
   {
+    "model": "sampleapp.Page",
+    "pk": 1,
+    "fields": {
+      "book": 1
+    }
+  },
+  {
     "model": "sampleapp.Book",
     "pk": 1,
     "fields": {

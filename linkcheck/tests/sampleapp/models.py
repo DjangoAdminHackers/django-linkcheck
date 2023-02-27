@@ -9,6 +9,13 @@ class Book(models.Model):
         return f"/book/{self.id}/"
 
 
+class Page(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        return f"/book/{self.book.id}/{self.id}"
+
+
 class Author(models.Model):
     # This model has purposefully no get_absolute_url
     name = models.CharField(max_length=50)
