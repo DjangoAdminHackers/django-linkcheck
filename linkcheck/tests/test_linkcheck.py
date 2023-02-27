@@ -23,7 +23,7 @@ from linkcheck.listeners import (
 from linkcheck.models import Link, Url
 from linkcheck.views import get_jquery_min_js
 
-from .sampleapp.models import Author, Book, Journal
+from .sampleapp.models import Author, Book, Journal, Page
 
 
 @override_settings(ROOT_URLCONF='linkcheck.tests.urls')
@@ -967,6 +967,7 @@ class FixtureTestCase(TestCase):
 
     def test_fixture(self):
         self.assertEqual(Book.objects.count(), 1)
+        self.assertEqual(Page.objects.count(), 1)
 
 
 class FilterCallableTestCase(TestCase):

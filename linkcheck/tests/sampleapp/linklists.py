@@ -1,7 +1,7 @@
 from django.db.models import OuterRef, Subquery
 
 from linkcheck import Linklist
-from linkcheck.tests.sampleapp.models import Author, Book, Journal
+from linkcheck.tests.sampleapp.models import Author, Book, Journal, Page
 
 
 class BookLinklist(Linklist):
@@ -9,6 +9,11 @@ class BookLinklist(Linklist):
     model = Book
     object_filter = {}
     html_fields = ['description']
+
+
+class PageLinklist(Linklist):
+    """ Class to let linkcheck app discover fields containing links """
+    model = Page
 
 
 class AuthorLinklist(Linklist):
@@ -31,6 +36,7 @@ class JournalLinklist(Linklist):
 
 linklists = {
     'Books': BookLinklist,
+    'Pages': PageLinklist,
     'Authors': AuthorLinklist,
     'Journals': JournalLinklist,
 }

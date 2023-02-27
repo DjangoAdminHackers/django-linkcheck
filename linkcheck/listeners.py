@@ -156,6 +156,10 @@ def instance_pre_save(sender, instance, raw=False, **kwargs):
 
 
 def instance_post_save(sender, instance, **kwargs):
+    # Ignore raw imports
+    if kwargs.get('raw'):
+        return
+
     def do_instance_post_save(sender, instance, **kwargs):
         current_url = instance.get_absolute_url()
         previous_url = getattr(instance, '__previous_url', None)
