@@ -428,7 +428,14 @@ class Url(models.Model):
             if not request_params['verify']:
                 self.message += ', SSL certificate could not be verified'
 
-        self.last_checked = now()
+        # When a rate limit was hit or the server returned an internal error, do not update
+        # the last_checked date so the result is not cached for EXTERNAL_RECHECK_INTERVAL minutes
+        if (
+            not self.status_code or
+            self.status_code != HTTPStatus.TOO_MANY_REQUESTS and
+            self.status_code < 500
+        ):
+            self.last_checked = now()
         self.save()
         return self.status
 
