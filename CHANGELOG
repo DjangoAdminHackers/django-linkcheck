@@ -1,5 +1,6 @@
 Unreleased
 
+* Enable internationalization for URL status messages (Timo Ludwig, #125)
 * Enable re-checking after rate limit was hit (Timo Ludwig, #153)
 * Ignore raw `post_save` signal (Timo Ludwig, #106)
 * Retry with fallback user agent on forbidden response (Timo Ludwig, #159)

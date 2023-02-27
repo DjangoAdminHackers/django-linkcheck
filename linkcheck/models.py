@@ -80,6 +80,10 @@ class Url(models.Model):
     redirect_to = models.TextField(blank=True)
 
     @property
+    def redirect_ok(self):
+        return self.redirect_status_code < 300 if self.redirect_status_code else None
+
+    @property
     def type(self):
         if self.external:
             return 'external'
@@ -132,10 +136,31 @@ class Url(models.Model):
 
     @property
     def get_message(self):
-        if self.last_checked:
-            return self.message
-        else:
-            return "URL Not Yet Checked"
+        if not self.last_checked:
+            return _('URL Not Yet Checked')
+        elif self.type == 'empty':
+            return _('Empty link')
+        elif self.type == 'invalid':
+            return _('Invalid URL')
+        elif self.type == 'mailto':
+            return '{} ({})'.format(_("Email link"), _("not automatically checked"))
+        elif self.type == 'phone':
+            return '{} ({})'.format(_("Phone number link"), _("not automatically checked"))
+        elif self.type == 'anchor':
+            return '{} ({})'.format(_("Anchor link"), _("not automatically checked"))
+        elif self.type == 'file':
+            return _('Working file link') if self.status else _('Missing file')
+        elif not self.status_code:
+            return self.error_message
+        elif self.status_code < 300:
+            return _('Working external link') if self.external else _('Working internal link')
+        elif self.status_code < 400:
+            permanent = self.status_code in [HTTPStatus.MOVED_PERMANENTLY, HTTPStatus.PERMANENT_REDIRECT]
+            if self.redirect_ok:
+                return _('Working permanent redirect') if permanent else _('Working temporary redirect')
+            else:
+                return _('Broken permanent redirect') if permanent else _('Broken temporary redirect')
+        return _('Broken external link') if self.external else _('Broken internal link')
 
     @property
     def colour(self):
