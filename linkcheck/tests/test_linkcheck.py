@@ -541,6 +541,20 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
+    def test_external_check_rate_limit(self):
+        uv = Url(url=f"{self.live_server_url}/http/429/")
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.last_checked, None)
+        self.assertEqual(uv.message, '429 Too Many Requests')
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, None)
+        self.assertEqual(uv.ssl_message, 'Insecure link')
+        self.assertEqual(uv.get_status_code_display(), '429 Too Many Requests')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
     def test_working_external_anchor(self):
         uv = Url(url=f"{self.live_server_url}/http/anchor/#anchor")
         uv.check_url()
