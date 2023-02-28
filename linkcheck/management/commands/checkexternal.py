@@ -27,9 +27,9 @@ class Command(BaseCommand):
         externalinterval = options['externalinterval'] or EXTERNAL_RECHECK_INTERVAL
         limit = options.get('limit', None) or MAX_CHECKS_PER_RUN
 
-        self.stdout.write("Checking all external links that haven't been tested for %s minutes." % externalinterval)
+        self.stdout.write(f"Checking all external links that haven't been tested for {externalinterval} minutes.")
         if limit != -1:
-            self.stdout.write("Will run maximum of %s checks this run." % limit)
+            self.stdout.write(f"Will run maximum of {limit} checks this run.")
 
         check_count = check_links(external_recheck_interval=externalinterval, limit=limit, check_internal=False)
-        return "%s external URLs have been checked." % (check_count)
+        return f"{check_count} external URLs have been checked."
