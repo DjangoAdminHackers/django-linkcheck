@@ -1,4 +1,4 @@
-Unreleased
+2.2.0 (2023-04-01)
 
 * Enable internationalization for URL status messages (Timo Ludwig, #125)
 * Enable re-checking after rate limit was hit (Timo Ludwig, #153)
