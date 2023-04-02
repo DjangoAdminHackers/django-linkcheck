@@ -1,10 +1,16 @@
 import os
+import subprocess
+import sys
 
 from setuptools import find_packages, setup
 
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+if 'sdist' in sys.argv[1:]:
+    subprocess.run(["django-admin", "compilemessages"])
 
 setup(
     name='django-linkcheck',
