@@ -14,7 +14,7 @@ if 'sdist' in sys.argv[1:]:
 
 setup(
     name='django-linkcheck',
-    version='2.2.0',
+    version='2.2.1',
     description="A Django app that will analyze and report on links in any "
                 "model that you register with it.",
     long_description=read('README.rst'),
