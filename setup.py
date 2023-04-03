@@ -10,7 +10,7 @@ def read(fname):
 
 
 if 'sdist' in sys.argv[1:]:
-    subprocess.run(["django-admin", "compilemessages"])
+    subprocess.run(["django-admin", "compilemessages"], cwd="linkcheck")
 
 setup(
     name='django-linkcheck',
