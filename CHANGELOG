@@ -1,5 +1,8 @@
 Unreleased
 
+* Move coverage view to management command (Timo Brembeck, #187)
+  * Add new management command `linkcheck_suggest_config`
+  * Delete coverage view
 * Improve formatting for `NameResolutionError` (Timo Brembeck, #192)
 * Fix internal redirect checker (Timo Ludwig, #180)
 * Fix SSL status of unreachable domains (Timo Ludwig, #184)

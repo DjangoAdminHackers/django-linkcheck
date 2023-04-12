@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -924,6 +925,52 @@ class FindingLinksTestCase(TestCase):
             )
 
 
+class ManagementCommandTestCase(TestCase):
+
+    def test_linkcheck_suggest_config(self):
+        """
+        Test that the config of uncovered models is correctly suggested
+        """
+        out, err = get_command_output('linkcheck_suggest_config')
+        self.assertEqual(
+            out,
+            'All covered models:\n'
+            '\x1b[36msampleapp.Book\x1b[0m, \x1b[36msampleapp.Page\x1b[0m\n\n'
+            'Suggested config for model sampleapp.UncoveredModel:\n'
+            '\x1b[36mfrom sampleapp.models import UncoveredModel\n\n'
+            'class UncoveredModelLinklist(Linklist):\n'
+            '    model = UncoveredModel\n\n'
+            'linklists = {\n'
+            '    "UncoveredModel": UncoveredModelLinklist,\n'
+            '}\n\x1b[0m\n'
+        )
+        self.assertEqual(err, '')
+
+    def test_linkcheck_suggest_config_model(self):
+        """
+        Test that the config of given model is correctly printed
+        """
+        out, err = get_command_output('linkcheck_suggest_config', '--model', 'sampleapp.Author')
+        self.assertEqual(
+            out,
+            'from sampleapp.models import Author\n\n'
+            'class AuthorLinklist(Linklist):\n'
+            '    model = Author\n\n'
+            'linklists = {\n'
+            '    "Author": AuthorLinklist,\n'
+            '}\n'
+        )
+        self.assertEqual(err, '')
+
+    def test_linkcheck_suggest_config_model_non_existing(self):
+        """
+        Test that the command raises an error when the model does not exist
+        """
+        with self.assertRaises(CommandError) as cm:
+            get_command_output('linkcheck_suggest_config', '--model', 'non-existing')
+        self.assertEqual(str(cm.exception), 'Model "non-existing" does not exist.')
+
+
 class ObjectsUpdateTestCase(TestCase):
     def test_update_object(self):
         """
@@ -1068,17 +1115,6 @@ class ViewTestCase(TestCase):
             'message': '404 Not Found',
         })
 
-    def test_coverage_view(self):
-        self.client.force_login(self.user)
-        response = self.client.get(reverse('linkcheck_coverage'))
-        self.assertContains(
-            response,
-            '<tr><td>sampleapp.Book</td>'
-            '<td style="font-weight: bold;color:green;">Yes</td>'
-            '<td style="font-weight: bold;color:green;"></td></tr>',
-            html=True,
-        )
-
 
 class GetJqueryMinJsTestCase(TestCase):
     def test(self):
@@ -1115,10 +1151,18 @@ class FilterCallableTestCase(TestCase):
         )
 
 
+def get_command_output(command, *args, **kwargs):
+    """
+    Helper function for running a management command and checking its output
+    """
+    out = StringIO()
+    err = StringIO()
+    call_command(command, *args, stdout=out, stderr=err, **kwargs)
+    return out.getvalue(), err.getvalue()
+
+
 def findlinks():
     """
     Helper function for running the findlinks command and checking its output
     """
-    out = StringIO()
-    call_command('findlinks', stdout=out)
-    return out.getvalue()
+    return get_command_output('findlinks')[0]

@@ -228,41 +228,34 @@ def unignore():
 # Utilities for testing models coverage
 
 def is_interesting_field(field):
-    if is_url_field(field) or is_image_field(field) or is_html_field(field):
-        return True
-    return False
+    return is_url_field(field) or is_image_field(field) or is_html_field(field)
 
 
 def is_url_field(field):
-    for cls in URL_FIELD_CLASSES:
-        if isinstance(field, cls):
-            return True
+    return any(isinstance(field, cls) for cls in URL_FIELD_CLASSES)
 
 
 def is_image_field(field):
-    for cls in IMAGE_FIELD_CLASSES:
-        if isinstance(field, cls):
-            return True
+    return any(isinstance(field, cls) for cls in IMAGE_FIELD_CLASSES)
 
 
 def is_html_field(field):
-    for cls in HTML_FIELD_CLASSES:
-        if isinstance(field, cls):
-            return True
+    return any(isinstance(field, cls) for cls in HTML_FIELD_CLASSES)
 
 
 def has_active_field(klass):
-    for field in klass._meta.fields:
-        if field.name == 'active' and isinstance(field, models.BooleanField):
-            return True
+    return any(
+        field.name == 'active' and isinstance(field, models.BooleanField)
+        for field in klass._meta.fields
+    )
 
 
 def get_ignore_empty_fields(klass):
-    fields = []
-    for field in klass._meta.fields:
-        if is_interesting_field(field) and (field.blank or field.null):
-            fields.append(field)
-    return fields
+    return [
+        field
+        for field in klass._meta.fields
+        if is_interesting_field(field) and (field.blank or field.null)
+    ]
 
 
 def get_type_fields(klass, the_type):
@@ -272,19 +265,30 @@ def get_type_fields(klass, the_type):
         'image': is_image_field,
     }
     check_func = check_funcs[the_type]
-    fields = []
-    for field in klass._meta.fields:
-        if check_func(field):
-            fields.append(field)
-    return fields
+    return [field for field in klass._meta.fields if check_func(field)]
 
 
 def is_model_covered(klass):
     app = apps.get_app_config('linkcheck')
-    for linklist in app.all_linklists.items():
-        if linklist[1].model == klass:
-            return True
-    return False
+    return any(linklist[1].model == klass for linklist in app.all_linklists.items())
+
+
+def format_config(meta, active_field, html_fields, image_fields, url_fields, ignore_empty_fields):
+    config = f'from { meta.app_label }.models import { meta.object_name }\n\n'
+    config += f'class { meta.object_name }Linklist(Linklist):\n'
+    config += f'    model = { meta.object_name }\n'
+    if html_fields:
+        config += f'    html_fields = [{", ".join(map(str, html_fields))}]\n'
+    if image_fields:
+        config += f'    image_fields = [{", ".join(map(str, image_fields))}]\n'
+    if url_fields:
+        config += f'    url_fields = [{", ".join(map(str, url_fields))}]\n'
+    if ignore_empty_fields:
+        config += f'    ignore_empty = [{", ".join(map(str, ignore_empty_fields))}]\n'
+    if active_field:
+        config += '    object_filter = {"active": True}\n'
+    config += f'\nlinklists = {{\n    "{ meta.object_name }": { meta.object_name }Linklist,\n}}\n'
+    return config
 
 
 def get_suggested_linklist_config(klass):
@@ -294,14 +298,14 @@ def get_suggested_linklist_config(klass):
     image_fields = get_type_fields(klass, 'image')
     active_field = has_active_field(klass)
     ignore_empty_fields = get_ignore_empty_fields(klass)
-    return {
+    return format_config(**{
         'meta': meta,
         'html_fields': html_fields,
         'url_fields': url_fields,
         'image_fields': image_fields,
         'active_field': active_field,
         'ignore_empty_fields': ignore_empty_fields,
-    }
+    })
 
 
 def get_coverage_data():
@@ -309,7 +313,8 @@ def get_coverage_data():
     Check which models are covered by linkcheck
     This view assumes the key for link
     """
-    all_model_list = []
+    covered = []
+    uncovered = []
     for app in apps.get_app_configs():
         for model in app.get_models():
             should_append = False
@@ -321,10 +326,12 @@ def get_coverage_data():
                         should_append = True
                         break
             if should_append:
-                all_model_list.append({
-                    'name': f'{model._meta.app_label}.{model._meta.object_name}',
-                    'is_covered': is_model_covered(model),
-                    'suggested_config': get_suggested_linklist_config(model),
-                })
+                if is_model_covered(model):
+                    covered.append(f'{model._meta.app_label}.{model._meta.object_name}')
+                else:
+                    uncovered.append((
+                        f'{model._meta.app_label}.{model._meta.object_name}',
+                        get_suggested_linklist_config(model),
+                    ))
 
-    return all_model_list
+    return covered, uncovered
