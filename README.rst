@@ -44,6 +44,10 @@ Basic usage
    #) can be the target of a link - i.e. is addressed by a url - in this case
       make sure it has an instance method named 'get_absolute_url'
 
+   *Hint:* You can create a sample config for your model with::
+
+      manage.py linkcheck_suggest_config --model sampleapp.SampleModel > sampleapp/linklists.py
+
 #. Run ``./manage.py migrate``.
 
 #. Add to your root url config::
@@ -115,6 +119,15 @@ interval can be adapted per-invocation by using the ``--externalinterval``
 
 You can also limit the maximum number of links to be checked by passing a number
 to the ``--limit`` (``--l``) command option.
+
+linkcheck_suggest_config
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command goes through all models and checks whether they contain fields that
+can potentially be checked by linkcheck.
+If they are not yet registered, a sample config is suggested.
+
+You can also pass the option ``--model`` to generate a sample config for the given model.
 
 Settings
 --------
