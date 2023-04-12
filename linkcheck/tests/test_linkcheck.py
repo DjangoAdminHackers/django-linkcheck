@@ -436,6 +436,23 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
+    def test_external_check_unreachable(self):
+        uv = Url(url='https://invalid')
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        for attr in [uv.message, uv.get_message, uv.error_message]:
+            self.assertEqual(
+                attr,
+                'New Connection Error: Failed to establish a new connection: [Errno -2] Name or service not known',
+            )
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, None)
+        self.assertEqual(uv.ssl_message, 'SSL certificate could not be checked')
+        self.assertEqual(uv.get_status_code_display(), None)
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
     def test_external_check_200_utf8(self):
         uv = Url(url=f"{self.live_server_url}/http/200/r%C3%BCckmeldung/")
         uv.check_url()

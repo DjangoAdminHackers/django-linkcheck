@@ -387,18 +387,17 @@ class Url(models.Model):
         }
         try:
             try:
-                # If no exceptions occur, the SSL certificate is valid
-                if self.external_url.startswith('https://'):
-                    self.ssl_status = True
                 # At first try a HEAD request
                 fetch = requests.head
                 response = fetch(self.external_url, **request_params)
+                # If no exceptions occur, the SSL certificate is valid
+                if self.external_url.startswith('https://'):
+                    self.ssl_status = True
             except ConnectionError as e:
                 # This error could also be caused by an incomplete root certificate bundle,
                 # so let's retry without verifying the certificate
                 if "unable to get local issuer certificate" in str(e):
                     request_params['verify'] = False
-                    self.ssl_status = None
                     response = fetch(self.external_url, **request_params)
                 else:
                     # Re-raise exception if it's definitely not a false positive
