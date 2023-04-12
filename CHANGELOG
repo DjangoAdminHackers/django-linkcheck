@@ -1,5 +1,6 @@
 Unreleased
 
+* Fix internal redirect checker (Timo Ludwig, #180)
 * Fix SSL status of unreachable domains (Timo Ludwig, #184)
 * Fix URL message for internal server errorrs (Timo Ludwig, #182)
 * Add support for Django 4.2
