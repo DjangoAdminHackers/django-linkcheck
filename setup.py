@@ -24,7 +24,7 @@ setup(
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django', 'requests'],
+    install_requires=['django>=3.2', 'requests'],
     extras_require={
         "dev": ["flake8", "isort", "pre-commit"],
     },
@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python :: 3.11',
         'Framework :: Django',
         "Framework :: Django :: 3.2",
-        "Framework :: Django :: 4.0",
         "Framework :: Django :: 4.1",
+        "Framework :: Django :: 4.2",
     ],
 )
