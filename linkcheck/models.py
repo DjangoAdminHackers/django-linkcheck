@@ -136,7 +136,7 @@ class Url(models.Model):
 
     @property
     def get_message(self):
-        if not self.last_checked:
+        if not self.last_checked and self.status is None:
             return _('URL Not Yet Checked')
         elif self.type == 'empty':
             return _('Empty link')
