@@ -331,9 +331,14 @@ class Url(models.Model):
                 self.message = 'Working internal link'
                 self.status = True
             elif response.status_code < 400:
+                initial_location = response.get('Location')
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
-                response = c.get(self.internal_url, follow=True)
-                self.redirect_to, _ = response.redirect_chain[-1]
+                with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
+                    response = c.get(self.internal_url, follow=True)
+                if response.redirect_chain:
+                    self.redirect_to, _ = response.redirect_chain[-1]
+                else:
+                    self.redirect_to = initial_location
                 self.redirect_status_code = response.status_code
                 self.status = response.status_code < 300
                 redirect_result = "Working" if self.status else "Broken"
