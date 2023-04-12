@@ -623,7 +623,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.last_checked, None)
         self.assertEqual(uv.message, '429 Too Many Requests')
-        self.assertEqual(uv.get_message, 'URL Not Yet Checked')
+        self.assertEqual(uv.get_message, 'Broken external link')
         self.assertEqual(uv.error_message, '')
         self.assertEqual(uv.anchor_message, '')
         self.assertEqual(uv.ssl_status, None)
