@@ -15,7 +15,7 @@ from django.test.utils import modify_settings
 from django.utils.encoding import iri_to_uri
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from requests.exceptions import ConnectionError, ReadTimeout
 
 try:
@@ -57,6 +57,21 @@ def html_decode(s):
     return s
 
 
+STATUS_CHOICES = [
+    (True, _('Valid')),
+    (False, _('Invalid')),
+    (None, _('Unchecked')),
+]
+TYPE_CHOICES = [
+    ('external', _('External')),
+    ('internal', _('Internal')),
+    ('anchor', _('Anchor')),
+    ('file', _('File')),
+    ('mailto', _('E-mail')),
+    ('phone', _('Phone number')),
+    ('empty', _('Empty')),
+    ('invalid', _('Invalid')),
+]
 STATUS_CODE_CHOICES = [(s.value, f'{s.value} {s.phrase}') for s in HTTPStatus]
 DEFAULT_USER_AGENT = f'{settings.SITE_DOMAIN} Linkchecker'
 FALLBACK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'
@@ -68,16 +83,20 @@ class Url(models.Model):
     A single Url can have multiple Links associated with it.
     """
     # See http://www.boutell.com/newfaq/misc/urllength.html
-    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
-    last_checked = models.DateTimeField(blank=True, null=True)
-    anchor_status = models.BooleanField(null=True)
-    ssl_status = models.BooleanField(null=True)
-    status = models.BooleanField(null=True)
-    status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
-    redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
-    message = models.CharField(max_length=1024, blank=True, null=True)
-    error_message = models.CharField(max_length=1024, default='', blank=True)
-    redirect_to = models.TextField(blank=True)
+    url = models.CharField(max_length=MAX_URL_LENGTH, unique=True, verbose_name=_('URL'))
+    last_checked = models.DateTimeField(blank=True, null=True, verbose_name=_('last checked'))
+    anchor_status = models.BooleanField(null=True, verbose_name=_('anchor status'))
+    ssl_status = models.BooleanField(null=True, verbose_name=_('SSL status'))
+    status = models.BooleanField(choices=STATUS_CHOICES, null=True, verbose_name=_('status'))
+    status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True, verbose_name=_('status code'))
+    redirect_status_code = models.IntegerField(
+        choices=STATUS_CODE_CHOICES,
+        null=True,
+        verbose_name=_('redirect status code')
+    )
+    message = models.CharField(max_length=1024, blank=True, null=True, verbose_name=_('message'))
+    error_message = models.CharField(max_length=1024, default='', blank=True, verbose_name=_('error message'))
+    redirect_to = models.TextField(blank=True, verbose_name=_('redirects to'))
 
     @property
     def redirect_ok(self):
@@ -102,6 +121,9 @@ class Url(models.Model):
         else:
             return 'invalid'
 
+    def get_type_display(self):
+        return dict(TYPE_CHOICES).get(self.type)
+
     @property
     def has_anchor(self):
         return '#' in self.url
@@ -118,7 +140,7 @@ class Url(models.Model):
             return _('Working empty anchor')
         if self.anchor_status is None:
             return _('Anchor could not be checked')
-        elif self.anchor_status is False:
+        if self.anchor_status is False:
             return _('Broken anchor')
         return _('Working anchor')
 
@@ -509,6 +531,10 @@ class Url(models.Model):
                             self.status = False
         return self.anchor_status, self.anchor_message
 
+    class Meta:
+        verbose_name = _("URL")
+        verbose_name_plural = _("URLs")
+
 
 class Link(models.Model):
     """
@@ -517,13 +543,13 @@ class Link(models.Model):
     Such as a HTML or Rich Text field.
     Multiple Links can reference a single Url
     """
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_('source model'))
+    object_id = models.PositiveIntegerField(_('source object id'))
     content_object = GenericForeignKey('content_type', 'object_id')
-    field = models.CharField(max_length=128)
-    url = models.ForeignKey(Url, related_name="links", on_delete=models.CASCADE)
-    text = models.CharField(max_length=256, default='')
-    ignore = models.BooleanField(default=False)
+    field = models.CharField(max_length=128, verbose_name=_('field'))
+    url = models.ForeignKey(Url, related_name="links", on_delete=models.CASCADE, verbose_name=_('URL'))
+    text = models.CharField(max_length=256, default='', verbose_name=_('link text'))
+    ignore = models.BooleanField(default=False, verbose_name=_('ignored'))
 
     @property
     def display_url(self):
@@ -541,6 +567,10 @@ class Link(models.Model):
 
     def __repr__(self):
         return f"<Link (id: {self.id}, url: {self.url!r}, source: {self.content_object!r})>"
+
+    class Meta:
+        verbose_name = _("link")
+        verbose_name_plural = _("links")
 
 
 def link_post_delete(sender, instance, **kwargs):

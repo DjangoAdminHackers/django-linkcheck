@@ -1,12 +1,156 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-28 23:01+0100\n"
+"POT-Creation-Date: 2023-11-21 02:07+0100\n"
 "Language: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin/link_admin.py:37 models.py:551
+msgid "link text"
+msgstr "Link-Text"
+
+#: admin/link_admin.py:41
+msgid "source"
+msgstr "Quelle"
+
+#: admin/link_admin.py:53 admin/url_admin.py:159
+msgid "Actions"
+msgstr "Aktionen"
+
+#: admin/link_admin.py:66
+msgid "Recheck selected links"
+msgstr "Ausgewählte Links erneut prüfen"
+
+#: admin/link_admin.py:73
+msgid "The link \"{}\" was rechecked."
+msgstr "Der Link \"{}\" wurde erneut überprüft."
+
+#: admin/link_admin.py:78
+msgid "The selected links were rechecked."
+msgstr "Die ausgewählten Links wurden erneut überprüft."
+
+#: admin/link_admin.py:81
+msgid "Ignore selected links"
+msgstr "Ausgewählte Links ignorieren"
+
+#: admin/link_admin.py:87
+msgid "The link \"{}\" is now ignored."
+msgstr "Der Link \"{}\" wird nun ignoriert."
+
+#: admin/link_admin.py:92
+msgid "The selected links are now ignored."
+msgstr "Die ausgewählten Links werden nun ignoriert."
+
+#: admin/link_admin.py:95
+msgid "No longer ignore selected links"
+msgstr "Ausgewählte Links nicht mehr ignorieren"
+
+#: admin/link_admin.py:101
+msgid "The link \"{}\" is no longer ignored."
+msgstr "Der Link \"{}\" wird nicht mehr ignoriert."
+
+#: admin/link_admin.py:106
+msgid "The selected links are no longer ignored."
+msgstr "Die ausgewählten Links werden nicht mehr ignoriert."
+
+#: admin/link_admin.py:112
+msgid "Ignored links"
+msgstr "Ignorierte Links"
+
+#: admin/link_admin.py:114
+msgid "Not ignored links"
+msgstr "Nicht ignorierte Links"
+
+#: admin/link_admin.py:116
+msgid "Links"
+msgstr "Links"
+
+#: admin/url_admin.py:23 models.py:90
+msgid "status"
+msgstr "Status"
+
+#: admin/url_admin.py:46
+msgid "All"
+msgstr "Alle"
+
+#: admin/url_admin.py:78
+msgid "Ignored"
+msgstr "ignoriert"
+
+#: admin/url_admin.py:84 admin/url_admin.py:147
+msgid "type"
+msgstr "Typ"
+
+#: admin/url_admin.py:131
+msgid "SSL"
+msgstr ""
+
+#: admin/url_admin.py:135 models.py:68
+msgid "Anchor"
+msgstr "Anker"
+
+#: admin/url_admin.py:143 models.py:97
+msgid "message"
+msgstr "Nachricht"
+
+#: admin/url_admin.py:172
+msgid "Recheck selected URLs"
+msgstr "Ausgewählte URLs erneut prüfen"
+
+#: admin/url_admin.py:179
+msgid "The URL \"{}\" was rechecked."
+msgstr "Die URL \"{}\" wurde erneut überprüft."
+
+#: admin/url_admin.py:184
+msgid "The selected URLs were rechecked."
+msgstr "Die ausgewählten URLs wurden erneut überprüft."
+
+#: admin/url_admin.py:187
+msgid "Ignore selected URLs"
+msgstr "Ausgewählte URLs ignorieren"
+
+#: admin/url_admin.py:193
+msgid "The URL \"{}\" is now ignored."
+msgstr "Die URL \"{}\" wird nun ignoriert."
+
+#: admin/url_admin.py:198
+msgid "The selected URLs are now ignored."
+msgstr "Die ausgewählten URLs werden nun ignoriert."
+
+#: admin/url_admin.py:201
+msgid "No longer ignore selected URLs"
+msgstr "Ausgewählte URLs nicht mehr ignorieren"
+
+#: admin/url_admin.py:207
+msgid "The URL \"{}\" is no longer ignored."
+msgstr "Die URL \"{}\" wird nicht mehr ignoriert."
+
+#: admin/url_admin.py:212
+msgid "The selected URLs are no longer ignored."
+msgstr "Die ausgewählten URLs werden nicht mehr ignoriert."
+
+#: admin/url_admin.py:224
+msgid "Valid URLs"
+msgstr "Gültige URLs"
+
+#: admin/url_admin.py:226
+msgid "Invalid URLs"
+msgstr "Ungültige URLs"
+
+#: admin/url_admin.py:228
+msgid "Unchecked URLs"
+msgstr "Nicht geprüfte URLs"
+
+#: admin/url_admin.py:230
+msgid "Ignored URLs"
+msgstr "Ignorierte URLs"
+
+#: admin/url_admin.py:232 models.py:536
+msgid "URLs"
+msgstr "URLs"
 
 #: filebrowser.py:43
 msgid "Uploading {} has corrected {} broken link."
@@ -53,220 +197,287 @@ msgstr[0] ""
 msgstr[1] ""
 "Das Löschen von {} hat dazu geführt, dass {} Links nicht mehr funktionieren."
 
-#: models.py:118
+#: models.py:61
+msgid "Valid"
+msgstr "Gültig"
+
+#: models.py:62 models.py:73
+msgid "Invalid"
+msgstr "Ungültig"
+
+#: models.py:63
+msgid "Unchecked"
+msgstr "Nicht geprüft"
+
+#: models.py:66
+msgid "External"
+msgstr "Extern"
+
+#: models.py:67
+msgid "Internal"
+msgstr "Intern"
+
+#: models.py:69
+msgid "File"
+msgstr "Datei"
+
+#: models.py:70
+msgid "E-mail"
+msgstr "Email"
+
+#: models.py:71
+msgid "Phone number"
+msgstr "Telefonnummer"
+
+#: models.py:72
+msgid "Empty"
+msgstr "Leer"
+
+#: models.py:86 models.py:535 models.py:550
+msgid "URL"
+msgstr "URL"
+
+#: models.py:87
+msgid "last checked"
+msgstr "zuletzt geprüft"
+
+#: models.py:88
+msgid "anchor status"
+msgstr "Anker-Status"
+
+#: models.py:89
+msgid "SSL status"
+msgstr "SSL-Status"
+
+#: models.py:91
+msgid "status code"
+msgstr "Status-Code"
+
+#: models.py:95
+msgid "redirect status code"
+msgstr "Status-Code der Weiterleitung"
+
+#: models.py:98
+msgid "error message"
+msgstr "Fehlermeldung"
+
+#: models.py:99
+msgid "redirects to"
+msgstr "Leitet weiter zu"
+
+#: models.py:140
 msgid "Working empty anchor"
 msgstr "Funktionierender leerer Anker"
 
-#: models.py:120
+#: models.py:142
 msgid "Anchor could not be checked"
 msgstr "Anker konnte nicht geprüft werden"
 
-#: models.py:122
+#: models.py:144
 msgid "Broken anchor"
 msgstr "Ungültiger Anker"
 
-#: models.py:123
+#: models.py:145
 msgid "Working anchor"
 msgstr "Funktionierender Anker"
 
-#: models.py:130
+#: models.py:152
 msgid "Insecure link"
 msgstr "Unsicherer Link"
 
-#: models.py:132
+#: models.py:154
 msgid "SSL certificate could not be checked"
 msgstr "SSL-Zertifikat konnte nicht überprüft werden"
 
-#: models.py:134
+#: models.py:156
 msgid "Broken SSL certificate"
 msgstr "Fehlerhaftes SSL-Zertifikat"
 
-#: models.py:135
+#: models.py:157
 msgid "Valid SSL certificate"
 msgstr "Valides SSL-Zertifikat"
 
-#: models.py:140
+#: models.py:162
 msgid "URL Not Yet Checked"
 msgstr "URL noch nicht geprüft"
 
-#: models.py:142
+#: models.py:164
 msgid "Empty link"
 msgstr "Leerer Link"
 
-#: models.py:144
+#: models.py:166
 msgid "Invalid URL"
 msgstr "Ungültige URL"
 
-#: models.py:146
+#: models.py:168
 msgid "Email link"
 msgstr "Email-Link"
 
-#: models.py:146 models.py:148 models.py:150
+#: models.py:168 models.py:170 models.py:172
 msgid "not automatically checked"
 msgstr "nicht automatisch geprüft"
 
-#: models.py:148
+#: models.py:170
 msgid "Phone number link"
 msgstr "Telefonnummern-Link"
 
-#: models.py:150
+#: models.py:172
 msgid "Anchor link"
 msgstr "Anker-Link"
 
-#: models.py:152
+#: models.py:174
 msgid "Working file link"
 msgstr "Funktionierender Datei-Link"
 
-#: models.py:152
+#: models.py:174
 msgid "Missing file"
 msgstr "Fehlende Datei"
 
-#: models.py:156
+#: models.py:178
 msgid "Working external link"
 msgstr "Funktionierender externer Link"
 
-#: models.py:156
+#: models.py:178
 msgid "Working internal link"
 msgstr "Funktionierender interner Link"
 
-#: models.py:160
+#: models.py:182
 msgid "Working permanent redirect"
 msgstr "Funktionierende dauerhafte Weiterleitung"
 
-#: models.py:160
+#: models.py:182
 msgid "Working temporary redirect"
 msgstr "Funktionierende temporäre Weiterleitung"
 
-#: models.py:162
+#: models.py:184
 msgid "Broken permanent redirect"
 msgstr "Fehlerhafte dauerhafte Weiterleitung"
 
-#: models.py:162
+#: models.py:184
 msgid "Broken temporary redirect"
 msgstr "Fehlerhafte temporäre Weiterleitung"
 
-#: models.py:163
+#: models.py:185
 msgid "Broken external link"
 msgstr "Fehlerhafter externer Link"
 
-#: models.py:163
+#: models.py:185
 msgid "Broken internal link"
 msgstr "Fehlerhafter interner Link"
 
-#: templates/linkcheck/base_linkcheck.html:5
-#: templates/linkcheck/base_linkcheck.html:11
-#: templates/linkcheck/base_linkcheck.html:17
-#: templates/linkcheck/coverage.html:14
-msgid "Link Checker"
-msgstr ""
+#: models.py:546
+msgid "source model"
+msgstr "Quell-Modell"
 
-#: templates/linkcheck/base_linkcheck.html:10
-#: templates/linkcheck/coverage.html:13
-msgid "Home"
-msgstr ""
+#: models.py:547
+msgid "source object id"
+msgstr "Quell-Objekt ID"
 
-#: templates/linkcheck/coverage.html:8 templates/linkcheck/coverage.html:15
-msgid "Coverage"
-msgstr "Abdeckung"
+#: models.py:549
+msgid "field"
+msgstr "Feld"
 
-#: templates/linkcheck/coverage.html:22
-msgid "Model"
-msgstr "Datenbank-Modell"
+#: models.py:552
+msgid "ignored"
+msgstr "ignoriert"
 
-#: templates/linkcheck/coverage.html:23
-msgid "Covered"
-msgstr "Überprüft"
+#: models.py:572
+msgid "link"
+msgstr "Link"
 
-#: templates/linkcheck/coverage.html:24
-msgid "Suggested config"
-msgstr "Empfohlene Konfiguration"
+#: models.py:573
+msgid "links"
+msgstr "Links"
 
-#: templates/linkcheck/coverage.html:30
-msgid "Yes,No"
-msgstr "Ja,Nein"
-
-#: templates/linkcheck/paginator.html:7
-msgid "First"
-msgstr "Erste"
-
-#: templates/linkcheck/paginator.html:11 templates/linkcheck/paginator.html:13
-msgid "Previous"
-msgstr "Vorherige"
-
-#: templates/linkcheck/paginator.html:17
-#, python-format
-msgid "Page %(current)s of %(max)s"
-msgstr "Seite %(current)s von %(max)s"
-
-#: templates/linkcheck/paginator.html:21 templates/linkcheck/paginator.html:23
-msgid "Next"
-msgstr "Nächste"
-
-#: templates/linkcheck/paginator.html:27 templates/linkcheck/paginator.html:29
-msgid "Last"
-msgstr "Letze"
-
-#: templates/linkcheck/report.html:125
-msgid "Show"
-msgstr "Anzeigen"
-
-#: templates/linkcheck/report.html:126 views.py:83
-msgid "Valid links"
-msgstr "Gültige Links"
-
-#: templates/linkcheck/report.html:127 views.py:92
-msgid "Broken links"
-msgstr "Ungültige Links"
-
-#: templates/linkcheck/report.html:128 views.py:86
-msgid "Untested links"
-msgstr "Ungetestete Links"
-
-#: templates/linkcheck/report.html:129 views.py:89
-msgid "Ignored links"
-msgstr "Ignorierte Links"
-
-#: templates/linkcheck/report.html:140
-#, python-format
-msgid "View %(content_type_name)s"
-msgstr "%(content_type_name)s anzeigen"
-
-#: templates/linkcheck/report.html:141
-#, python-format
-msgid "Edit %(content_type_name)s"
-msgstr "%(content_type_name)s bearbeiten"
-
-#: templates/linkcheck/report.html:143
-msgid "Destination"
-msgstr "Ziel"
-
-#: templates/linkcheck/report.html:144
-msgid "Linked Text"
-msgstr "Link-Text"
-
-#: templates/linkcheck/report.html:145
-msgid "Field to edit"
-msgstr "Zu bearbeitendes Feld"
-
-#: templates/linkcheck/report.html:146
-msgid "Status"
-msgstr ""
-
-#: templates/linkcheck/report.html:157
+#: templatetags/linkcheck_admin_tags.py:104
 msgid "Recheck"
 msgstr "Erneut prüfen"
 
-#: templates/linkcheck/report.html:164
-msgid "Ignore"
-msgstr "Ignorieren"
-
-#: templates/linkcheck/report.html:166
+#: templatetags/linkcheck_admin_tags.py:110
 msgid "Unignore"
 msgstr "Nicht ignorieren"
 
-#: templates/linkcheck/report.html:173
-msgid "Redirects to"
-msgstr "Leitet weiter zu"
+#: templatetags/linkcheck_admin_tags.py:110
+msgid "Ignore"
+msgstr "Ignorieren"
+
+#: templatetags/linkcheck_admin_tags.py:125
+msgid "view"
+msgstr "anzeigen"
+
+#: templatetags/linkcheck_admin_tags.py:136
+msgid "edit"
+msgstr "bearbeiten"
+
+#: templatetags/linkcheck_admin_tags.py:143
+msgid "filter"
+msgstr "filtern"
+
+#~ msgid "Coverage"
+#~ msgstr "Abdeckung"
+
+#~ msgid "Model"
+#~ msgstr "Datenbank-Modell"
+
+#~ msgid "Covered"
+#~ msgstr "Überprüft"
+
+#~ msgid "Suggested config"
+#~ msgstr "Empfohlene Konfiguration"
+
+#~ msgid "Yes,No"
+#~ msgstr "Ja,Nein"
+
+#~ msgid "First"
+#~ msgstr "Erste"
+
+#~ msgid "Previous"
+#~ msgstr "Vorherige"
+
+#, python-format
+#~ msgid "Page %(current)s of %(max)s"
+#~ msgstr "Seite %(current)s von %(max)s"
+
+#~ msgid "Next"
+#~ msgstr "Nächste"
+
+#~ msgid "Last"
+#~ msgstr "Letze"
+
+#~ msgid "Show"
+#~ msgstr "Anzeigen"
+
+#~ msgid "Valid links"
+#~ msgstr "Gültige Links"
+
+#~ msgid "Broken links"
+#~ msgstr "Ungültige Links"
+
+#~ msgid "Untested links"
+#~ msgstr "Ungetestete Links"
+
+#, python-format
+#~ msgid "View %(content_type_name)s"
+#~ msgstr "%(content_type_name)s anzeigen"
+
+#, python-format
+#~ msgid "Edit %(content_type_name)s"
+#~ msgstr "%(content_type_name)s bearbeiten"
+
+#~ msgid "Destination"
+#~ msgstr "Ziel"
+
+#~ msgid "Linked Text"
+#~ msgstr "Link-Text"
+
+#~ msgid "Field to edit"
+#~ msgstr "Zu bearbeitendes Feld"
+
+#~ msgid "Status"
+#~ msgstr "Status"
+
+#~ msgid "Redirects to"
+#~ msgstr "Leitet weiter zu"
 
 #~ msgid "Link to section on same page"
 #~ msgstr "Link zu Abschnitt auf derselben Seite"

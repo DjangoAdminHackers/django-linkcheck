@@ -25,7 +25,6 @@ from linkcheck.listeners import (
     unregister_listeners,
 )
 from linkcheck.models import Link, Url
-from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book, Journal, Page
 
@@ -1128,51 +1127,49 @@ class ViewTestCase(TestCase):
             set(["http://www.example.org", "http://www.example.org#john"]),
         )
 
-    def test_report_view(self):
+    def test_url_list(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse('linkcheck_report'))
-        self.assertContains(response, "<h1>Link Checker</h1>")
+        response = self.client.get(reverse('admin:linkcheck_url_changelist'))
+        self.assertContains(response, "<h1>URLs</h1>")
+        self.assertEqual(response.status_code, 200)
 
-    def test_report_ignore_unignore(self):
+    def test_link_list(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('admin:linkcheck_link_changelist'))
+        self.assertContains(response, "<h1>Links</h1>")
+        self.assertEqual(response.status_code, 200)
+
+    def test_url_ignore_unignore(self):
         Author.objects.create(name="John Smith", website="http://www.example.org/john")
         self.client.force_login(self.user)
         link = Link.objects.first()
         self.assertFalse(link.ignore)
         response = self.client.post(
-            reverse('linkcheck_report') + f"?ignore={link.pk}",
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+            reverse('admin:linkcheck_url_changelist'),
+            data={'action': 'ignore', '_selected_action': link.pk}
         )
-        self.assertEqual(response.json(), {'link': link.pk})
+        self.assertEqual(response.status_code, 302)
         link.refresh_from_db()
         self.assertTrue(link.ignore)
         response = self.client.post(
-            reverse('linkcheck_report') + f"?unignore={link.pk}",
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+            reverse('admin:linkcheck_url_changelist'),
+            data={'action': 'unignore', '_selected_action': link.pk}
         )
-        self.assertEqual(response.json(), {'link': link.pk})
+        self.assertEqual(response.status_code, 302)
         link.refresh_from_db()
         self.assertFalse(link.ignore)
 
-    def test_report_recheck(self):
+    def test_url_recheck(self):
         Author.objects.create(name="John Smith", website="http://www.example.org/john")
         self.client.force_login(self.user)
         link = Link.objects.first()
         response = self.client.post(
-            reverse('linkcheck_report') + f"?recheck={link.pk}",
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+            reverse('admin:linkcheck_url_changelist'),
+            data={'action': 'recheck', '_selected_action': link.pk}
         )
-        self.assertEqual(response.json(), {
-            'colour': 'red',
-            'links': [link.pk],
-            'message': '404 Not Found',
-        })
-
-
-class GetJqueryMinJsTestCase(TestCase):
-    def test(self):
-        self.assertEqual(
-            'admin/js/vendor/jquery/jquery.min.js', get_jquery_min_js()
-        )
+        self.assertEqual(response.status_code, 302)
+        link.refresh_from_db()
+        self.assertIsNotNone(link.ignore)
 
 
 class FixtureTestCase(TestCase):
