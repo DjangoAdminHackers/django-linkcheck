@@ -2,6 +2,7 @@ Unreleased
 
 * Migrate linkcheck views to `ModelAdmin` (Timo Brembeck, #186)
   * Add `ModelAdmin` for Url and Link models
+  * Delete `report` view
 * Fix encoding of utf-8 domain names (Timo Brembeck, #190)
 * Move coverage view to management command (Timo Brembeck, #187)
   * Add new management command `linkcheck_suggest_config`
