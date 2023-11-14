@@ -50,6 +50,8 @@ Basic usage
 
     path('admin/linkcheck/', include('linkcheck.urls'))
 
+#. Run ``./manage.py collectstatic`` if you're deploying your app in production environment. 
+
 #. View ``/admin/linkcheck/`` from your browser.
 
 We are aware that this documentation is on the brief side of things so any

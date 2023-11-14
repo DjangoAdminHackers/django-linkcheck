@@ -23,6 +23,9 @@ setup(
     license='BSD',
     url='https://github.com/DjangoAdminHackers/django-linkcheck',
     packages=find_packages(),
+    package_data={
+        'linkcheck': ['static/linkcheck/css/*', 'static/linkcheck/js/*'],
+    },
     include_package_data=True,
     install_requires=['django>=3.2', 'requests'],
     extras_require={
