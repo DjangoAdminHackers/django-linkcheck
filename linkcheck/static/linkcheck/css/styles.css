@@ -1,0 +1,96 @@
+
+.objecttype {
+    width: 99%!important;
+    margin-bottom: 30px;
+    border: 0 !important;
+}
+
+.objecttype td {
+    border: 0;
+}
+
+.module {
+    width: 100%!important;
+    border: 0 !important;
+}
+
+.object {
+    width: 100%!important;
+    margin: 0;
+    padding: 35px 0 0 0;
+}
+
+.links {
+    width: 100%!important;
+    background-color: white;
+    border: 1px solid #ddd;
+    margin: 10px 0 0 0;
+}
+
+.links td, .links tr {
+    border: 1px solid #ddd;
+}
+
+.links th {
+    border: 0!important;
+}
+
+td.actioncell {
+    border-left: 0 !important;
+    width: 60px !important;
+}
+
+#linkcheck-nav {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding: 10px;
+}
+
+#linkcheck-nav a {
+    text-decoration: underline;
+}
+
+/* Header Styles */
+.header-cell {
+    padding: 0;
+}
+
+.header-table-small {
+    width: 20%;
+}
+
+.header-table-big {
+    width: 40%;
+
+}
+
+.header-report {
+    display: inline; 
+    padding-left: 5px;
+}
+
+.header-link {
+    text-decoration: underline;
+}
+
+/* table body styles */
+.emphasis {
+    font-weight: bold;
+}
+.coloured-green {
+    color: green;
+}
+.coloured-red {
+    color: red;
+}
+
+/* other styles */
+.current {
+    margin: 0 25px;
+}
+
+.center-aligned {
+    text-align: center;
+}

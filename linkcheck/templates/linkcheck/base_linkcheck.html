@@ -5,6 +5,11 @@
     {% translate "Link Checker" %} {{ block.super }}
 {% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{% static 'linkcheck/css/styles.css' %}">
+    <script src="{% static 'linkcheck/js/script.js' %}"></script>
+{% endblock %}
+
 {% block breadcrumbs %}
     <div class="breadcrumbs">
         <a href="{% url 'admin:index' %}">{% translate "Home" %}</a> &rsaquo;

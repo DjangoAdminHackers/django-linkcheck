@@ -169,7 +169,7 @@ def get_status_message():
         broken_links = Link.objects.filter(ignore=False, url__status=False).count()
         if broken_links:
             return (
-                "<span style='color: red;'>We've found {} broken link{}.</span><br>"
+                "<span class='coloured-red' >We've found {} broken link{}.</span><br>"
                 "<a href='{}'>View/fix broken links</a>".format(
                     broken_links,
                     "s" if broken_links > 1 else "",

@@ -26,10 +26,10 @@
         {% for model in coverage_data %}
             <tr>
                 <td>{{ model.name }}</td>
-                <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
+                <td class="emphasis coloured-{% if model.is_covered %}green{% else %}red{% endif %}">
                     {{ model.is_covered|yesno:_("Yes,No") }}
                 </td>
-                <td style="font-weight: bold;color:{% if model.is_covered %}green{% else %}red{% endif %};">
+                <td class="emphasis coloured-{% if model.is_covered %}green{% else %}red{% endif %}">
                     {% if not model.is_covered %}
                         {{ model.suggested_config|render_config }}
                     {% endif %}

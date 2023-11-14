@@ -1074,8 +1074,8 @@ class ViewTestCase(TestCase):
         self.assertContains(
             response,
             '<tr><td>sampleapp.Book</td>'
-            '<td style="font-weight: bold;color:green;">Yes</td>'
-            '<td style="font-weight: bold;color:green;"></td></tr>',
+            '<td class="emphasis coloured-green">Yes</td>'
+            '<td class="emphasis coloured-green"></td></tr>',
             html=True,
         )
 
