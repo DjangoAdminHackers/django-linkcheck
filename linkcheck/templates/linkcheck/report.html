@@ -1,123 +1,6 @@
 {% extends "linkcheck/base_linkcheck.html" %}
 {% load i18n %}
 {% load  linkcheck_model_tags %}
-{% block extrahead %}
-{{ block.super }}
-<script type="text/javascript">
-    function showProgressDots(numberOfDots) {
-        var progress = document.getElementById('progressDots');
-        if (!progress) return;
-        switch(numberOfDots) {
-            case 1:
-                progress.innerHTML = '.&nbsp;&nbsp;';
-                timerHandle = setTimeout('showProgressDots(2)',200);
-                break;
-            case 2:
-                progress.innerHTML = '..&nbsp;';
-                timerHandle = setTimeout('showProgressDots(3)',200);
-                break;
-            case 3:
-                progress.innerHTML = '...';
-                timerHandle = setTimeout('showProgressDots(1)',200);
-                break;
-        }
-    }
-
-    $(document).ready(function() {
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        $(".ignore").submit(function(){
-            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
-                $('tr#link' + data.link).hide('medium');
-                var ignored_count = parseInt($('#ignored_count').text());
-                ignored_count++;
-                $('#ignored_count').text(ignored_count);
-            });
-            return false;
-        });
-
-        $(".unignore").submit(function(){
-            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
-                $('tr#link' + data.link).hide('medium');
-                var ignored_count = parseInt($('#ignored_count').text());
-                ignored_count--;
-                $('#ignored_count').text(ignored_count);
-            });
-            return false;
-        });
-
-        $(".recheck").submit(function(){
-            $(this).closest('tr').find('td.link_message').html('Checking<span id="progressDots"></span>');
-            showProgressDots(1);
-            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
-                var links = data['links'];
-                for (var link in links) {
-                    $('tr#link'+links[link]).find('td.link_message').text(data['message']).css('color', data['colour']);
-                }
-            });
-            return false;
-        });
-    });
-</script>
-
-<style type="text/css">
-
-    .objecttype {
-        width: 99%!important;
-        margin-bottom: 30px;
-        border: 0 !important;
-    }
-
-    .objecttype td {
-        border: 0;
-    }
-
-    .module {
-        width: 100%!important;
-        border: 0 !important;
-    }
-
-    .object {
-        width: 100%!important;
-        margin: 0;
-        padding: 35px 0 0 0;
-    }
-
-    .links {
-        width: 100%!important;
-        background-color: white;
-        border: 1px solid #ddd;
-        margin: 10px 0 0 0;
-    }
-
-    .links td, .links tr {
-        border: 1px solid #ddd;
-    }
-
-    .links th {
-        border: 0!important;
-    }
-
-    td.actioncell {
-        border-left: 0 !important;
-        width: 60px !important;
-    }
-
-    #linkcheck-nav {
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
-        padding: 10px;
-    }
-
-    #linkcheck-nav a {
-        text-decoration: underline;
-    }
-
-</style>
-{% endblock %}
 
 {% block innercontent %}
 
@@ -133,17 +16,17 @@
 
     {% for content_type in content_types_list %}
         <table class="objecttype">
-            <tr class="type-header"><td style='padding: 0;'><h2>{{content_type.content_type|get_verbose_name_plural}}</h2>
+            <tr class="type-header"><td class="header-cell"><h2>{{content_type.content_type|get_verbose_name_plural}}</h2>
                 {% for object in content_type.object_list %}
                     <div class="object">
-                        <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
-                        <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}View {{ content_type_name }}{% endblocktrans %}</a>&nbsp;&nbsp;
-                        {% if object.admin_url %}<a href='{{ object.admin_url }}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}Edit {{ content_type_name }}{% endblocktrans %}</a>{% endif %}
+                        <h3 class="header-report">{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
+                        <a class="header-link" href='{{object.object.get_absolute_url}}'>{% blocktrans with content_type_name=content_type.content_type.name %}View {{ content_type_name }}{% endblocktrans %}</a>&nbsp;&nbsp;
+                        {% if object.admin_url %}<a class="header-link" href='{{ object.admin_url }}'>{% blocktrans with content_type_name=content_type.content_type.name %}Edit {{ content_type_name }}{% endblocktrans %}</a>{% endif %}
                         <table class="links">
-                            <th style='width: 40%;'>{% translate "Destination" %}</th>
-                            <th style='width: 20%;'>{% translate "Linked Text" %}</th>
-                            <th style='width: 20%;'>{% translate "Field to edit" %}</th>
-                            <th style='width: 20%;'>{% translate "Status" %}</th>
+                            <th class="header-table-big">{% translate "Destination" %}</th>
+                            <th class="header-table-small">{% translate "Linked Text" %}</th>
+                            <th class="header-table-small">{% translate "Field to edit" %}</th>
+                            <th class="header-table-small">{% translate "Status" %}</th>
                             <th></th>
                             <th></th>
                             {% for link in object.link_list %}
@@ -151,7 +34,7 @@
                                     <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
                                     <td>{% if link.text == "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
                                     <td>{{link.field}}</td>
-                                    <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
+                                    <td class="link_message emphasis coloured-{{link.url.colour}}">{{link.url.message}}</td>
                                     <td class="actioncell">
                                         {% if not link.url.status %}
                                             <form class="recheck" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}recheck={{ link.id }}"><input type="submit" value="{% translate "Recheck" %}" /></form>

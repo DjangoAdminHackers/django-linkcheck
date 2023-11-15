@@ -1,5 +1,6 @@
 {% load i18n %}
-<div style="text-align: center">
+
+<div class="center-aligned">
     <span class="step-links">
         {% if pages.number > 1 %}
             <a href="?{{qry_data}}&page=1">&lt; First</a>
@@ -13,7 +14,7 @@
             &lt;&lt; {% translate "Previous" %}
         {% endif %}
 
-        <span class="current" style="margin: 0 25px;">
+        <span class="current">
             {% blocktrans with current=pages.number max=pages.paginator.num_pages %}Page {{ current }} of {{ max }}{% endblocktrans %}
         </span>
 
