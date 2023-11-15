@@ -5,6 +5,7 @@ Unreleased
 * Fix SSL status of unreachable domains (Timo Ludwig, #184)
 * Fix URL message for internal server errorrs (Timo Ludwig, #182)
 * Add support for Django 4.2
+* Add support for Python 3.12
 * Remove support for Django 4.0
 * Remove support for Python 3.7
 
