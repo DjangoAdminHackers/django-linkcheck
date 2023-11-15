@@ -3,12 +3,14 @@
 {% load i18n %}
 
 {% block title %}
-    {% translate "Link Checker" %} {{ block.super }}
+    {% translate "Link Checker" %}
 {% endblock %}
 
-{% block head %}
+{% block extrahead %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'linkcheck/css/styles.css' %}">
     <script src="{% static 'linkcheck/js/script.js' %}"></script>
+
 {% endblock %}
 
 {% block breadcrumbs %}

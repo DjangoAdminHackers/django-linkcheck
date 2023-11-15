@@ -4,15 +4,15 @@ function showProgressDots(numberOfDots) {
     switch(numberOfDots) {
         case 1:
             progress.innerHTML = '.&nbsp;&nbsp;';
-            timerHandle = setTimeout('showProgressDots(2)',200);
+            timerHandle = setTimeout(function() { showProgressDots(2); }, 200);
             break;
         case 2:
             progress.innerHTML = '..&nbsp;';
-            timerHandle = setTimeout('showProgressDots(3)',200);
+            timerHandle = setTimeout(function() { showProgressDots(3); }, 200);
             break;
         case 3:
             progress.innerHTML = '...';
-            timerHandle = setTimeout('showProgressDots(1)',200);
+            timerHandle = setTimeout(function() { showProgressDots(1); }, 200);
             break;
     }
 }
