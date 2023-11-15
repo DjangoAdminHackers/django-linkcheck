@@ -443,7 +443,7 @@ class ExternalCheckTestCase(LiveServerTestCase):
         for attr in [uv.message, uv.get_message, uv.error_message]:
             self.assertEqual(
                 attr,
-                'New Connection Error: Failed to establish a new connection: [Errno -2] Name or service not known',
+                "Name Resolution Error: Failed to resolve 'invalid' ([Errno -2] Name or service not known)",
             )
         self.assertEqual(uv.anchor_message, '')
         self.assertEqual(uv.ssl_status, None)

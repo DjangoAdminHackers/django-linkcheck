@@ -567,6 +567,9 @@ def format_connection_error(e):
     # If the underlying cause is a new connection error, provide additional formatting
     if reason.startswith("NewConnectionError"):
         return format_new_connection_error(reason)
+    # If the underlying cause is a name resolution error, provide additional formatting
+    if reason.startswith("NameResolutionError"):
+        return format_name_resolution_error(reason)
     # If the underlying cause is an SSL error, provide additional formatting
     if reason.startswith("SSLError"):
         return format_ssl_error(reason)
@@ -583,6 +586,19 @@ def format_new_connection_error(reason):
     )
     if connection_reason:
         return f"New Connection Error: {connection_reason[1]}"
+    return reason
+
+
+def format_name_resolution_error(reason):
+    """
+    Helper function to provide better readable output of name resolution errors thrown by urllib3
+    """
+    resolution_reason = re.search(
+        r"NameResolutionError\([\"']<urllib3\.connection\.HTTPSConnection object at 0x[0-9a-f]+>: (.+)[\"']\)",
+        reason,
+    )
+    if resolution_reason:
+        return f"Name Resolution Error: {resolution_reason[1]}"
     return reason
 
 
