@@ -3,7 +3,7 @@ import os.path
 import re
 from datetime import timedelta
 from http import HTTPStatus
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 import requests
 from django.conf import settings
@@ -230,13 +230,14 @@ class Url(models.Model):
         if self.internal:
             return None
 
-        # Remove URL fragment identifiers
-        external_url = self.url.rsplit('#')[0]
-        # Check that non-ascii chars are properly encoded
-        try:
-            external_url.encode('ascii')
-        except UnicodeEncodeError:
-            external_url = iri_to_uri(external_url)
+        # Encode path and query and remove anchor fragment
+        parsed = urlparse(self.url)
+        external_url = parsed._replace(
+            path=iri_to_uri(parsed.path),
+            query=iri_to_uri(parsed.query),
+            fragment=""
+        ).geturl()
+
         logger.debug('External URL: %s', external_url)
         return external_url
 
