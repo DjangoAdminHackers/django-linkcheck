@@ -1,5 +1,6 @@
 Unreleased
 
+* Fix encoding of utf-8 domain names (Timo Brembeck, #190)
 * Move coverage view to management command (Timo Brembeck, #187)
   * Add new management command `linkcheck_suggest_config`
   * Delete coverage view

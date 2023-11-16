@@ -484,6 +484,37 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
+    def test_external_check_200_utf8_domain(self):
+        uv = Url(url='https://bafög.de/')
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '302 Found')
+        self.assertEqual(uv.get_message, 'Working temporary redirect')
+        self.assertEqual(uv.error_message, '')
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, True)
+        self.assertEqual(uv.ssl_message, 'Valid SSL certificate')
+        self.assertEqual(uv.get_status_code_display(), '302 Found')
+        self.assertEqual(uv.get_redirect_status_code_display(), '200 OK')
+        self.assertEqual(uv.type, 'external')
+        # The actual redirect URL might be subject to change
+        self.assertNotEqual(uv.redirect_to, '')
+
+    def test_external_check_200_punycode_domain(self):
+        uv = Url(url='https://www.xn--jobbrse-stellenangebote-blc.de/')
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.get_message, 'Working external link')
+        self.assertEqual(uv.error_message, '')
+        self.assertEqual(uv.anchor_message, '')
+        self.assertEqual(uv.ssl_status, True)
+        self.assertEqual(uv.ssl_message, 'Valid SSL certificate')
+        self.assertEqual(uv.get_status_code_display(), '200 OK')
+        self.assertEqual(uv.get_redirect_status_code_display(), None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
     def test_external_check_301(self):
         uv = Url(url=f"{self.live_server_url}/http/301/")
         uv.check_url()
