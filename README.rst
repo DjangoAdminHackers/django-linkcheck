@@ -281,3 +281,14 @@ If you want to contribute translations for ``LOCALE``, run:
     django-admin makemessages --locale LOCALE
 
 and edit the corresponding file in ``linkcheck/locale/LOCALE/LC_MESSAGES/django.po``.
+
+Create new release
+~~~~~~~~~~~~~~~~~~
+
+1. Bump version in `pyproject.toml <./pyproject.toml>`_
+2. Update `CHANGELOG <./CHANGELOG>`_
+3. Create release commit: ``git commit --message "Release vX.Y.Z"``
+4. Create git tag: ``git tag -a "X.Y.Z" -m "Release vX.Y.Z"``
+5. Push the commit and tag to the repository: ``git push && git push --tags``
+6. Build the source distribution: ``python -m build``
+7. Publish the package to PyPI: ``twine upload dist/django-linkcheck-X.Y.Z*``
