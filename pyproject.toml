@@ -53,6 +53,7 @@ dev = [
     "flake8",
     "isort",
     "pre-commit",
+    "requests_mock",
 ]
 
 [tool.setuptools]
