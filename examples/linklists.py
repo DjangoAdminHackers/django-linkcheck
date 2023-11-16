@@ -9,4 +9,5 @@ class PageLinklist(Linklist):
     object_filter = {'active': True}
     html_fields = ['content', 'extra_content']
 
+
 linklists = {'Pages': PageLinklist}
