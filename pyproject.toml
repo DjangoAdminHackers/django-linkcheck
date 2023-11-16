@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "build_meta"
+backend-path = ["linkcheck"]
+
+[project]
+name = "django-linkcheck"
+version = "2.2.1"
+authors = [
+    {name = "Andy Baker",    email = "andy@andybak.net"},
+    {name = "Fruits Chen",   email = "fruitschen@gmail.com"},
+    {name = "Tim Graves",    email = "gravesit@gmail.com"},
+    {name = "Jannis Leidel", email = "jannis@leidel.info"},
+    {name = "Claude Paroz",  email = "claude@2xlibre.net"},
+    {name = "Timo Brembeck", email = "opensource@timo.brembeck.email"}
+]
+description = "A Django app that will analyze and report on links in any model that you register with it."
+readme = "README.rst"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+]
+license = {text = "BSD-3-Clause"}
+requires-python = ">=3.8"
+dependencies = [
+    "django>=3.2",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/DjangoAdminHackers/django-linkcheck"
+Issues = "https://github.com/DjangoAdminHackers/django-linkcheck/issues"
+Changelog = "https://github.com/DjangoAdminHackers/django-linkcheck/blob/master/CHANGELOG"
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "flake8",
+    "isort",
+    "pre-commit",
+]
+
+[tool.setuptools]
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["linkcheck*"]
