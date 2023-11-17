@@ -4,6 +4,7 @@ from io import StringIO
 from unittest.mock import patch
 
 import requests_mock
+import urllib3
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -349,6 +350,10 @@ class InternalMediaCheckTestCase(TestCase):
 
 @override_settings(SITE_DOMAIN='example.com')
 class ExternalCheckTestCase(LiveServerTestCase):
+
+    def setUp(self):
+        urllib3.disable_warnings()
+
     def test_external_check_200(self):
         uv = Url(url=f"{self.live_server_url}/http/200/")
         uv.check_url()
