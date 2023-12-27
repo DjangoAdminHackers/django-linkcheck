@@ -1,4 +1,4 @@
-Unreleased
+2.3.0 (2023-12-27)
 
 * Fix encoding of utf-8 domain names (Timo Brembeck, #190)
 * Move coverage view to management command (Timo Brembeck, #187)

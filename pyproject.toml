@@ -5,7 +5,7 @@ backend-path = ["linkcheck"]
 
 [project]
 name = "django-linkcheck"
-version = "2.2.1"
+version = "2.3.0"
 authors = [
     {name = "Andy Baker",    email = "andy@andybak.net"},
     {name = "Fruits Chen",   email = "fruitschen@gmail.com"},
