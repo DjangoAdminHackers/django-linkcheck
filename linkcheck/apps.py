@@ -23,7 +23,10 @@ class BaseLinkcheckConfig(AppConfig):
         """Autodiscovery of linkLists"""
         for app in apps.get_app_configs():
             module_name = f"{app.name}.linklists"
-            if not importlib.util.find_spec(module_name):
+            try:
+                if not importlib.util.find_spec(module_name):
+                    continue
+            except ModuleNotFoundError:
                 continue
             the_module = importlib.import_module(module_name)
             try:
