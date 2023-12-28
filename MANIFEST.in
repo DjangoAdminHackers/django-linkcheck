@@ -4,4 +4,5 @@ include README.rst
 include linkcheck/locale/*/LC_MESSAGES/django.mo
 exclude linkcheck/locale/*/LC_MESSAGES/django.po
 recursive-include linkcheck/templates/linkcheck *
+recursive-include linkcheck/static/linkcheck *
 recursive-include linkcheck/tests/media *

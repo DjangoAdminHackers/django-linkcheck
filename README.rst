@@ -13,7 +13,7 @@ django-linkcheck
 A fairly flexible app that will analyze and report on links in any model that
 you register with it.
 
-.. image:: https://github.com/DjangoAdminHackers/django-linkcheck/raw/master/linkcheck.jpg
+.. image:: examples/linkcheck.png
 
 Links can be bare (urls or image and file fields) or
 embedded in HTML (linkcheck handles the parsing). It's fairly easy to override
@@ -50,11 +50,16 @@ Basic usage
 
 #. Run ``./manage.py migrate``.
 
-#. Add to your root url config::
+#. Register linkcheck models in your admin::
 
-    path('admin/linkcheck/', include('linkcheck.urls'))
+    from django.contrib import admin
+    from linkcheck.models import Link, Url
+    from linkcheck.admin import LinkAdmin, UrlAdmin
 
-#. View ``/admin/linkcheck/`` from your browser.
+    admin.site.register(Url, UrlAdmin)
+    admin.site.register(Link, LinkAdmin)
+
+#. View ``/admin/linkcheck/url/`` from your browser.
 
 We are aware that this documentation is on the brief side of things so any
 suggestions for elaboration or clarification would be gratefully accepted.

@@ -1,0 +1,109 @@
+#result_list > tbody > tr > td, th {
+    max-width: 500px;
+}
+
+.nowrap {
+    white-space: unset;
+}
+
+.field-list_url {
+    overflow-wrap: anywhere;
+}
+
+.field-list_get_message > div,
+.field-list_text > div,
+.field-list_url > div {
+    max-height: 64px;
+    overflow: hidden;
+}
+
+.column-list_anchor_status,
+.column-list_links,
+.column-list_ssl_status,
+.column-list_status,
+.field-list_anchor_status,
+.field-list_links,
+.field-list_ssl_status,
+.field-list_status {
+    text-align: center;
+}
+
+.field-content_type,
+.field-list_content_object,
+.field-list_get_message,
+.field-list_text {
+    overflow-wrap: anywhere;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+.field-list_content_object > span {
+    display: inline-block;
+}
+
+.column-list_actions,
+.column-list_ignore,
+.field-list_actions,
+.field-list_ignore {
+    text-align: right;
+}
+
+.field-list_links {
+    padding: 5px;
+}
+
+.field-list_actions > a,
+.field-list_links > a {
+    background: #e3e3e3;
+    display: inline-block;
+    font-weight: bold;
+    padding: 3px 8px;
+    text-align: center;
+}
+
+.field-list_links > a {
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+}
+
+.field-list_actions > a {
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    border-radius: 15px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+    .field-list_links > a,
+    .field-list_actions > a {
+        background: #373737;
+    }
+}
+
+.linkcheck-icon {
+    display: inline-block;
+    vertical-align: middle;
+    width: 13px;
+    height: 13px;
+    -webkit-mask-size: contain;
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
+}
+
+.linkcheck-lock {
+    background: #70bf2b;
+    -webkit-mask-image: url(../img/lock.svg);
+    mask-image: url(../img/lock.svg);
+}
+
+.linkcheck-lock-open {
+    background: #dd4646;
+    -webkit-mask-image: url(../img/lock-open.svg);
+    mask-image: url(../img/lock-open.svg);
+}
