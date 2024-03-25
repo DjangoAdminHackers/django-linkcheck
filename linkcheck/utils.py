@@ -22,7 +22,7 @@ class LinkCheckHandler(ClientHandler):
     # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
-        self.ignore_keywords = ['reversion.middleware', 'MaintenanceModeMiddleware']
+        self.ignore_keywords = ['reversion.middleware', 'MaintenanceModeMiddleware', 'raven_compat']
         super().load_middleware()
         new_request_middleware = []
 
