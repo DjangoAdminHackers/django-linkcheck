@@ -131,54 +131,58 @@
         <br />
     </div>
 
-    {% for content_type in content_types_list %}
-        <table class="objecttype">
-            <tr class="type-header"><td style='padding: 0;'><h2>{{content_type.content_type|get_verbose_name_plural}}</h2>
-                {% for object in content_type.object_list %}
-                    <div class="object">
-                        <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
-                        <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}View {{ content_type_name }}{% endblocktrans %}</a>&nbsp;&nbsp;
-                        {% if object.admin_url %}<a href='{{ object.admin_url }}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}Edit {{ content_type_name }}{% endblocktrans %}</a>{% endif %}
-                        <table class="links">
-                            <th style='width: 40%;'>{% translate "Destination" %}</th>
-                            <th style='width: 20%;'>{% translate "Linked Text" %}</th>
-                            <th style='width: 20%;'>{% translate "Field to edit" %}</th>
-                            <th style='width: 20%;'>{% translate "Status" %}</th>
-                            <th></th>
-                            <th></th>
-                            {% for link in object.link_list %}
-                                <tr id="link{{ link.id }}">
-                                    <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
-                                    <td>{% if link.text == "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
-                                    <td>{{link.field}}</td>
-                                    <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
-                                    <td class="actioncell">
-                                        {% if not link.url.status %}
-                                            <form class="recheck" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}recheck={{ link.id }}"><input type="submit" value="{% translate "Recheck" %}" /></form>
-                                        {% endif %}
-                                    </td>
-                                    <td class="actioncell">
-                                        {% if not link.url.status %}
-                                            {% if link.url.external %}
-                                                {% if not link.ignore %}
-                                                    <form class="ignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}ignore={{ link.id }}"><input type="submit" value="{% translate "Ignore" %}" /></form>
-                                                {% else %}
-                                                    <form class="unignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}unignore={{ link.id }}"><input type="submit" value="{% translate "Unignore" %}" /></form>
+    {% if content_types_list %}
+        {% for content_type in content_types_list %}
+            <table class="objecttype">
+                <tr class="type-header"><td style='padding: 0;'><h2>{{content_type.content_type|get_verbose_name_plural}}</h2>
+                    {% for object in content_type.object_list %}
+                        <div class="object">
+                            <h3 style='display: inline; padding-left: 5px;'>{{report_type}} in '{{object.object}}'</h3>&nbsp;&nbsp;
+                            <a href='{{object.object.get_absolute_url}}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}View {{ content_type_name }}{% endblocktrans %}</a>&nbsp;&nbsp;
+                            {% if object.admin_url %}<a href='{{ object.admin_url }}' style="text-decoration: underline;">{% blocktrans with content_type_name=content_type.content_type.name %}Edit {{ content_type_name }}{% endblocktrans %}</a>{% endif %}
+                            <table class="links">
+                                <th style='width: 40%;'>{% translate "Destination" %}</th>
+                                <th style='width: 20%;'>{% translate "Linked Text" %}</th>
+                                <th style='width: 20%;'>{% translate "Field to edit" %}</th>
+                                <th style='width: 20%;'>{% translate "Status" %}</th>
+                                <th></th>
+                                <th></th>
+                                {% for link in object.link_list %}
+                                    <tr id="link{{ link.id }}">
+                                        <td><a href='{{link.url}}' target='_blank'>{{link.display_url}}</a></td>
+                                        <td>{% if link.text == "empty" %}none{% else %}"{{link.text}}"{% endif %}</td>
+                                        <td>{{link.field}}</td>
+                                        <td style='font-weight: bold; color: {{link.url.colour}};' class="link_message">{{link.url.message}}</td>
+                                        <td class="actioncell">
+                                            {% if not link.url.status %}
+                                                <form class="recheck" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}recheck={{ link.id }}"><input type="submit" value="{% translate "Recheck" %}" /></form>
+                                            {% endif %}
+                                        </td>
+                                        <td class="actioncell">
+                                            {% if not link.url.status %}
+                                                {% if link.url.external %}
+                                                    {% if not link.ignore %}
+                                                        <form class="ignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}ignore={{ link.id }}"><input type="submit" value="{% translate "Ignore" %}" /></form>
+                                                    {% else %}
+                                                        <form class="unignore" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% else %}{% endif %}unignore={{ link.id }}"><input type="submit" value="{% translate "Unignore" %}" /></form>
+                                                    {% endif %}
                                                 {% endif %}
                                             {% endif %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% if link.url.redirect_to %}
-                                    <tr><td colspan="6">R{% translate "Redirects to" %}: <a href="{{ link.url.redirect_to }}" target="_blank">{{ link.url.redirect_to }}</a></td></tr>
-                                {% endif %}
-                            {% endfor %}
-                        </table>
-                    </div>
-                {% endfor %}
-            </td></tr>
-        </table>
-    {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% if link.url.redirect_to %}
+                                        <tr><td colspan="6">R{% translate "Redirects to" %}: <a href="{{ link.url.redirect_to }}" target="_blank">{{ link.url.redirect_to }}</a></td></tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endfor %}
+                </td></tr>
+            </table>
+        {% endfor %}
+    {% else %}
+        <p>No results</p>
+    {% endif %}
     {% csrf_token %}
     {% if content_types_list %}
         {% include "linkcheck/paginator.html" %}
