@@ -898,7 +898,7 @@ class FindingLinksTestCase(TestCase):
             Here's a link: <a href="http://www.example.org">Example</a>,
             and an image: <img src="http://www.example.org/logo.png" alt="logo">""")
         self.assertEqual(Url.objects.all().count(), 2)
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             Url.objects.all().order_by('url'),
             ["http://www.example.org", "http://www.example.org/logo.png"],
             transform=lambda obj: obj.url

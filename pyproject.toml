@@ -31,15 +31,14 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Framework :: Django",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
 ]
 license = {text = "BSD-3-Clause"}
 requires-python = ">=3.8"
 dependencies = [
-    "django>=3.2",
+    "django>=4.2",
     "requests",
 ]
 
