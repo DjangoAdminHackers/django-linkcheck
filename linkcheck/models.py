@@ -525,6 +525,11 @@ class Link(models.Model):
     text = models.CharField(max_length=256, default='')
     ignore = models.BooleanField(default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"], name="content_type_and_object_id"),
+        ]
+
     @property
     def display_url(self):
         # when page /test/ has a anchor link to /test/#anchor, we display it
