@@ -10,8 +10,8 @@ jobs:
   flake8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
       - name: Install dependencies
         run: pip install flake8
       - name: Run flake8
@@ -19,8 +19,8 @@ jobs:
   isort:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
       - uses: jamescurtin/isort-action@master
         with:
             configuration: --multi-line=3 --trailing-comma --check-only
