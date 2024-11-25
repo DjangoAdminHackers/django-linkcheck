@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name='link',
-            index=models.Index(fields=['content_type', 'object_id'], name='linkcheck_l_content_32c54e_idx'),
+            index=models.Index(fields=['content_type', 'object_id'], name='content_type_and_object_id'),
         ),
     ]

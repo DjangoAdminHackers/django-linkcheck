@@ -527,7 +527,7 @@ class Link(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["content_type", "object_id"], name="content_type_and_object_id"),
         ]
 
     @property
