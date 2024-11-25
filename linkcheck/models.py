@@ -542,6 +542,11 @@ class Link(models.Model):
     def __repr__(self):
         return f"<Link (id: {self.id}, url: {self.url!r}, source: {self.content_object!r})>"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
 
 def link_post_delete(sender, instance, **kwargs):
     try:
