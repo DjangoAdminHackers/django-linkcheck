@@ -525,6 +525,11 @@ class Link(models.Model):
     text = models.CharField(max_length=256, default='')
     ignore = models.BooleanField(default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
     @property
     def display_url(self):
         # when page /test/ has a anchor link to /test/#anchor, we display it
@@ -541,11 +546,6 @@ class Link(models.Model):
 
     def __repr__(self):
         return f"<Link (id: {self.id}, url: {self.url!r}, source: {self.content_object!r})>"
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["content_type", "object_id"]),
-        ]
 
 
 def link_post_delete(sender, instance, **kwargs):
