@@ -59,7 +59,8 @@ def html_decode(s):
 
 STATUS_CODE_CHOICES = [(s.value, f'{s.value} {s.phrase}') for s in HTTPStatus]
 DEFAULT_USER_AGENT = f'{settings.SITE_DOMAIN} Linkchecker'
-FALLBACK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'
+FALLBACK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
+
 
 
 class Url(models.Model):
