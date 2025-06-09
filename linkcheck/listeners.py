@@ -22,7 +22,7 @@ tests_running = len(sys.argv) > 1 and sys.argv[1] == 'test' or sys.argv[0].endsw
 
 
 def linkcheck_worker(block=True):
-    global worker_running
+    global worker_running  # noqa
     while tasks_queue.not_empty:
         try:
             task = tasks_queue.get(block=block)
@@ -45,7 +45,7 @@ def linkcheck_worker(block=True):
 
 
 def start_worker():
-    global worker_running
+    global worker_running  # noqa
     if worker_running is False:
         worker_running = True
         t = Thread(target=linkcheck_worker)
@@ -70,7 +70,7 @@ def check_instance_links(sender, instance, **kwargs):
         # thread transaction to account for the object change (GH #41).
         # A candidate for the future post_commit signal.
 
-        global worker_running
+        global worker_running  # noqa
 
         if wait:
             time.sleep(0.1)
