@@ -311,7 +311,7 @@ class Url(models.Model):
         elif self.type == "file":
             # TODO: Assumes a direct mapping from media url to local filesystem path.
             # This will break quite easily for alternate setups
-            path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1 :]
+            path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1:]
             decoded_path = html_decode(path)
             self.status = os.path.exists(path) or os.path.exists(decoded_path)
             self.message = "Working file link" if self.status else "Missing Document"
