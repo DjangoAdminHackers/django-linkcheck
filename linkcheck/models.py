@@ -20,6 +20,7 @@ from requests.exceptions import ConnectionError, ReadTimeout
 
 try:
     from reversion.revisions import revision_context_manager
+
     USE_REVERSION = True
 except ImportError:
     USE_REVERSION = False
@@ -45,22 +46,17 @@ def html_decode(s):
     Returns the ASCII decoded version of the given HTML string. This does
     NOT remove normal HTML tags like <p>.
     """
-    html_codes = (
-            ("'", '&#39;'),
-            ('"', '&quot;'),
-            ('>', '&gt;'),
-            ('<', '&lt;'),
-            ('&', '&amp;')
-        )
+    html_codes = (("'", "&#39;"), ('"', "&quot;"), (">", "&gt;"), ("<", "&lt;"), ("&", "&amp;"))
     for code in html_codes:
         s = s.replace(code[1], code[0])
     return s
 
 
-STATUS_CODE_CHOICES = [(s.value, f'{s.value} {s.phrase}') for s in HTTPStatus]
-DEFAULT_USER_AGENT = f'{settings.SITE_DOMAIN} Linkchecker'
-FALLBACK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'
-
+STATUS_CODE_CHOICES = [(s.value, f"{s.value} {s.phrase}") for s in HTTPStatus]
+DEFAULT_USER_AGENT = f"{settings.SITE_DOMAIN} Linkchecker"
+FALLBACK_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+)
 
 
 class Url(models.Model):
@@ -68,6 +64,7 @@ class Url(models.Model):
     Represents a distinct URL found somewhere in the models registered with linkcheck
     A single Url can have multiple Links associated with it.
     """
+
     # See http://www.boutell.com/newfaq/misc/urllength.html
     url = models.CharField(max_length=MAX_URL_LENGTH, unique=True)
     last_checked = models.DateTimeField(blank=True, null=True)
@@ -77,7 +74,7 @@ class Url(models.Model):
     status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     redirect_status_code = models.IntegerField(choices=STATUS_CODE_CHOICES, null=True)
     message = models.CharField(max_length=1024, blank=True, null=True)
-    error_message = models.CharField(max_length=1024, default='', blank=True)
+    error_message = models.CharField(max_length=1024, default="", blank=True)
     redirect_to = models.TextField(blank=True)
 
     @property
@@ -87,90 +84,90 @@ class Url(models.Model):
     @property
     def type(self):
         if self.external:
-            return 'external'
-        if self.url.startswith('mailto:'):
-            return 'mailto'
-        if self.url.startswith('tel:'):
-            return 'phone'
-        elif self.internal_url == '':
-            return 'empty'
-        elif self.internal_url.startswith('#'):
-            return 'anchor'
+            return "external"
+        if self.url.startswith("mailto:"):
+            return "mailto"
+        if self.url.startswith("tel:"):
+            return "phone"
+        elif self.internal_url == "":
+            return "empty"
+        elif self.internal_url.startswith("#"):
+            return "anchor"
         elif self.internal_url.startswith(MEDIA_PREFIX):
-            return 'file'
-        elif self.internal_url.startswith('/'):
-            return 'internal'
+            return "file"
+        elif self.internal_url.startswith("/"):
+            return "internal"
         else:
-            return 'invalid'
+            return "invalid"
 
     @property
     def has_anchor(self):
-        return '#' in self.url
+        return "#" in self.url
 
     @property
     def anchor(self):
-        return self.url.split('#')[1] if self.has_anchor else None
+        return self.url.split("#")[1] if self.has_anchor else None
 
     @property
     def anchor_message(self):
         if not self.has_anchor or not self.last_checked:
-            return ''
-        if self.anchor == '':
-            return _('Working empty anchor')
+            return ""
+        if self.anchor == "":
+            return _("Working empty anchor")
         if self.anchor_status is None:
-            return _('Anchor could not be checked')
+            return _("Anchor could not be checked")
         elif self.anchor_status is False:
-            return _('Broken anchor')
-        return _('Working anchor')
+            return _("Broken anchor")
+        return _("Working anchor")
 
     @property
     def ssl_message(self):
         if self.internal:
-            return ''
-        if self.external_url.startswith('http://'):
-            return _('Insecure link')
+            return ""
+        if self.external_url.startswith("http://"):
+            return _("Insecure link")
         if self.ssl_status is None:
-            return _('SSL certificate could not be checked')
+            return _("SSL certificate could not be checked")
         elif self.ssl_status is False:
-            return _('Broken SSL certificate')
-        return _('Valid SSL certificate')
+            return _("Broken SSL certificate")
+        return _("Valid SSL certificate")
 
     @property
     def get_message(self):
         if not self.last_checked and self.status is None:
-            return _('URL Not Yet Checked')
-        elif self.type == 'empty':
-            return _('Empty link')
-        elif self.type == 'invalid':
-            return _('Invalid URL')
-        elif self.type == 'mailto':
-            return '{} ({})'.format(_("Email link"), _("not automatically checked"))
-        elif self.type == 'phone':
-            return '{} ({})'.format(_("Phone number link"), _("not automatically checked"))
-        elif self.type == 'anchor':
-            return '{} ({})'.format(_("Anchor link"), _("not automatically checked"))
-        elif self.type == 'file':
-            return _('Working file link') if self.status else _('Missing file')
+            return _("URL Not Yet Checked")
+        elif self.type == "empty":
+            return _("Empty link")
+        elif self.type == "invalid":
+            return _("Invalid URL")
+        elif self.type == "mailto":
+            return "{} ({})".format(_("Email link"), _("not automatically checked"))
+        elif self.type == "phone":
+            return "{} ({})".format(_("Phone number link"), _("not automatically checked"))
+        elif self.type == "anchor":
+            return "{} ({})".format(_("Anchor link"), _("not automatically checked"))
+        elif self.type == "file":
+            return _("Working file link") if self.status else _("Missing file")
         elif not self.status_code:
             return self.error_message
         elif self.status_code < 300:
-            return _('Working external link') if self.external else _('Working internal link')
+            return _("Working external link") if self.external else _("Working internal link")
         elif self.status_code < 400:
             permanent = self.status_code in [HTTPStatus.MOVED_PERMANENTLY, HTTPStatus.PERMANENT_REDIRECT]
             if self.redirect_ok:
-                return _('Working permanent redirect') if permanent else _('Working temporary redirect')
+                return _("Working permanent redirect") if permanent else _("Working temporary redirect")
             else:
-                return _('Broken permanent redirect') if permanent else _('Broken temporary redirect')
-        return _('Broken external link') if self.external else _('Broken internal link')
+                return _("Broken permanent redirect") if permanent else _("Broken temporary redirect")
+        return _("Broken external link") if self.external else _("Broken internal link")
 
     @property
     def colour(self):
         if not self.last_checked:
-            return 'blue'
+            return "blue"
         elif self.status is True:
-            return 'green'
+            return "green"
         else:
-            return 'red'
+            return "red"
 
     def __str__(self):
         return self.url
@@ -199,25 +196,25 @@ class Url(models.Model):
         internal_exceptions = []
         if SITE_DOMAINS:  # If the setting is present
             internal_exceptions = SITE_DOMAINS
-        elif getattr(settings, 'SITE_DOMAIN', None):  # try using SITE_DOMAIN
+        elif getattr(settings, "SITE_DOMAIN", None):  # try using SITE_DOMAIN
             root_domain = settings.SITE_DOMAIN
-            if root_domain.startswith('www.'):
+            if root_domain.startswith("www."):
                 root_domain = root_domain[4:]
-            elif root_domain.startswith('test.'):
+            elif root_domain.startswith("test."):
                 root_domain = root_domain[5:]
             internal_exceptions = [
-                f'{protocol}://{sub}{root_domain}' for sub in ['', 'www.', 'test.'] for protocol in ['http', 'https']
+                f"{protocol}://{sub}{root_domain}" for sub in ["", "www.", "test."] for protocol in ["http", "https"]
             ]
 
         for ex in internal_exceptions:
             if ex and prepared_url.startswith(ex):
-                prepared_url = prepared_url.replace(ex, '', 1)
+                prepared_url = prepared_url.replace(ex, "", 1)
 
         # If the URL is still external, return `None`
         if EXTERNAL_REGEX.match(prepared_url):
             return None
 
-        logger.debug('Internal URL: %s', prepared_url)
+        logger.debug("Internal URL: %s", prepared_url)
         return prepared_url
 
     @cached_property
@@ -234,12 +231,10 @@ class Url(models.Model):
         # Encode path and query and remove anchor fragment
         parsed = urlparse(self.url)
         external_url = parsed._replace(
-            path=iri_to_uri(parsed.path),
-            query=iri_to_uri(parsed.query),
-            fragment=""
+            path=iri_to_uri(parsed.path), query=iri_to_uri(parsed.query), fragment=""
         ).geturl()
 
-        logger.debug('External URL: %s', external_url)
+        logger.debug("External URL: %s", external_url)
         return external_url
 
     @property
@@ -267,8 +262,8 @@ class Url(models.Model):
         self.status_code = None
         self.redirect_status_code = None
         self.ssl_status = None
-        self.error_message = ''
-        self.message = ''
+        self.error_message = ""
+        self.message = ""
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -290,52 +285,52 @@ class Url(models.Model):
         Check an internal URL
         """
         if not self.internal:
-            logger.info('URL %r is not internal', self)
+            logger.info("URL %r is not internal", self)
             return None
 
-        logger.debug('checking internal link: %s', self.internal_url)
+        logger.debug("checking internal link: %s", self.internal_url)
 
         # Reset all fields in case they were already set
         self.reset_for_check()
 
         from linkcheck.utils import LinkCheckHandler
 
-        if self.type == 'empty':
+        if self.type == "empty":
             self.status = False
-            self.message = 'Empty link'
+            self.message = "Empty link"
 
-        elif self.type == 'mailto':
-            self.message = 'Email link (not automatically checked)'
+        elif self.type == "mailto":
+            self.message = "Email link (not automatically checked)"
 
-        elif self.type == 'phone':
-            self.message = 'Phone number (not automatically checked)'
+        elif self.type == "phone":
+            self.message = "Phone number (not automatically checked)"
 
-        elif self.type == 'anchor':
-            self.message = 'Link to within the same page (not automatically checked)'
+        elif self.type == "anchor":
+            self.message = "Link to within the same page (not automatically checked)"
 
-        elif self.type == 'file':
+        elif self.type == "file":
             # TODO: Assumes a direct mapping from media url to local filesystem path.
             # This will break quite easily for alternate setups
-            path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1:]
+            path = settings.MEDIA_ROOT + unquote(self.internal_url)[len(MEDIA_PREFIX) - 1 :]
             decoded_path = html_decode(path)
             self.status = os.path.exists(path) or os.path.exists(decoded_path)
-            self.message = 'Working file link' if self.status else 'Missing Document'
+            self.message = "Working file link" if self.status else "Missing Document"
 
-        elif self.type == 'internal':
+        elif self.type == "internal":
             old_prepend_setting = settings.PREPEND_WWW
             settings.PREPEND_WWW = False
             c = Client()
             c.handler = LinkCheckHandler()
-            with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
+            with modify_settings(ALLOWED_HOSTS={"append": "testserver"}):
                 response = c.get(self.internal_url)
             self.status_code = response.status_code
             if response.status_code < 300:
-                self.message = 'Working internal link'
+                self.message = "Working internal link"
                 self.status = True
             elif response.status_code < 400:
-                initial_location = response.get('Location')
+                initial_location = response.get("Location")
                 redirect_type = "permanent" if response.status_code == 301 else "temporary"
-                with modify_settings(ALLOWED_HOSTS={'append': 'testserver'}):
+                with modify_settings(ALLOWED_HOSTS={"append": "testserver"}):
                     response = c.get(self.internal_url, follow=True)
                 if response.redirect_chain:
                     self.redirect_to, _ = response.redirect_chain[-1]
@@ -344,10 +339,10 @@ class Url(models.Model):
                 self.redirect_status_code = response.status_code
                 self.status = response.status_code < 300
                 redirect_result = "Working" if self.status else "Broken"
-                self.message = f'{redirect_result} {redirect_type} redirect'
+                self.message = f"{redirect_result} {redirect_type} redirect"
             else:
                 self.status = False
-                self.message = 'Broken internal link'
+                self.message = "Broken internal link"
 
             # Check the anchor (if it exists)
             self.check_anchor(response.content)
@@ -355,7 +350,7 @@ class Url(models.Model):
             settings.PREPEND_WWW = old_prepend_setting
         else:
             self.status = False
-            self.message = 'Invalid URL'
+            self.message = "Invalid URL"
 
         if USE_REVERSION:
             # using test client will clear the RevisionContextManager stack.
@@ -370,16 +365,15 @@ class Url(models.Model):
         Check an external URL
         """
         if not self.external:
-            logger.info('URL %r is not external', self)
+            logger.info("URL %r is not external", self)
             return None
 
-        logger.info('checking external link: %s', self.url)
+        logger.info("checking external link: %s", self.url)
         external_recheck_datetime = now() - timedelta(minutes=external_recheck_interval)
 
         if self.last_checked and (self.last_checked > external_recheck_datetime):
             logger.debug(
-                'URL was last checked in the last %s minutes, so not checking it again',
-                external_recheck_interval
+                "URL was last checked in the last %s minutes, so not checking it again", external_recheck_interval
             )
             return self.status
 
@@ -387,10 +381,10 @@ class Url(models.Model):
         self.reset_for_check()
 
         request_params = {
-            'allow_redirects': True,
-            'headers': {'User-Agent': DEFAULT_USER_AGENT},
-            'timeout': LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
-            'verify': True,
+            "allow_redirects": True,
+            "headers": {"User-Agent": DEFAULT_USER_AGENT},
+            "timeout": LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
+            "verify": True,
         }
         try:
             try:
@@ -398,60 +392,60 @@ class Url(models.Model):
                 fetch = requests.head
                 response = fetch(self.external_url, **request_params)
                 # If no exceptions occur, the SSL certificate is valid
-                if self.external_url.startswith('https://'):
+                if self.external_url.startswith("https://"):
                     self.ssl_status = True
             except ConnectionError as e:
                 # This error could also be caused by an incomplete root certificate bundle,
                 # so let's retry without verifying the certificate
                 if "unable to get local issuer certificate" in str(e):
-                    request_params['verify'] = False
+                    request_params["verify"] = False
                     response = fetch(self.external_url, **request_params)
                 else:
                     # Re-raise exception if it's definitely not a false positive
                     raise
             # If HEAD is not allowed, let's try with GET
             if response.status_code in [HTTPStatus.BAD_REQUEST, HTTPStatus.METHOD_NOT_ALLOWED]:
-                logger.debug('HEAD is not allowed, retry with GET')
+                logger.debug("HEAD is not allowed, retry with GET")
                 fetch = requests.get
                 response = fetch(self.external_url, **request_params)
             # If access is denied, possibly the user agent is blocked
             if response.status_code == HTTPStatus.FORBIDDEN:
-                logger.debug('Forbidden, retry with different user agent')
-                request_params['headers'] = {'User-Agent': FALLBACK_USER_AGENT}
+                logger.debug("Forbidden, retry with different user agent")
+                request_params["headers"] = {"User-Agent": FALLBACK_USER_AGENT}
                 response = fetch(self.external_url, **request_params)
             # If URL contains hash anchor and is a valid HTML document, let's repeat with GET
             elif (
-                self.has_anchor and
-                response.ok and
-                fetch == requests.head and
-                'text/html' in response.headers.get('content-type')
+                self.has_anchor
+                and response.ok
+                and fetch == requests.head
+                and "text/html" in response.headers.get("content-type")
             ):
-                logger.debug('Retrieve content for anchor check')
+                logger.debug("Retrieve content for anchor check")
                 fetch = requests.get
                 response = fetch(self.external_url, **request_params)
         except ReadTimeout:
             self.status = False
-            self.message = 'Other Error: The read operation timed out'
-            self.error_message = 'The read operation timed out'
+            self.message = "Other Error: The read operation timed out"
+            self.error_message = "The read operation timed out"
         except ConnectionError as e:
             self.status = False
             self.message = self.error_message = format_connection_error(e)
-            if 'SSLError' in str(e):
+            if "SSLError" in str(e):
                 self.ssl_status = False
         except Exception as e:
             self.status = False
-            self.message = f'Other Error: {e}'
+            self.message = f"Other Error: {e}"
             self.error_message = str(e)
         else:
             self.status = response.status_code < 300
             self.message = f"{response.status_code} {response.reason}"
-            logger.debug('Response message: %s', self.message)
+            logger.debug("Response message: %s", self.message)
 
             # If initial response was a redirect, return the initial return code
             if response.history:
-                logger.debug('Redirect history: %r', response.history)
+                logger.debug("Redirect history: %r", response.history)
                 if response.ok:
-                    self.message = f'{response.history[0].status_code} {response.history[0].reason}'
+                    self.message = f"{response.history[0].status_code} {response.history[0].reason}"
                 self.redirect_to = response.url
                 self.redirect_status_code = response.status_code
                 self.status_code = response.history[0].status_code
@@ -461,16 +455,12 @@ class Url(models.Model):
             # Check the anchor (if it exists)
             if fetch == requests.get:
                 self.check_anchor(response.text)
-            if not request_params['verify']:
-                self.message += ', SSL certificate could not be verified'
+            if not request_params["verify"]:
+                self.message += ", SSL certificate could not be verified"
 
         # When a rate limit was hit or the server returned an internal error, do not update
         # the last_checked date so the result is not cached for EXTERNAL_RECHECK_INTERVAL minutes
-        if (
-            not self.status_code or
-            self.status_code != HTTPStatus.TOO_MANY_REQUESTS and
-            self.status_code < 500
-        ):
+        if not self.status_code or self.status_code != HTTPStatus.TOO_MANY_REQUESTS and self.status_code < 500:
             self.last_checked = now()
         self.save()
         return self.status
@@ -485,27 +475,23 @@ class Url(models.Model):
             # Empty fragment '#' is always valid
             if not self.anchor:
                 self.anchor_status = True
-                self.message += f', working {scope} hash anchor'
+                self.message += f", working {scope} hash anchor"
             else:
                 try:
                     names = parse_anchors(html)
                 # Known possible errors include: AssertionError, NotImplementedError, UnicodeDecodeError
                 except Exception as e:
-                    logger.debug(
-                        '%s while parsing anchors: %s',
-                        type(e).__name__,
-                        e
-                    )
-                    self.message += ', failed to parse HTML for anchor'
+                    logger.debug("%s while parsing anchors: %s", type(e).__name__, e)
+                    self.message += ", failed to parse HTML for anchor"
                     if not TOLERATE_BROKEN_ANCHOR:
                         self.status = False
                 else:
                     if self.anchor in names:
                         self.anchor_status = True
-                        self.message += f', working {scope} hash anchor'
+                        self.message += f", working {scope} hash anchor"
                     else:
                         self.anchor_status = False
-                        self.message += f', broken {scope} hash anchor'
+                        self.message += f", broken {scope} hash anchor"
                         if not TOLERATE_BROKEN_ANCHOR:
                             self.status = False
         return self.anchor_status, self.anchor_message
@@ -518,12 +504,13 @@ class Link(models.Model):
     Such as a HTML or Rich Text field.
     Multiple Links can reference a single Url
     """
+
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
     field = models.CharField(max_length=128)
     url = models.ForeignKey(Url, related_name="links", on_delete=models.CASCADE)
-    text = models.CharField(max_length=256, default='')
+    text = models.CharField(max_length=256, default="")
     ignore = models.BooleanField(default=False)
 
     class Meta:
@@ -535,11 +522,11 @@ class Link(models.Model):
     def display_url(self):
         # when page /test/ has a anchor link to /test/#anchor, we display it
         # as "#anchor" rather than "/test/#anchor"
-        if self.url.url.count('#') and hasattr(self.content_object, 'get_absolute_url'):
-            url_part, anchor_part = self.url.url.split('#')
+        if self.url.url.count("#") and hasattr(self.content_object, "get_absolute_url"):
+            url_part, anchor_part = self.url.url.split("#")
             absolute_url = self.content_object.get_absolute_url()
             if url_part == absolute_url:
-                return '#' + anchor_part
+                return "#" + anchor_part
         return self.url.url
 
     def __str__(self):
@@ -556,7 +543,7 @@ def link_post_delete(sender, instance, **kwargs):
         url = instance.url
         count = url.links.all().count()
         if count == 0:
-            logger.debug('This was the last link for %r, so deleting it', url)
+            logger.debug("This was the last link for %r, so deleting it", url)
             url.delete()
     except Url.DoesNotExist:
         pass
