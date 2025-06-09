@@ -18,11 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class LinkCheckHandler(ClientHandler):
-
     # Customize the ClientHandler to allow us removing some middlewares
 
     def load_middleware(self):
-        self.ignore_keywords = ['reversion.middleware', 'MaintenanceModeMiddleware', 'raven_compat']
+        self.ignore_keywords = ["reversion.middleware", "MaintenanceModeMiddleware", "raven_compat"]
         super().load_middleware()
         new_request_middleware = []
 
@@ -122,7 +121,6 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
 
 
 def update_urls(urls, content_type, object_id):
-
     # Structure of urls param is [(field, link text, url), ... ]
 
     urls_created = links_created = 0
@@ -130,14 +128,13 @@ def update_urls(urls, content_type, object_id):
     new_link_ids = set()
 
     for field, link_text, url in urls:
-
-        if url is not None and url.startswith('#'):
+        if url is not None and url.startswith("#"):
             instance = content_type.get_object_for_this_type(id=object_id)
             url = instance.get_absolute_url() + url
 
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
-            logger.warning('URL exceeding max length will be skipped: %s', url)
+            logger.warning("URL exceeding max length will be skipped: %s", url)
             continue
 
         url, url_created = Url.objects.get_or_create(url=url)
@@ -171,9 +168,8 @@ def update_urls(urls, content_type, object_id):
 
 
 def find_all_links(linklists=None):
-
     if linklists is None:
-        linklists = apps.get_app_config('linkcheck').all_linklists
+        linklists = apps.get_app_config("linkcheck").all_linklists
 
     urls_created = links_created = 0
     new_url_ids = set()
@@ -183,13 +179,12 @@ def find_all_links(linklists=None):
     links_before = Link.objects.count()
 
     for linklist_name, linklist_cls in linklists.items():
-
         content_type = linklist_cls.content_type()
         linklists = linklist_cls().get_linklist()
 
         for linklist in linklists:
-            object_id = linklist['object'].id
-            urls = linklist['urls'] + linklist['images']
+            object_id = linklist["object"].id
+            urls = linklist["urls"] + linklist["images"]
             if urls:
                 new = update_urls(urls, content_type, object_id)
 
@@ -227,6 +222,7 @@ def unignore():
 
 # Utilities for testing models coverage
 
+
 def is_interesting_field(field):
     return is_url_field(field) or is_image_field(field) or is_html_field(field)
 
@@ -244,68 +240,63 @@ def is_html_field(field):
 
 
 def has_active_field(klass):
-    return any(
-        field.name == 'active' and isinstance(field, models.BooleanField)
-        for field in klass._meta.fields
-    )
+    return any(field.name == "active" and isinstance(field, models.BooleanField) for field in klass._meta.fields)
 
 
 def get_ignore_empty_fields(klass):
-    return [
-        field
-        for field in klass._meta.fields
-        if is_interesting_field(field) and (field.blank or field.null)
-    ]
+    return [field for field in klass._meta.fields if is_interesting_field(field) and (field.blank or field.null)]
 
 
 def get_type_fields(klass, the_type):
     check_funcs = {
-        'html': is_html_field,
-        'url': is_url_field,
-        'image': is_image_field,
+        "html": is_html_field,
+        "url": is_url_field,
+        "image": is_image_field,
     }
     check_func = check_funcs[the_type]
     return [field for field in klass._meta.fields if check_func(field)]
 
 
 def is_model_covered(klass):
-    app = apps.get_app_config('linkcheck')
+    app = apps.get_app_config("linkcheck")
     return any(linklist[1].model == klass for linklist in app.all_linklists.items())
 
 
 def format_config(meta, active_field, html_fields, image_fields, url_fields, ignore_empty_fields):
-    config = f'from { meta.app_label }.models import { meta.object_name }\n\n'
-    config += f'class { meta.object_name }Linklist(Linklist):\n'
-    config += f'    model = { meta.object_name }\n'
+    config = f"from {meta.app_label}.models import {meta.object_name}\n\n"
+    config += f"class {meta.object_name}Linklist(Linklist):\n"
+    config += f"    model = {meta.object_name}\n"
     if html_fields:
-        config += f'    html_fields = [{", ".join(map(str, html_fields))}]\n'
+        config += f"    html_fields = [{', '.join(map(str, html_fields))}]\n"
     if image_fields:
-        config += f'    image_fields = [{", ".join(map(str, image_fields))}]\n'
+        config += f"    image_fields = [{', '.join(map(str, image_fields))}]\n"
     if url_fields:
-        config += f'    url_fields = [{", ".join(map(str, url_fields))}]\n'
+        config += f"    url_fields = [{', '.join(map(str, url_fields))}]\n"
     if ignore_empty_fields:
-        config += f'    ignore_empty = [{", ".join(map(str, ignore_empty_fields))}]\n'
+        config += f"    ignore_empty = [{', '.join(map(str, ignore_empty_fields))}]\n"
     if active_field:
         config += '    object_filter = {"active": True}\n'
-    config += f'\nlinklists = {{\n    "{ meta.object_name }": { meta.object_name }Linklist,\n}}\n'
+    config += f'\nlinklists = {{\n    "{meta.object_name}": {meta.object_name}Linklist,\n}}\n'
     return config
 
 
 def get_suggested_linklist_config(klass):
     meta = klass._meta
-    html_fields = get_type_fields(klass, 'html')
-    url_fields = get_type_fields(klass, 'url')
-    image_fields = get_type_fields(klass, 'image')
+    html_fields = get_type_fields(klass, "html")
+    url_fields = get_type_fields(klass, "url")
+    image_fields = get_type_fields(klass, "image")
     active_field = has_active_field(klass)
     ignore_empty_fields = get_ignore_empty_fields(klass)
-    return format_config(**{
-        'meta': meta,
-        'html_fields': html_fields,
-        'url_fields': url_fields,
-        'image_fields': image_fields,
-        'active_field': active_field,
-        'ignore_empty_fields': ignore_empty_fields,
-    })
+    return format_config(
+        **{
+            "meta": meta,
+            "html_fields": html_fields,
+            "url_fields": url_fields,
+            "image_fields": image_fields,
+            "active_field": active_field,
+            "ignore_empty_fields": ignore_empty_fields,
+        }
+    )
 
 
 def get_coverage_data():
@@ -318,7 +309,7 @@ def get_coverage_data():
     for app in apps.get_app_configs():
         for model in app.get_models():
             should_append = False
-            if getattr(model, 'get_absolute_url', None):
+            if getattr(model, "get_absolute_url", None):
                 should_append = True
             else:
                 for field in model._meta.fields:
@@ -327,11 +318,13 @@ def get_coverage_data():
                         break
             if should_append:
                 if is_model_covered(model):
-                    covered.append(f'{model._meta.app_label}.{model._meta.object_name}')
+                    covered.append(f"{model._meta.app_label}.{model._meta.object_name}")
                 else:
-                    uncovered.append((
-                        f'{model._meta.app_label}.{model._meta.object_name}',
-                        get_suggested_linklist_config(model),
-                    ))
+                    uncovered.append(
+                        (
+                            f"{model._meta.app_label}.{model._meta.object_name}",
+                            get_suggested_linklist_config(model),
+                        )
+                    )
 
     return covered, uncovered
