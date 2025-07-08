@@ -31,6 +31,7 @@ from .linkcheck_settings import (
     LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
     MAX_URL_LENGTH,
     MEDIA_PREFIX,
+    PROXIES,
     SITE_DOMAINS,
     TOLERATE_BROKEN_ANCHOR,
 )
@@ -386,6 +387,9 @@ class Url(models.Model):
             "timeout": LINKCHECK_CONNECTION_ATTEMPT_TIMEOUT,
             "verify": True,
         }
+        if PROXIES:
+            request_params["proxies"] = PROXIES
+
         try:
             try:
                 # At first try a HEAD request
