@@ -183,7 +183,7 @@ def find_all_links(linklists=None):
         linklists = linklist_cls().get_linklist()
 
         for linklist in linklists:
-            object_id = linklist["object"].id
+            object_id = linklist["object"].pk
             urls = linklist["urls"] + linklist["images"]
             if urls:
                 new = update_urls(urls, content_type, object_id)
