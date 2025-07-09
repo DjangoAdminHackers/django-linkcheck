@@ -34,6 +34,7 @@ from .linkcheck_settings import (
     PROXIES,
     SITE_DOMAINS,
     TOLERATE_BROKEN_ANCHOR,
+    TRUST_PROXY_SSL,
 )
 
 logger = logging.getLogger(__name__)
@@ -388,6 +389,7 @@ class Url(models.Model):
             "verify": True,
         }
         if PROXIES:
+            request_params["verify"] = not TRUST_PROXY_SSL
             request_params["proxies"] = PROXIES
 
         try:
