@@ -672,7 +672,10 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
 
-    @patch('linkcheck.models.PROXIES', {'http': 'http://proxy.example.com:8080'})
+    @patch(
+        'linkcheck.models.PROXIES',
+        {'http': 'http://proxy.example.com:8080'},
+    )
     @patch('requests.head')
     def test_external_proxy_request(self, mock_head):
         mock_response = Mock()
@@ -689,7 +692,10 @@ class ExternalCheckTestCase(LiveServerTestCase):
         mock_head.assert_called_once()
         (call_url,), call_kwargs = mock_head.call_args
         self.assertEqual(call_url, request_url)
-        self.assertEqual(call_kwargs.get('proxies'), {'http': 'http://proxy.example.com:8080'})
+        self.assertEqual(
+            call_kwargs.get('proxies'),
+            {'http': 'http://proxy.example.com:8080'},
+        )
 
     def test_external_check_timedout(self):
         uv = Url(url=f"{self.live_server_url}/timeout/")
