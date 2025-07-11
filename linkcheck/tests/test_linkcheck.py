@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import requests_mock
 import urllib3
@@ -672,6 +672,25 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.get_redirect_status_code_display(), None)
         self.assertEqual(uv.redirect_to, '')
         self.assertEqual(uv.type, 'external')
+
+    @patch('linkcheck.models.PROXIES', {'http': 'http://proxy.example.com:8080'})
+    @patch('requests.head')
+    def test_external_proxy_request(self, mock_head):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.reason = 'OK'
+        mock_response.history = []
+        mock_head.return_value = mock_response
+        request_url = 'http://test.com'
+        uv = Url(url=request_url)
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.type, 'external')
+        mock_head.assert_called_once()
+        (call_url,), call_kwargs = mock_head.call_args
+        self.assertEqual(call_url, request_url)
+        self.assertEqual(call_kwargs.get('proxies'), {'http': 'http://proxy.example.com:8080'})
 
     def test_external_check_timedout(self):
         uv = Url(url=f"{self.live_server_url}/timeout/")
