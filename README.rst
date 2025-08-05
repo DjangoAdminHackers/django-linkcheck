@@ -33,7 +33,9 @@ Basic usage
 -----------
 
 #. Install app to somewhere on your Python path (e.g. ``pip install
-   django-linkcheck``).
+   django-linkcheck``). If you do not need multilingual support, you can skip
+   the compilation of the translation files with an environment variable, e.g.
+   (``LINKCHECK_SKIP_TRANSLATIONS=true pip install django-linkcheck``).
 
 #. Add ``'linkcheck'`` to your ``settings.INSTALLED_APPS``.
 
