@@ -27,7 +27,7 @@ from linkcheck.listeners import (
     unregister_listeners,
 )
 from linkcheck.models import Link, Url
-from linkcheck.utils import check_links
+from linkcheck.utils import check_links, concurrent_check_links
 from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book, Journal, Page
@@ -1208,8 +1208,10 @@ class FilterCallableTestCase(TestCase):
 
 class TestCheckLinks(TestCase):
 
-    @requests_mock.Mocker()
-    def test_check_links(self, mocker):
+    def _setup_mock_urls(self, mocker):
+        """
+        Set up common mock URLs for link checking tests.
+        """
         good_url = 'https://example.com/good'
         mocker.register_uri('HEAD', good_url, status_code=HTTPStatus.OK, reason='OK')
         Url.objects.create(url=good_url)
@@ -1224,13 +1226,40 @@ class TestCheckLinks(TestCase):
 
         recently_checked_url = 'https://example.com/recent'
         # Shouldn't be requested
-        Url.objects.create(url=recently_checked_url, last_checked=timezone.now() - timedelta(days=1))
+        Url.objects.create(url=recently_checked_url, status=None, last_checked=timezone.now() - timedelta(days=1))
+
+        return (good_url, bad_url, exception_url, recently_checked_url)
+
+    @requests_mock.Mocker()
+    def test_check_links(self, mocker):
+        good_url, bad_url, exception_url, recently_checked_url = self._setup_mock_urls(mocker)
 
         self.assertEqual(check_links(), 3)
         self.assertEqual(Url.objects.get(url=good_url).status, True)
         self.assertEqual(Url.objects.get(url=bad_url).status, False)
         self.assertEqual(Url.objects.get(url=exception_url).status, False)
         self.assertEqual(Url.objects.get(url=recently_checked_url).status, None)
+
+    @requests_mock.Mocker()
+    def test_concurrent_check_links(self, mocker):
+        self._setup_mock_urls(mocker)
+
+        # Since the tests are running in sqlite, we can't insert data via our threaded code
+        # there's enough other test coverage that we can use `Url.save` as a proxy
+        with patch.object(Url, "save") as patched_save:
+            self.assertEqual(concurrent_check_links(), 3)
+            self.assertEqual(patched_save.call_count, 3)
+
+    def test_concurrent_check_links_error_handling(self):
+        Url.objects.create(url='https://example.com/good')
+        with (
+            patch("linkcheck.utils.logger.exception") as patched_logged_exception,
+            patch.object(Url, "check_external", side_effect=ValueError("oops")),
+        ):
+            self.assertEqual(concurrent_check_links(), 0)
+            self.assertEqual(patched_logged_exception.call_count, 1)
+            msg, *args = patched_logged_exception.call_args[0]
+            self.assertEqual(msg % tuple(args), "ValueError while checking https://example.com/good: oops")
 
 
 def get_command_output(command, *args, **kwargs):
