@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from http import HTTPStatus
 from io import StringIO
 from unittest.mock import patch
 
@@ -13,6 +14,7 @@ from django.core.management.base import CommandError
 from django.test import LiveServerTestCase, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from requests.exceptions import ConnectionError
 
 from linkcheck.linkcheck_settings import MAX_URL_LENGTH
@@ -25,6 +27,7 @@ from linkcheck.listeners import (
     unregister_listeners,
 )
 from linkcheck.models import Link, Url
+from linkcheck.utils import check_links
 from linkcheck.views import get_jquery_min_js
 
 from .sampleapp.models import Author, Book, Journal, Page
@@ -1201,6 +1204,33 @@ class FilterCallableTestCase(TestCase):
             "Urls: 1 created, 0 deleted, 0 unchanged\n"
             "Links: 1 created, 0 deleted, 0 unchanged\n"
         )
+
+
+class TestCheckLinks(TestCase):
+
+    @requests_mock.Mocker()
+    def test_check_links(self, mocker):
+        good_url = 'https://example.com/good'
+        mocker.register_uri('HEAD', good_url, status_code=HTTPStatus.OK, reason='OK')
+        Url.objects.create(url=good_url)
+
+        bad_url = 'https://example.com/bad'
+        mocker.register_uri('HEAD', bad_url, status_code=HTTPStatus.NOT_FOUND, reason='NOT FOUND')
+        Url.objects.create(url=bad_url)
+
+        exception_url = 'https://example.com/exception'
+        mocker.register_uri('HEAD', exception_url, exc=ConnectionError("Something went wrong"))
+        Url.objects.create(url=exception_url)
+
+        recently_checked_url = 'https://example.com/recent'
+        # Shouldn't be requested
+        Url.objects.create(url=recently_checked_url, last_checked=timezone.now() - timedelta(days=1))
+
+        self.assertEqual(check_links(), 3)
+        self.assertEqual(Url.objects.get(url=good_url).status, True)
+        self.assertEqual(Url.objects.get(url=bad_url).status, False)
+        self.assertEqual(Url.objects.get(url=exception_url).status, False)
+        self.assertEqual(Url.objects.get(url=recently_checked_url).status, None)
 
 
 def get_command_output(command, *args, **kwargs):
