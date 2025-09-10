@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from http import HTTPStatus
 from io import StringIO
 from unittest.mock import patch
@@ -873,7 +873,7 @@ class ChecklinksTestCase(TestCase):
             "1 internal URLs and 0 external URLs have been checked.\n"
         )
 
-        yesterday = datetime.now() - timedelta(days=1)
+        yesterday = timezone.now() - timedelta(days=1)
         Url.objects.all().update(last_checked=yesterday)
         out = StringIO()
         call_command('checklinks', externalinterval=20, stdout=out)
