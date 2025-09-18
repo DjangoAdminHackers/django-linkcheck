@@ -676,26 +676,20 @@ class ExternalCheckTestCase(LiveServerTestCase):
         'linkcheck.models.PROXIES',
         {'http': 'http://proxy.example.com:8080'},
     )
-    @patch('requests.head')
-    def test_external_proxy_request(self, mock_head):
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.reason = 'OK'
-        mock_response.history = []
-        mock_head.return_value = mock_response
-        request_url = 'http://test.com'
-        uv = Url(url=request_url)
+    @requests_mock.Mocker()
+    def test_external_proxy_request(self, mocker):
+        mocker.register_uri('HEAD', 'http://test.com', reason='OK'),
+        uv = Url(url='http://test.com')
+        self.assertEqual(mocker.called, False)
         uv.check_url()
+        self.assertEqual(mocker.called, True)
         self.assertEqual(uv.status, True)
         self.assertEqual(uv.message, '200 OK')
         self.assertEqual(uv.type, 'external')
-        mock_head.assert_called_once()
-        (call_url,), call_kwargs = mock_head.call_args
-        self.assertEqual(call_url, request_url)
-        self.assertEqual(
-            call_kwargs.get('proxies'),
-            {'http': 'http://proxy.example.com:8080'},
-        )
+        last_request = mocker.last_request
+        self.assertEqual(last_request.hostname, 'test.com')
+        self.assertEqual(last_request.scheme, 'http')
+        self.assertEqual(last_request.proxies, {'http': 'http://proxy.example.com:8080'})
 
     def test_external_check_timedout(self):
         uv = Url(url=f"{self.live_server_url}/timeout/")
