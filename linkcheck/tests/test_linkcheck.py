@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 from io import StringIO
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import requests_mock
 import urllib3
