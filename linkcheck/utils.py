@@ -131,7 +131,11 @@ def concurrent_check_links(
 ):
     """
     Return the number of links effectively checked.
-    A concurrent version of `check_links`
+
+    A concurrent version of `check_links`. It should be faster than `check_links`, but
+    be aware that if you have multiple links to the same domain, you risk triggering
+    some attack detection on the target server, hence this concurrent version is best used
+    for links from all different domains or internal links.
 
     Args:
         external_recheck_interval: Minutes before rechecking external links
