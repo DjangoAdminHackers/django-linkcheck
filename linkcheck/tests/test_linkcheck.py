@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from http import HTTPStatus
 from io import StringIO
@@ -814,13 +815,19 @@ class ExternalCheckTestCase(LiveServerTestCase):
         self.assertEqual(uv.type, 'external')
 
     def test_forged_video_with_time_anchor(self):
-        uv = Url(url=f"{self.live_server_url}/static-files/fake-video.mp4#t=2.0")
+        uv = Url(url=f"{self.live_server_url}/static-files/fake-video.mp4#<t=2.0")
         uv.check_url()
-        self.assertEqual(uv.message, "200 OK, failed to parse HTML for anchor")
+        if sys.version_info >= (3, 13):
+            # Following fixes for https://github.com/python/cpython/issues/135661,
+            # it is harder to make html parser fail.
+            self.assertEqual(uv.message, "200 OK, broken external hash anchor")
+            self.assertEqual(uv.anchor_message, "Broken anchor")
+        else:
+            self.assertEqual(uv.message, "200 OK, failed to parse HTML for anchor")
+            self.assertEqual(uv.anchor_message, "Anchor could not be checked")
         self.assertEqual(uv.get_message, 'Working external link')
         self.assertEqual(uv.error_message, '')
         self.assertEqual(uv.status, True)
-        self.assertEqual(uv.anchor_message, 'Anchor could not be checked')
         self.assertEqual(uv.ssl_status, None)
         self.assertEqual(uv.ssl_message, 'Insecure link')
         self.assertEqual(uv.get_status_code_display(), '200 OK')
