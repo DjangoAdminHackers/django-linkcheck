@@ -1,10 +1,18 @@
-Unreleased
+2.4.0 (2025-09-28)
 
 * Add index to Link (David Venhoff, #202)
 * Add support for Django 5.1 and 5.2
 * Add support for Python 3.13
 * Remove support for Django < 4.2
 * Remove support for Python 3.8
+* Remove `raven_compat` middleware if present
+* Updated fallback User Agent string
+* Reference object primary key by `pk` instead of `id` (Ben Stockermans)
+* More robust check for unsaved instances in `instance_pre_save` (Ben Stockermans)
+* Add `LINKCHECK_PROXIES` and `LINKCHECK_TRUST_PROXY_SSL` settings to be able to
+  pass a proxy to requests when cheking links. (Ben Stockermans)
+* Add `LINKCHECK_SKIP_TRANSLATIONS` env variable to skip translation compilation
+  during package building (Ben Stockermans)
 
 2.3.0 (2023-12-27)
 
