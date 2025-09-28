@@ -226,12 +226,12 @@ Default: `{}`
 
 Allows you to make your `check_external` requests via a proxy. Expects a dictionary, e.g.:
 
-```
-LINKCHECK_PROXIES = {
-    "http": "http://...",
-    "https": "https://...",
-}
-```
+.. code-block:: python3
+
+    LINKCHECK_PROXIES = {
+        "http": "http://...",
+        "https": "https://...",
+    }
 
 
 LINKCHECK_TRUST_PROXY_SSL
