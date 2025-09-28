@@ -20,7 +20,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -36,7 +35,8 @@ classifiers = [
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
 ]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
     "django>=4.2",
@@ -59,7 +59,6 @@ dev = [
 
 [tool.setuptools]
 include-package-data = true
-license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 include = ["linkcheck*"]
