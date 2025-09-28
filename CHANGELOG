@@ -1,7 +1,7 @@
 Unreleased
 
 * Add index to Link (David Venhoff, #202)
-* Add support for Django 5.1
+* Add support for Django 5.1 and 5.2
 * Add support for Python 3.13
 * Remove support for Django < 4.2
 * Remove support for Python 3.8
