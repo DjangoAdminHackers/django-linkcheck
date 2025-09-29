@@ -1,4 +1,6 @@
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import timedelta
 
 from django.apps import apps
@@ -116,6 +118,74 @@ def check_links(external_recheck_interval=10080, limit=-1, check_internal=True, 
         check_count += 1 if status is not None else 0
         if -1 < limit <= check_count:
             break
+
+    return check_count
+
+
+def concurrent_check_links(
+    external_recheck_interval=10080,
+    limit=-1,
+    check_internal=True,
+    check_external=True,
+    max_workers=20,
+):
+    """
+    Return the number of links effectively checked.
+
+    A concurrent version of `check_links`. It should be faster than `check_links`, but
+    be aware that if you have multiple links to the same domain, you risk triggering
+    some attack detection on the target server, hence this concurrent version is best used
+    for links from all different domains or internal links.
+
+    Args:
+        external_recheck_interval: Minutes before rechecking external links
+        limit: Maximum number of URLs to check (-1 for unlimited)
+        check_internal: Whether to check internal links
+        check_external: Whether to check external links
+        max_workers: Maximum number of concurrent threads
+    """
+
+    urls = Url.objects.all()
+
+    # An optimization for when check_internal is False
+    if not check_internal:
+        recheck_datetime = timezone.now() - timedelta(minutes=external_recheck_interval)
+        urls = urls.exclude(last_checked__gt=recheck_datetime)
+
+    url_list = list(urls[:limit] if limit > 0 else urls)
+
+    if not url_list:
+        return 0
+
+    # Thread-safe counter
+    check_count = 0
+    count_lock = threading.Lock()
+
+    def check_single_url(url_obj):
+        """Check a single URL and return 1 if checked, 0 if not"""
+        try:
+            status = url_obj.check_url(check_internal=check_internal, check_external=check_external)
+            return 1 if status is not None else 0
+        except Exception as e:
+            logger.exception(
+                "%s while checking %s: %s",
+                type(e).__name__,
+                url_obj.url,
+                e
+            )
+            return 0
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_url = {
+            executor.submit(check_single_url, url): url
+            for url in url_list
+        }
+        # Process completed futures
+        for future in as_completed(future_to_url):
+            result = future.result()
+            with count_lock:
+                check_count += result
 
     return check_count
 
