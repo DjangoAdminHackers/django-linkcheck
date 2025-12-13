@@ -32,7 +32,7 @@ class URLLister(Lister):
                 self.text += f' [image:{src[0]}] '
 
     def handle_endtag(self, tag):
-        if tag == 'a' and self.in_a:
+        if tag == 'a' and self.in_a and not self.url.startswith("data:"):
             self.urls.append((self.text[:256], self.url))
             self.in_a = False
             self.text = ''
@@ -48,7 +48,7 @@ class ImageLister(Lister):
     def handle_starttag(self, tag, attrs):
         if tag == 'img':
             src = [v for k, v in attrs if k == 'src']
-            if src:
+            if src and not src[0].startswith("data:"):
                 self.urls.append(('', src[0]))
 
 

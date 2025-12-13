@@ -943,6 +943,19 @@ class FindingLinksTestCase(TestCase):
         )
         self.assertEqual(Url.objects.all().count(), 1)
 
+    def test_data_urls_ignored(self):
+        self.assertEqual(Url.objects.all().count(), 0)
+        Book.objects.create(
+            title="My Title",
+            description=(
+                'This is a normal link: <a href="https://www.example.org">Example</a>, '
+                'This is a data link: <a href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgAAZABkAAD">Example 2</a>, '
+                'This is a data img: <img src="data:image/jpeg;base64,/9j/4AAQGffsbRR4AAZABkAAD">'
+            )
+        )
+        # Only the normal link is extracted
+        self.assertEqual(Url.objects.all().count(), 1)
+
     def test_empty_url_field(self):
         """
         Test that URLField empty content is excluded depending on ignore_empty list.
