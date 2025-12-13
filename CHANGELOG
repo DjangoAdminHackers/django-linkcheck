@@ -1,3 +1,9 @@
+Unreleased
+
+ * Add support for Django 6.0
+ * Add support for Python 3.14
+ * Remove support for Python 3.9
+
 2.4.0 (2025-09-28)
 
 * Add index to Link (David Venhoff, #202)
