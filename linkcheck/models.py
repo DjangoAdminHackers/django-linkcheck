@@ -266,6 +266,7 @@ class Url(models.Model):
         self.ssl_status = None
         self.error_message = ""
         self.message = ""
+        self.redirect_to = ""
 
     def check_url(self, check_internal=True, check_external=True, external_recheck_interval=EXTERNAL_RECHECK_INTERVAL):
         """
@@ -457,6 +458,23 @@ class Url(models.Model):
                 self.status_code = response.history[0].status_code
             else:
                 self.status_code = response.status_code
+                # Some proxies follow redirects upstream so response.history
+                # is empty; the final URL and the original status code are
+                # exposed via response headers.
+                resolved_url = response.headers.get("Resolved-Url")
+                if resolved_url and resolved_url != self.external_url:
+                    self.redirect_to = resolved_url
+                    initial_status = response.headers.get("Initial-Status-Code")
+                    if initial_status and initial_status.isdigit():
+                        initial_status_code = int(initial_status)
+                        self.redirect_status_code = response.status_code
+                        self.status_code = initial_status_code
+                        if response.ok:
+                            try:
+                                phrase = HTTPStatus(initial_status_code).phrase
+                            except ValueError:
+                                phrase = ""
+                            self.message = f"{initial_status_code} {phrase}".strip()
 
             # Check the anchor (if it exists)
             if fetch == requests.get:
