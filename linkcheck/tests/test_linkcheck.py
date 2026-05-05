@@ -687,6 +687,8 @@ class ExternalCheckTestCase(LiveServerTestCase):
         mock_response.status_code = 200
         mock_response.reason = 'OK'
         mock_response.history = []
+        mock_response.ok = True
+        mock_response.headers = {}
         mock_head.return_value = mock_response
         request_url = 'http://test.com'
         uv = Url(url=request_url)
@@ -701,6 +703,109 @@ class ExternalCheckTestCase(LiveServerTestCase):
             call_kwargs.get('proxies'),
             {'http': 'http://proxy.example.com:8080'},
         )
+
+    @patch(
+        'linkcheck.models.PROXIES',
+        {'http': 'http://proxy.example.com:8080'},
+    )
+    @patch('requests.head')
+    def test_external_proxy_redirect_with_resolved_url_and_status(self, mock_head):
+        """Proxy follows redirect upstream and exposes resolved URL and initial status via headers."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.reason = 'OK'
+        mock_response.history = []
+        mock_response.ok = True
+        mock_response.headers = {
+            'Resolved-Url': 'http://test.com/final/',
+            'Initial-Status-Code': '301',
+        }
+        mock_head.return_value = mock_response
+        uv = Url(url='http://test.com')
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '301 Moved Permanently')
+        self.assertEqual(uv.status_code, 301)
+        self.assertEqual(uv.redirect_status_code, 200)
+        self.assertEqual(uv.redirect_to, 'http://test.com/final/')
+        self.assertEqual(uv.type, 'external')
+
+    @patch(
+        'linkcheck.models.PROXIES',
+        {'http': 'http://proxy.example.com:8080'},
+    )
+    @patch('requests.head')
+    def test_external_proxy_redirect_with_resolved_url_no_initial_status(self, mock_head):
+        """Proxy exposes resolved URL but not initial status code."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.reason = 'OK'
+        mock_response.history = []
+        mock_response.ok = True
+        mock_response.headers = {
+            'Resolved-Url': 'http://test.com/final/',
+        }
+        mock_head.return_value = mock_response
+        uv = Url(url='http://test.com')
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.status_code, 200)
+        self.assertEqual(uv.redirect_status_code, None)
+        self.assertEqual(uv.redirect_to, 'http://test.com/final/')
+        self.assertEqual(uv.type, 'external')
+
+    @patch(
+        'linkcheck.models.PROXIES',
+        {'http': 'http://proxy.example.com:8080'},
+    )
+    @patch('requests.head')
+    def test_external_proxy_redirect_same_url(self, mock_head):
+        """Resolved-Url matches the original URL, so no redirect is detected."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.reason = 'OK'
+        mock_response.history = []
+        mock_response.ok = True
+        mock_response.headers = {
+            'Resolved-Url': 'http://test.com',
+            'Initial-Status-Code': '301',
+        }
+        mock_head.return_value = mock_response
+        uv = Url(url='http://test.com')
+        uv.check_url()
+        self.assertEqual(uv.status, True)
+        self.assertEqual(uv.message, '200 OK')
+        self.assertEqual(uv.status_code, 200)
+        self.assertEqual(uv.redirect_status_code, None)
+        self.assertEqual(uv.redirect_to, '')
+        self.assertEqual(uv.type, 'external')
+
+    @patch(
+        'linkcheck.models.PROXIES',
+        {'http': 'http://proxy.example.com:8080'},
+    )
+    @patch('requests.head')
+    def test_external_proxy_redirect_not_ok(self, mock_head):
+        """Proxy redirect where final response is not OK (e.g. 404 after redirect)."""
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.reason = 'Not Found'
+        mock_response.history = []
+        mock_response.ok = False
+        mock_response.headers = {
+            'Resolved-Url': 'http://test.com/final/',
+            'Initial-Status-Code': '301',
+        }
+        mock_head.return_value = mock_response
+        uv = Url(url='http://test.com')
+        uv.check_url()
+        self.assertEqual(uv.status, False)
+        self.assertEqual(uv.message, '404 Not Found')
+        self.assertEqual(uv.status_code, 301)
+        self.assertEqual(uv.redirect_status_code, 404)
+        self.assertEqual(uv.redirect_to, 'http://test.com/final/')
+        self.assertEqual(uv.type, 'external')
 
     def test_external_check_timedout(self):
         uv = Url(url=f"{self.live_server_url}/timeout/")
