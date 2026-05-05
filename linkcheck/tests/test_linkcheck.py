@@ -390,9 +390,11 @@ class ExternalCheckTestCase(LiveServerTestCase):
     def test_external_check_200_missing_cert(self):
         uv = Url(url=f"{self.live_server_url.replace('http://', 'https://')}/http/200/")
         uv.check_url()
-        self.assertEqual(uv.message, 'SSL Error: wrong version number')
-        self.assertEqual(uv.get_message, 'SSL Error: wrong version number')
-        self.assertEqual(uv.error_message, 'SSL Error: wrong version number')
+        # The specific SSL error message depends on the OpenSSL version:
+        # OpenSSL < 3.5: "wrong version number", OpenSSL >= 3.5: "record layer failure"
+        self.assertIn(uv.message, ['SSL Error: wrong version number', 'SSL Error: record layer failure'])
+        self.assertEqual(uv.get_message, uv.message)
+        self.assertEqual(uv.error_message, uv.message)
         self.assertEqual(uv.status, False)
         self.assertEqual(uv.anchor_message, '')
         self.assertEqual(uv.ssl_status, False)
