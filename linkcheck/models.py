@@ -483,23 +483,30 @@ class Url(models.Model):
                 self.anchor_status = True
                 self.message += f", working {scope} hash anchor"
             else:
-                try:
-                    names = parse_anchors(html)
-                # Known possible errors include: AssertionError, NotImplementedError, UnicodeDecodeError
-                except Exception as e:
-                    logger.debug("%s while parsing anchors: %s", type(e).__name__, e)
+                # Check if content contains null bytes, indicating it's not valid HTML
+                # (e.g. binary content served with a text/html content type)
+                if isinstance(html, str) and '\x00' in html:
                     self.message += ", failed to parse HTML for anchor"
                     if not TOLERATE_BROKEN_ANCHOR:
                         self.status = False
                 else:
-                    if self.anchor in names:
-                        self.anchor_status = True
-                        self.message += f", working {scope} hash anchor"
-                    else:
-                        self.anchor_status = False
-                        self.message += f", broken {scope} hash anchor"
+                    try:
+                        names = parse_anchors(html)
+                    # Known possible errors include: AssertionError, NotImplementedError, UnicodeDecodeError
+                    except Exception as e:
+                        logger.debug("%s while parsing anchors: %s", type(e).__name__, e)
+                        self.message += ", failed to parse HTML for anchor"
                         if not TOLERATE_BROKEN_ANCHOR:
                             self.status = False
+                    else:
+                        if self.anchor in names:
+                            self.anchor_status = True
+                            self.message += f", working {scope} hash anchor"
+                        else:
+                            self.anchor_status = False
+                            self.message += f", broken {scope} hash anchor"
+                            if not TOLERATE_BROKEN_ANCHOR:
+                                self.status = False
         return self.anchor_status, self.anchor_message
 
 
