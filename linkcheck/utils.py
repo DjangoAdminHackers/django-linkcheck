@@ -134,7 +134,10 @@ def update_urls(urls, content_type, object_id):
 
         if len(url) > MAX_URL_LENGTH:
             # We cannot handle url longer than MAX_URL_LENGTH at the moment
-            logger.warning("URL exceeding max length will be skipped: %s", url)
+            if url.startswith("data:"):
+                # If the URL is a data URL, it might occupy a LOT of space in the logs without being useful – truncate it
+                url = url[:64]
+            logger.warning("URL exceeding max length will be skipped: %s  (in %r)", url, instance)
             continue
 
         url, url_created = Url.objects.get_or_create(url=url)
